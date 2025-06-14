@@ -21,7 +21,7 @@ public class Program
     {
         Log.Information("Downloading \"{Uri}\" to \"{FileName}\" ...", uri.ToString(), fileName);
         Stream httpStream = await GetHttpClient().GetStreamAsync(uri);
-        using FileStream fileStream = File.OpenWrite(fileName);
+        using FileStream fileStream = File.Create(fileName);
         await httpStream.CopyToAsync(fileStream);
     }
 

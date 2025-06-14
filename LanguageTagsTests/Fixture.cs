@@ -10,7 +10,7 @@ public class Fixture : IDisposable
 
     public static string GetDataFilePath(string fileName)
     {
-        string assemblyDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+        string assemblyDirectory = Path.GetDirectoryName(typeof(Fixture).Assembly.Location);
         string dataDirectory = Path.GetFullPath(
             Path.Combine(assemblyDirectory, "../../../../LanguageData")
         );

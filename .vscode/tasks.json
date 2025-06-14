@@ -1,0 +1,50 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": ".NET Build",
+            "type": "dotnet",
+            "task": "build",
+            "group": "build",
+            "problemMatcher": ["$msCompile"],
+            "presentation": {
+                "showReuseMessage": false,
+                "clear": false
+            }
+        },
+        {
+            "label": ".NET Format",
+            "type": "process",
+            "command": "dotnet",
+            "args": [
+                "format",
+                "--verify-no-changes",
+                "--severity=info",
+                "--verbosity=detailed"
+            ],
+            "problemMatcher": [
+                "$msCompile"
+            ],
+            "presentation": {
+                "showReuseMessage": false,
+                "clear": false
+            }
+        },
+        {
+            "label": "CSharpier Format",
+            "type": "process",
+            "command": "csharpier",
+            "args": [
+                "format",
+                "."
+            ],
+            "problemMatcher": [
+                "$msCompile"
+            ],
+            "presentation": {
+                "showReuseMessage": false,
+                "clear": false
+            }
+        },
+   ]
+}

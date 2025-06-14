@@ -1,0 +1,3413 @@
+{
+  "RecordList": [
+    {
+      "Id": "aar",
+      "Part2B": "aar",
+      "Part2T": "",
+      "Part1": "aa",
+      "RefName": "Afar"
+    },
+    {
+      "Id": "abk",
+      "Part2B": "abk",
+      "Part2T": "",
+      "Part1": "ab",
+      "RefName": "Abkhazian"
+    },
+    {
+      "Id": "ace",
+      "Part2B": "ace",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Achinese"
+    },
+    {
+      "Id": "ach",
+      "Part2B": "ach",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Acoli"
+    },
+    {
+      "Id": "ada",
+      "Part2B": "ada",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Adangme"
+    },
+    {
+      "Id": "ady",
+      "Part2B": "ady",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Adyghe; Adygei"
+    },
+    {
+      "Id": "afa",
+      "Part2B": "afa",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Afro-Asiatic languages"
+    },
+    {
+      "Id": "afh",
+      "Part2B": "afh",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Afrihili"
+    },
+    {
+      "Id": "afr",
+      "Part2B": "afr",
+      "Part2T": "",
+      "Part1": "af",
+      "RefName": "Afrikaans"
+    },
+    {
+      "Id": "ain",
+      "Part2B": "ain",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Ainu"
+    },
+    {
+      "Id": "aka",
+      "Part2B": "aka",
+      "Part2T": "",
+      "Part1": "ak",
+      "RefName": "Akan"
+    },
+    {
+      "Id": "akk",
+      "Part2B": "akk",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Akkadian"
+    },
+    {
+      "Id": "alb",
+      "Part2B": "alb",
+      "Part2T": "sqi",
+      "Part1": "sq",
+      "RefName": "Albanian"
+    },
+    {
+      "Id": "ale",
+      "Part2B": "ale",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Aleut"
+    },
+    {
+      "Id": "alg",
+      "Part2B": "alg",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Algonquian languages"
+    },
+    {
+      "Id": "alt",
+      "Part2B": "alt",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Southern Altai"
+    },
+    {
+      "Id": "amh",
+      "Part2B": "amh",
+      "Part2T": "",
+      "Part1": "am",
+      "RefName": "Amharic"
+    },
+    {
+      "Id": "ang",
+      "Part2B": "ang",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "English, Old (ca.450-1100)"
+    },
+    {
+      "Id": "anp",
+      "Part2B": "anp",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Angika"
+    },
+    {
+      "Id": "apa",
+      "Part2B": "apa",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Apache languages"
+    },
+    {
+      "Id": "ara",
+      "Part2B": "ara",
+      "Part2T": "",
+      "Part1": "ar",
+      "RefName": "Arabic"
+    },
+    {
+      "Id": "arc",
+      "Part2B": "arc",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Official Aramaic (700-300 BCE); Imperial Aramaic (700-300 BCE)"
+    },
+    {
+      "Id": "arg",
+      "Part2B": "arg",
+      "Part2T": "",
+      "Part1": "an",
+      "RefName": "Aragonese"
+    },
+    {
+      "Id": "arm",
+      "Part2B": "arm",
+      "Part2T": "hye",
+      "Part1": "hy",
+      "RefName": "Armenian"
+    },
+    {
+      "Id": "arn",
+      "Part2B": "arn",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Mapudungun; Mapuche"
+    },
+    {
+      "Id": "arp",
+      "Part2B": "arp",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Arapaho"
+    },
+    {
+      "Id": "art",
+      "Part2B": "art",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Artificial languages"
+    },
+    {
+      "Id": "arw",
+      "Part2B": "arw",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Arawak"
+    },
+    {
+      "Id": "asm",
+      "Part2B": "asm",
+      "Part2T": "",
+      "Part1": "as",
+      "RefName": "Assamese"
+    },
+    {
+      "Id": "ast",
+      "Part2B": "ast",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Asturian; Bable; Leonese; Asturleonese"
+    },
+    {
+      "Id": "ath",
+      "Part2B": "ath",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Athapascan languages"
+    },
+    {
+      "Id": "aus",
+      "Part2B": "aus",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Australian languages"
+    },
+    {
+      "Id": "ava",
+      "Part2B": "ava",
+      "Part2T": "",
+      "Part1": "av",
+      "RefName": "Avaric"
+    },
+    {
+      "Id": "ave",
+      "Part2B": "ave",
+      "Part2T": "",
+      "Part1": "ae",
+      "RefName": "Avestan"
+    },
+    {
+      "Id": "awa",
+      "Part2B": "awa",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Awadhi"
+    },
+    {
+      "Id": "aym",
+      "Part2B": "aym",
+      "Part2T": "",
+      "Part1": "ay",
+      "RefName": "Aymara"
+    },
+    {
+      "Id": "aze",
+      "Part2B": "aze",
+      "Part2T": "",
+      "Part1": "az",
+      "RefName": "Azerbaijani"
+    },
+    {
+      "Id": "bad",
+      "Part2B": "bad",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Banda languages"
+    },
+    {
+      "Id": "bai",
+      "Part2B": "bai",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Bamileke languages"
+    },
+    {
+      "Id": "bak",
+      "Part2B": "bak",
+      "Part2T": "",
+      "Part1": "ba",
+      "RefName": "Bashkir"
+    },
+    {
+      "Id": "bal",
+      "Part2B": "bal",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Baluchi"
+    },
+    {
+      "Id": "bam",
+      "Part2B": "bam",
+      "Part2T": "",
+      "Part1": "bm",
+      "RefName": "Bambara"
+    },
+    {
+      "Id": "ban",
+      "Part2B": "ban",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Balinese"
+    },
+    {
+      "Id": "baq",
+      "Part2B": "baq",
+      "Part2T": "eus",
+      "Part1": "eu",
+      "RefName": "Basque"
+    },
+    {
+      "Id": "bas",
+      "Part2B": "bas",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Basa"
+    },
+    {
+      "Id": "bat",
+      "Part2B": "bat",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Baltic languages"
+    },
+    {
+      "Id": "bej",
+      "Part2B": "bej",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Beja; Bedawiyet"
+    },
+    {
+      "Id": "bel",
+      "Part2B": "bel",
+      "Part2T": "",
+      "Part1": "be",
+      "RefName": "Belarusian"
+    },
+    {
+      "Id": "bem",
+      "Part2B": "bem",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Bemba"
+    },
+    {
+      "Id": "ben",
+      "Part2B": "ben",
+      "Part2T": "",
+      "Part1": "bn",
+      "RefName": "Bengali"
+    },
+    {
+      "Id": "ber",
+      "Part2B": "ber",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Berber languages"
+    },
+    {
+      "Id": "bho",
+      "Part2B": "bho",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Bhojpuri"
+    },
+    {
+      "Id": "bih",
+      "Part2B": "bih",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Bihari languages"
+    },
+    {
+      "Id": "bik",
+      "Part2B": "bik",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Bikol"
+    },
+    {
+      "Id": "bin",
+      "Part2B": "bin",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Bini; Edo"
+    },
+    {
+      "Id": "bis",
+      "Part2B": "bis",
+      "Part2T": "",
+      "Part1": "bi",
+      "RefName": "Bislama"
+    },
+    {
+      "Id": "bla",
+      "Part2B": "bla",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Siksika"
+    },
+    {
+      "Id": "bnt",
+      "Part2B": "bnt",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Bantu languages"
+    },
+    {
+      "Id": "bos",
+      "Part2B": "bos",
+      "Part2T": "",
+      "Part1": "bs",
+      "RefName": "Bosnian"
+    },
+    {
+      "Id": "bra",
+      "Part2B": "bra",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Braj"
+    },
+    {
+      "Id": "bre",
+      "Part2B": "bre",
+      "Part2T": "",
+      "Part1": "br",
+      "RefName": "Breton"
+    },
+    {
+      "Id": "btk",
+      "Part2B": "btk",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Batak languages"
+    },
+    {
+      "Id": "bua",
+      "Part2B": "bua",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Buriat"
+    },
+    {
+      "Id": "bug",
+      "Part2B": "bug",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Buginese"
+    },
+    {
+      "Id": "bul",
+      "Part2B": "bul",
+      "Part2T": "",
+      "Part1": "bg",
+      "RefName": "Bulgarian"
+    },
+    {
+      "Id": "bur",
+      "Part2B": "bur",
+      "Part2T": "mya",
+      "Part1": "my",
+      "RefName": "Burmese"
+    },
+    {
+      "Id": "byn",
+      "Part2B": "byn",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Blin; Bilin"
+    },
+    {
+      "Id": "cad",
+      "Part2B": "cad",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Caddo"
+    },
+    {
+      "Id": "cai",
+      "Part2B": "cai",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Central American Indian languages"
+    },
+    {
+      "Id": "car",
+      "Part2B": "car",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Galibi Carib"
+    },
+    {
+      "Id": "cat",
+      "Part2B": "cat",
+      "Part2T": "",
+      "Part1": "ca",
+      "RefName": "Catalan; Valencian"
+    },
+    {
+      "Id": "cau",
+      "Part2B": "cau",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Caucasian languages"
+    },
+    {
+      "Id": "ceb",
+      "Part2B": "ceb",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Cebuano"
+    },
+    {
+      "Id": "cel",
+      "Part2B": "cel",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Celtic languages"
+    },
+    {
+      "Id": "cha",
+      "Part2B": "cha",
+      "Part2T": "",
+      "Part1": "ch",
+      "RefName": "Chamorro"
+    },
+    {
+      "Id": "chb",
+      "Part2B": "chb",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Chibcha"
+    },
+    {
+      "Id": "che",
+      "Part2B": "che",
+      "Part2T": "",
+      "Part1": "ce",
+      "RefName": "Chechen"
+    },
+    {
+      "Id": "chg",
+      "Part2B": "chg",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Chagatai"
+    },
+    {
+      "Id": "chi",
+      "Part2B": "chi",
+      "Part2T": "zho",
+      "Part1": "zh",
+      "RefName": "Chinese"
+    },
+    {
+      "Id": "chk",
+      "Part2B": "chk",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Chuukese"
+    },
+    {
+      "Id": "chm",
+      "Part2B": "chm",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Mari"
+    },
+    {
+      "Id": "chn",
+      "Part2B": "chn",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Chinook jargon"
+    },
+    {
+      "Id": "cho",
+      "Part2B": "cho",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Choctaw"
+    },
+    {
+      "Id": "chp",
+      "Part2B": "chp",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Chipewyan; Dene Suline"
+    },
+    {
+      "Id": "chr",
+      "Part2B": "chr",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Cherokee"
+    },
+    {
+      "Id": "chu",
+      "Part2B": "chu",
+      "Part2T": "",
+      "Part1": "cu",
+      "RefName": "Church Slavic; Old Slavonic; Church Slavonic; Old Bulgarian; Old Church Slavonic"
+    },
+    {
+      "Id": "chv",
+      "Part2B": "chv",
+      "Part2T": "",
+      "Part1": "cv",
+      "RefName": "Chuvash"
+    },
+    {
+      "Id": "chy",
+      "Part2B": "chy",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Cheyenne"
+    },
+    {
+      "Id": "cmc",
+      "Part2B": "cmc",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Chamic languages"
+    },
+    {
+      "Id": "cnr",
+      "Part2B": "cnr",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Montenegrin"
+    },
+    {
+      "Id": "cop",
+      "Part2B": "cop",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Coptic"
+    },
+    {
+      "Id": "cor",
+      "Part2B": "cor",
+      "Part2T": "",
+      "Part1": "kw",
+      "RefName": "Cornish"
+    },
+    {
+      "Id": "cos",
+      "Part2B": "cos",
+      "Part2T": "",
+      "Part1": "co",
+      "RefName": "Corsican"
+    },
+    {
+      "Id": "cpe",
+      "Part2B": "cpe",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Creoles and pidgins, English based"
+    },
+    {
+      "Id": "cpf",
+      "Part2B": "cpf",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Creoles and pidgins, French-based"
+    },
+    {
+      "Id": "cpp",
+      "Part2B": "cpp",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Creoles and pidgins, Portuguese-based"
+    },
+    {
+      "Id": "cre",
+      "Part2B": "cre",
+      "Part2T": "",
+      "Part1": "cr",
+      "RefName": "Cree"
+    },
+    {
+      "Id": "crh",
+      "Part2B": "crh",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Crimean Tatar; Crimean Turkish"
+    },
+    {
+      "Id": "crp",
+      "Part2B": "crp",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Creoles and pidgins"
+    },
+    {
+      "Id": "csb",
+      "Part2B": "csb",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Kashubian"
+    },
+    {
+      "Id": "cus",
+      "Part2B": "cus",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Cushitic languages"
+    },
+    {
+      "Id": "cze",
+      "Part2B": "cze",
+      "Part2T": "ces",
+      "Part1": "cs",
+      "RefName": "Czech"
+    },
+    {
+      "Id": "dak",
+      "Part2B": "dak",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Dakota"
+    },
+    {
+      "Id": "dan",
+      "Part2B": "dan",
+      "Part2T": "",
+      "Part1": "da",
+      "RefName": "Danish"
+    },
+    {
+      "Id": "dar",
+      "Part2B": "dar",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Dargwa"
+    },
+    {
+      "Id": "day",
+      "Part2B": "day",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Land Dayak languages"
+    },
+    {
+      "Id": "del",
+      "Part2B": "del",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Delaware"
+    },
+    {
+      "Id": "den",
+      "Part2B": "den",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Slave (Athapascan)"
+    },
+    {
+      "Id": "dgr",
+      "Part2B": "dgr",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Tlicho; Dogrib"
+    },
+    {
+      "Id": "din",
+      "Part2B": "din",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Dinka"
+    },
+    {
+      "Id": "div",
+      "Part2B": "div",
+      "Part2T": "",
+      "Part1": "dv",
+      "RefName": "Divehi; Dhivehi; Maldivian"
+    },
+    {
+      "Id": "doi",
+      "Part2B": "doi",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Dogri"
+    },
+    {
+      "Id": "dra",
+      "Part2B": "dra",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Dravidian languages"
+    },
+    {
+      "Id": "dsb",
+      "Part2B": "dsb",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Lower Sorbian"
+    },
+    {
+      "Id": "dua",
+      "Part2B": "dua",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Duala"
+    },
+    {
+      "Id": "dum",
+      "Part2B": "dum",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Dutch, Middle (ca.1050-1350)"
+    },
+    {
+      "Id": "dut",
+      "Part2B": "dut",
+      "Part2T": "nld",
+      "Part1": "nl",
+      "RefName": "Dutch; Flemish"
+    },
+    {
+      "Id": "dyu",
+      "Part2B": "dyu",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Dyula"
+    },
+    {
+      "Id": "dzo",
+      "Part2B": "dzo",
+      "Part2T": "",
+      "Part1": "dz",
+      "RefName": "Dzongkha"
+    },
+    {
+      "Id": "efi",
+      "Part2B": "efi",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Efik"
+    },
+    {
+      "Id": "egy",
+      "Part2B": "egy",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Egyptian (Ancient)"
+    },
+    {
+      "Id": "eka",
+      "Part2B": "eka",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Ekajuk"
+    },
+    {
+      "Id": "elx",
+      "Part2B": "elx",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Elamite"
+    },
+    {
+      "Id": "eng",
+      "Part2B": "eng",
+      "Part2T": "",
+      "Part1": "en",
+      "RefName": "English"
+    },
+    {
+      "Id": "enm",
+      "Part2B": "enm",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "English, Middle (1100-1500)"
+    },
+    {
+      "Id": "epo",
+      "Part2B": "epo",
+      "Part2T": "",
+      "Part1": "eo",
+      "RefName": "Esperanto"
+    },
+    {
+      "Id": "est",
+      "Part2B": "est",
+      "Part2T": "",
+      "Part1": "et",
+      "RefName": "Estonian"
+    },
+    {
+      "Id": "ewe",
+      "Part2B": "ewe",
+      "Part2T": "",
+      "Part1": "ee",
+      "RefName": "Ewe"
+    },
+    {
+      "Id": "ewo",
+      "Part2B": "ewo",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Ewondo"
+    },
+    {
+      "Id": "fan",
+      "Part2B": "fan",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Fang"
+    },
+    {
+      "Id": "fao",
+      "Part2B": "fao",
+      "Part2T": "",
+      "Part1": "fo",
+      "RefName": "Faroese"
+    },
+    {
+      "Id": "fat",
+      "Part2B": "fat",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Fanti"
+    },
+    {
+      "Id": "fij",
+      "Part2B": "fij",
+      "Part2T": "",
+      "Part1": "fj",
+      "RefName": "Fijian"
+    },
+    {
+      "Id": "fil",
+      "Part2B": "fil",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Filipino; Pilipino"
+    },
+    {
+      "Id": "fin",
+      "Part2B": "fin",
+      "Part2T": "",
+      "Part1": "fi",
+      "RefName": "Finnish"
+    },
+    {
+      "Id": "fiu",
+      "Part2B": "fiu",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Finno-Ugrian languages"
+    },
+    {
+      "Id": "fon",
+      "Part2B": "fon",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Fon"
+    },
+    {
+      "Id": "fre",
+      "Part2B": "fre",
+      "Part2T": "fra",
+      "Part1": "fr",
+      "RefName": "French"
+    },
+    {
+      "Id": "frm",
+      "Part2B": "frm",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "French, Middle (ca.1400-1600)"
+    },
+    {
+      "Id": "fro",
+      "Part2B": "fro",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "French, Old (842-ca.1400)"
+    },
+    {
+      "Id": "frr",
+      "Part2B": "frr",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Northern Frisian"
+    },
+    {
+      "Id": "frs",
+      "Part2B": "frs",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Eastern Frisian"
+    },
+    {
+      "Id": "fry",
+      "Part2B": "fry",
+      "Part2T": "",
+      "Part1": "fy",
+      "RefName": "Western Frisian"
+    },
+    {
+      "Id": "ful",
+      "Part2B": "ful",
+      "Part2T": "",
+      "Part1": "ff",
+      "RefName": "Fulah"
+    },
+    {
+      "Id": "fur",
+      "Part2B": "fur",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Friulian"
+    },
+    {
+      "Id": "gaa",
+      "Part2B": "gaa",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Ga"
+    },
+    {
+      "Id": "gay",
+      "Part2B": "gay",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Gayo"
+    },
+    {
+      "Id": "gba",
+      "Part2B": "gba",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Gbaya"
+    },
+    {
+      "Id": "gem",
+      "Part2B": "gem",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Germanic languages"
+    },
+    {
+      "Id": "geo",
+      "Part2B": "geo",
+      "Part2T": "kat",
+      "Part1": "ka",
+      "RefName": "Georgian"
+    },
+    {
+      "Id": "ger",
+      "Part2B": "ger",
+      "Part2T": "deu",
+      "Part1": "de",
+      "RefName": "German"
+    },
+    {
+      "Id": "gez",
+      "Part2B": "gez",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Geez"
+    },
+    {
+      "Id": "gil",
+      "Part2B": "gil",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Gilbertese"
+    },
+    {
+      "Id": "gla",
+      "Part2B": "gla",
+      "Part2T": "",
+      "Part1": "gd",
+      "RefName": "Gaelic; Scottish Gaelic"
+    },
+    {
+      "Id": "gle",
+      "Part2B": "gle",
+      "Part2T": "",
+      "Part1": "ga",
+      "RefName": "Irish"
+    },
+    {
+      "Id": "glg",
+      "Part2B": "glg",
+      "Part2T": "",
+      "Part1": "gl",
+      "RefName": "Galician"
+    },
+    {
+      "Id": "glv",
+      "Part2B": "glv",
+      "Part2T": "",
+      "Part1": "gv",
+      "RefName": "Manx"
+    },
+    {
+      "Id": "gmh",
+      "Part2B": "gmh",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "German, Middle High (ca.1050-1500)"
+    },
+    {
+      "Id": "goh",
+      "Part2B": "goh",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "German, Old High (ca.750-1050)"
+    },
+    {
+      "Id": "gon",
+      "Part2B": "gon",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Gondi"
+    },
+    {
+      "Id": "gor",
+      "Part2B": "gor",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Gorontalo"
+    },
+    {
+      "Id": "got",
+      "Part2B": "got",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Gothic"
+    },
+    {
+      "Id": "grb",
+      "Part2B": "grb",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Grebo"
+    },
+    {
+      "Id": "grc",
+      "Part2B": "grc",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Greek, Ancient (to 1453)"
+    },
+    {
+      "Id": "gre",
+      "Part2B": "gre",
+      "Part2T": "ell",
+      "Part1": "el",
+      "RefName": "Greek, Modern (1453-)"
+    },
+    {
+      "Id": "grn",
+      "Part2B": "grn",
+      "Part2T": "",
+      "Part1": "gn",
+      "RefName": "Guarani"
+    },
+    {
+      "Id": "gsw",
+      "Part2B": "gsw",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Swiss German; Alemannic; Alsatian"
+    },
+    {
+      "Id": "guj",
+      "Part2B": "guj",
+      "Part2T": "",
+      "Part1": "gu",
+      "RefName": "Gujarati"
+    },
+    {
+      "Id": "gwi",
+      "Part2B": "gwi",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Gwich\u0027in"
+    },
+    {
+      "Id": "hai",
+      "Part2B": "hai",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Haida"
+    },
+    {
+      "Id": "hat",
+      "Part2B": "hat",
+      "Part2T": "",
+      "Part1": "ht",
+      "RefName": "Haitian; Haitian Creole"
+    },
+    {
+      "Id": "hau",
+      "Part2B": "hau",
+      "Part2T": "",
+      "Part1": "ha",
+      "RefName": "Hausa"
+    },
+    {
+      "Id": "haw",
+      "Part2B": "haw",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Hawaiian"
+    },
+    {
+      "Id": "heb",
+      "Part2B": "heb",
+      "Part2T": "",
+      "Part1": "he",
+      "RefName": "Hebrew"
+    },
+    {
+      "Id": "her",
+      "Part2B": "her",
+      "Part2T": "",
+      "Part1": "hz",
+      "RefName": "Herero"
+    },
+    {
+      "Id": "hil",
+      "Part2B": "hil",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Hiligaynon"
+    },
+    {
+      "Id": "him",
+      "Part2B": "him",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Himachali languages; Western Pahari languages"
+    },
+    {
+      "Id": "hin",
+      "Part2B": "hin",
+      "Part2T": "",
+      "Part1": "hi",
+      "RefName": "Hindi"
+    },
+    {
+      "Id": "hit",
+      "Part2B": "hit",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Hittite"
+    },
+    {
+      "Id": "hmn",
+      "Part2B": "hmn",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Hmong; Mong"
+    },
+    {
+      "Id": "hmo",
+      "Part2B": "hmo",
+      "Part2T": "",
+      "Part1": "ho",
+      "RefName": "Hiri Motu"
+    },
+    {
+      "Id": "hrv",
+      "Part2B": "hrv",
+      "Part2T": "",
+      "Part1": "hr",
+      "RefName": "Croatian"
+    },
+    {
+      "Id": "hsb",
+      "Part2B": "hsb",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Upper Sorbian"
+    },
+    {
+      "Id": "hun",
+      "Part2B": "hun",
+      "Part2T": "",
+      "Part1": "hu",
+      "RefName": "Hungarian"
+    },
+    {
+      "Id": "hup",
+      "Part2B": "hup",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Hupa"
+    },
+    {
+      "Id": "iba",
+      "Part2B": "iba",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Iban"
+    },
+    {
+      "Id": "ibo",
+      "Part2B": "ibo",
+      "Part2T": "",
+      "Part1": "ig",
+      "RefName": "Igbo"
+    },
+    {
+      "Id": "ice",
+      "Part2B": "ice",
+      "Part2T": "isl",
+      "Part1": "is",
+      "RefName": "Icelandic"
+    },
+    {
+      "Id": "ido",
+      "Part2B": "ido",
+      "Part2T": "",
+      "Part1": "io",
+      "RefName": "Ido"
+    },
+    {
+      "Id": "iii",
+      "Part2B": "iii",
+      "Part2T": "",
+      "Part1": "ii",
+      "RefName": "Sichuan Yi; Nuosu"
+    },
+    {
+      "Id": "ijo",
+      "Part2B": "ijo",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Ijo languages"
+    },
+    {
+      "Id": "iku",
+      "Part2B": "iku",
+      "Part2T": "",
+      "Part1": "iu",
+      "RefName": "Inuktitut"
+    },
+    {
+      "Id": "ile",
+      "Part2B": "ile",
+      "Part2T": "",
+      "Part1": "ie",
+      "RefName": "Interlingue; Occidental"
+    },
+    {
+      "Id": "ilo",
+      "Part2B": "ilo",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Iloko"
+    },
+    {
+      "Id": "ina",
+      "Part2B": "ina",
+      "Part2T": "",
+      "Part1": "ia",
+      "RefName": "Interlingua (International Auxiliary Language Association)"
+    },
+    {
+      "Id": "inc",
+      "Part2B": "inc",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Indic languages"
+    },
+    {
+      "Id": "ind",
+      "Part2B": "ind",
+      "Part2T": "",
+      "Part1": "id",
+      "RefName": "Indonesian"
+    },
+    {
+      "Id": "ine",
+      "Part2B": "ine",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Indo-European languages"
+    },
+    {
+      "Id": "inh",
+      "Part2B": "inh",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Ingush"
+    },
+    {
+      "Id": "ipk",
+      "Part2B": "ipk",
+      "Part2T": "",
+      "Part1": "ik",
+      "RefName": "Inupiaq"
+    },
+    {
+      "Id": "ira",
+      "Part2B": "ira",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Iranian languages"
+    },
+    {
+      "Id": "iro",
+      "Part2B": "iro",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Iroquoian languages"
+    },
+    {
+      "Id": "ita",
+      "Part2B": "ita",
+      "Part2T": "",
+      "Part1": "it",
+      "RefName": "Italian"
+    },
+    {
+      "Id": "jav",
+      "Part2B": "jav",
+      "Part2T": "",
+      "Part1": "jv",
+      "RefName": "Javanese"
+    },
+    {
+      "Id": "jbo",
+      "Part2B": "jbo",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Lojban"
+    },
+    {
+      "Id": "jpn",
+      "Part2B": "jpn",
+      "Part2T": "",
+      "Part1": "ja",
+      "RefName": "Japanese"
+    },
+    {
+      "Id": "jpr",
+      "Part2B": "jpr",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Judeo-Persian"
+    },
+    {
+      "Id": "jrb",
+      "Part2B": "jrb",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Judeo-Arabic"
+    },
+    {
+      "Id": "kaa",
+      "Part2B": "kaa",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Kara-Kalpak"
+    },
+    {
+      "Id": "kab",
+      "Part2B": "kab",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Kabyle"
+    },
+    {
+      "Id": "kac",
+      "Part2B": "kac",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Kachin; Jingpho"
+    },
+    {
+      "Id": "kal",
+      "Part2B": "kal",
+      "Part2T": "",
+      "Part1": "kl",
+      "RefName": "Kalaallisut; Greenlandic"
+    },
+    {
+      "Id": "kam",
+      "Part2B": "kam",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Kamba"
+    },
+    {
+      "Id": "kan",
+      "Part2B": "kan",
+      "Part2T": "",
+      "Part1": "kn",
+      "RefName": "Kannada"
+    },
+    {
+      "Id": "kar",
+      "Part2B": "kar",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Karen languages"
+    },
+    {
+      "Id": "kas",
+      "Part2B": "kas",
+      "Part2T": "",
+      "Part1": "ks",
+      "RefName": "Kashmiri"
+    },
+    {
+      "Id": "kau",
+      "Part2B": "kau",
+      "Part2T": "",
+      "Part1": "kr",
+      "RefName": "Kanuri"
+    },
+    {
+      "Id": "kaw",
+      "Part2B": "kaw",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Kawi"
+    },
+    {
+      "Id": "kaz",
+      "Part2B": "kaz",
+      "Part2T": "",
+      "Part1": "kk",
+      "RefName": "Kazakh"
+    },
+    {
+      "Id": "kbd",
+      "Part2B": "kbd",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Kabardian"
+    },
+    {
+      "Id": "kha",
+      "Part2B": "kha",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Khasi"
+    },
+    {
+      "Id": "khi",
+      "Part2B": "khi",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Khoisan languages"
+    },
+    {
+      "Id": "khm",
+      "Part2B": "khm",
+      "Part2T": "",
+      "Part1": "km",
+      "RefName": "Central Khmer"
+    },
+    {
+      "Id": "kho",
+      "Part2B": "kho",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Khotanese; Sakan"
+    },
+    {
+      "Id": "kik",
+      "Part2B": "kik",
+      "Part2T": "",
+      "Part1": "ki",
+      "RefName": "Kikuyu; Gikuyu"
+    },
+    {
+      "Id": "kin",
+      "Part2B": "kin",
+      "Part2T": "",
+      "Part1": "rw",
+      "RefName": "Kinyarwanda"
+    },
+    {
+      "Id": "kir",
+      "Part2B": "kir",
+      "Part2T": "",
+      "Part1": "ky",
+      "RefName": "Kirghiz; Kyrgyz"
+    },
+    {
+      "Id": "kmb",
+      "Part2B": "kmb",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Kimbundu"
+    },
+    {
+      "Id": "kok",
+      "Part2B": "kok",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Konkani"
+    },
+    {
+      "Id": "kom",
+      "Part2B": "kom",
+      "Part2T": "",
+      "Part1": "kv",
+      "RefName": "Komi"
+    },
+    {
+      "Id": "kon",
+      "Part2B": "kon",
+      "Part2T": "",
+      "Part1": "kg",
+      "RefName": "Kongo"
+    },
+    {
+      "Id": "kor",
+      "Part2B": "kor",
+      "Part2T": "",
+      "Part1": "ko",
+      "RefName": "Korean"
+    },
+    {
+      "Id": "kos",
+      "Part2B": "kos",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Kosraean"
+    },
+    {
+      "Id": "kpe",
+      "Part2B": "kpe",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Kpelle"
+    },
+    {
+      "Id": "krc",
+      "Part2B": "krc",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Karachay-Balkar"
+    },
+    {
+      "Id": "krl",
+      "Part2B": "krl",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Karelian"
+    },
+    {
+      "Id": "kro",
+      "Part2B": "kro",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Kru languages"
+    },
+    {
+      "Id": "kru",
+      "Part2B": "kru",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Kurukh"
+    },
+    {
+      "Id": "kua",
+      "Part2B": "kua",
+      "Part2T": "",
+      "Part1": "kj",
+      "RefName": "Kuanyama; Kwanyama"
+    },
+    {
+      "Id": "kum",
+      "Part2B": "kum",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Kumyk"
+    },
+    {
+      "Id": "kur",
+      "Part2B": "kur",
+      "Part2T": "",
+      "Part1": "ku",
+      "RefName": "Kurdish"
+    },
+    {
+      "Id": "kut",
+      "Part2B": "kut",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Kutenai"
+    },
+    {
+      "Id": "lad",
+      "Part2B": "lad",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Ladino"
+    },
+    {
+      "Id": "lah",
+      "Part2B": "lah",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Lahnda"
+    },
+    {
+      "Id": "lam",
+      "Part2B": "lam",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Lamba"
+    },
+    {
+      "Id": "lao",
+      "Part2B": "lao",
+      "Part2T": "",
+      "Part1": "lo",
+      "RefName": "Lao"
+    },
+    {
+      "Id": "lat",
+      "Part2B": "lat",
+      "Part2T": "",
+      "Part1": "la",
+      "RefName": "Latin"
+    },
+    {
+      "Id": "lav",
+      "Part2B": "lav",
+      "Part2T": "",
+      "Part1": "lv",
+      "RefName": "Latvian"
+    },
+    {
+      "Id": "lez",
+      "Part2B": "lez",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Lezghian"
+    },
+    {
+      "Id": "lim",
+      "Part2B": "lim",
+      "Part2T": "",
+      "Part1": "li",
+      "RefName": "Limburgan; Limburger; Limburgish"
+    },
+    {
+      "Id": "lin",
+      "Part2B": "lin",
+      "Part2T": "",
+      "Part1": "ln",
+      "RefName": "Lingala"
+    },
+    {
+      "Id": "lit",
+      "Part2B": "lit",
+      "Part2T": "",
+      "Part1": "lt",
+      "RefName": "Lithuanian"
+    },
+    {
+      "Id": "lol",
+      "Part2B": "lol",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Mongo"
+    },
+    {
+      "Id": "loz",
+      "Part2B": "loz",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Lozi"
+    },
+    {
+      "Id": "ltz",
+      "Part2B": "ltz",
+      "Part2T": "",
+      "Part1": "lb",
+      "RefName": "Luxembourgish; Letzeburgesch"
+    },
+    {
+      "Id": "lua",
+      "Part2B": "lua",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Luba-Lulua"
+    },
+    {
+      "Id": "lub",
+      "Part2B": "lub",
+      "Part2T": "",
+      "Part1": "lu",
+      "RefName": "Luba-Katanga"
+    },
+    {
+      "Id": "lug",
+      "Part2B": "lug",
+      "Part2T": "",
+      "Part1": "lg",
+      "RefName": "Ganda"
+    },
+    {
+      "Id": "lui",
+      "Part2B": "lui",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Luiseno"
+    },
+    {
+      "Id": "lun",
+      "Part2B": "lun",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Lunda"
+    },
+    {
+      "Id": "luo",
+      "Part2B": "luo",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Luo (Kenya and Tanzania)"
+    },
+    {
+      "Id": "lus",
+      "Part2B": "lus",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Lushai"
+    },
+    {
+      "Id": "mac",
+      "Part2B": "mac",
+      "Part2T": "mkd",
+      "Part1": "mk",
+      "RefName": "Macedonian"
+    },
+    {
+      "Id": "mad",
+      "Part2B": "mad",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Madurese"
+    },
+    {
+      "Id": "mag",
+      "Part2B": "mag",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Magahi"
+    },
+    {
+      "Id": "mah",
+      "Part2B": "mah",
+      "Part2T": "",
+      "Part1": "mh",
+      "RefName": "Marshallese"
+    },
+    {
+      "Id": "mai",
+      "Part2B": "mai",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Maithili"
+    },
+    {
+      "Id": "mak",
+      "Part2B": "mak",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Makasar"
+    },
+    {
+      "Id": "mal",
+      "Part2B": "mal",
+      "Part2T": "",
+      "Part1": "ml",
+      "RefName": "Malayalam"
+    },
+    {
+      "Id": "man",
+      "Part2B": "man",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Mandingo"
+    },
+    {
+      "Id": "mao",
+      "Part2B": "mao",
+      "Part2T": "mri",
+      "Part1": "mi",
+      "RefName": "Maori"
+    },
+    {
+      "Id": "map",
+      "Part2B": "map",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Austronesian languages"
+    },
+    {
+      "Id": "mar",
+      "Part2B": "mar",
+      "Part2T": "",
+      "Part1": "mr",
+      "RefName": "Marathi"
+    },
+    {
+      "Id": "mas",
+      "Part2B": "mas",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Masai"
+    },
+    {
+      "Id": "may",
+      "Part2B": "may",
+      "Part2T": "msa",
+      "Part1": "ms",
+      "RefName": "Malay"
+    },
+    {
+      "Id": "mdf",
+      "Part2B": "mdf",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Moksha"
+    },
+    {
+      "Id": "mdr",
+      "Part2B": "mdr",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Mandar"
+    },
+    {
+      "Id": "men",
+      "Part2B": "men",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Mende"
+    },
+    {
+      "Id": "mga",
+      "Part2B": "mga",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Irish, Middle (900-1200)"
+    },
+    {
+      "Id": "mic",
+      "Part2B": "mic",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Mi\u0027kmaq; Micmac"
+    },
+    {
+      "Id": "min",
+      "Part2B": "min",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Minangkabau"
+    },
+    {
+      "Id": "mis",
+      "Part2B": "mis",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Uncoded languages"
+    },
+    {
+      "Id": "mkh",
+      "Part2B": "mkh",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Mon-Khmer languages"
+    },
+    {
+      "Id": "mlg",
+      "Part2B": "mlg",
+      "Part2T": "",
+      "Part1": "mg",
+      "RefName": "Malagasy"
+    },
+    {
+      "Id": "mlt",
+      "Part2B": "mlt",
+      "Part2T": "",
+      "Part1": "mt",
+      "RefName": "Maltese"
+    },
+    {
+      "Id": "mnc",
+      "Part2B": "mnc",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Manchu"
+    },
+    {
+      "Id": "mni",
+      "Part2B": "mni",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Manipuri"
+    },
+    {
+      "Id": "mno",
+      "Part2B": "mno",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Manobo languages"
+    },
+    {
+      "Id": "moh",
+      "Part2B": "moh",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Mohawk"
+    },
+    {
+      "Id": "mon",
+      "Part2B": "mon",
+      "Part2T": "",
+      "Part1": "mn",
+      "RefName": "Mongolian"
+    },
+    {
+      "Id": "mos",
+      "Part2B": "mos",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Mossi"
+    },
+    {
+      "Id": "mul",
+      "Part2B": "mul",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Multiple languages"
+    },
+    {
+      "Id": "mun",
+      "Part2B": "mun",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Munda languages"
+    },
+    {
+      "Id": "mus",
+      "Part2B": "mus",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Creek"
+    },
+    {
+      "Id": "mwl",
+      "Part2B": "mwl",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Mirandese"
+    },
+    {
+      "Id": "mwr",
+      "Part2B": "mwr",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Marwari"
+    },
+    {
+      "Id": "myn",
+      "Part2B": "myn",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Mayan languages"
+    },
+    {
+      "Id": "myv",
+      "Part2B": "myv",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Erzya"
+    },
+    {
+      "Id": "nah",
+      "Part2B": "nah",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Nahuatl languages"
+    },
+    {
+      "Id": "nai",
+      "Part2B": "nai",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "North American Indian languages"
+    },
+    {
+      "Id": "nap",
+      "Part2B": "nap",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Neapolitan"
+    },
+    {
+      "Id": "nau",
+      "Part2B": "nau",
+      "Part2T": "",
+      "Part1": "na",
+      "RefName": "Nauru"
+    },
+    {
+      "Id": "nav",
+      "Part2B": "nav",
+      "Part2T": "",
+      "Part1": "nv",
+      "RefName": "Navajo; Navaho"
+    },
+    {
+      "Id": "nbl",
+      "Part2B": "nbl",
+      "Part2T": "",
+      "Part1": "nr",
+      "RefName": "Ndebele, South; South Ndebele"
+    },
+    {
+      "Id": "nde",
+      "Part2B": "nde",
+      "Part2T": "",
+      "Part1": "nd",
+      "RefName": "Ndebele, North; North Ndebele"
+    },
+    {
+      "Id": "ndo",
+      "Part2B": "ndo",
+      "Part2T": "",
+      "Part1": "ng",
+      "RefName": "Ndonga"
+    },
+    {
+      "Id": "nds",
+      "Part2B": "nds",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Low German; Low Saxon; German, Low; Saxon, Low"
+    },
+    {
+      "Id": "nep",
+      "Part2B": "nep",
+      "Part2T": "",
+      "Part1": "ne",
+      "RefName": "Nepali"
+    },
+    {
+      "Id": "new",
+      "Part2B": "new",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Nepal Bhasa; Newari"
+    },
+    {
+      "Id": "nia",
+      "Part2B": "nia",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Nias"
+    },
+    {
+      "Id": "nic",
+      "Part2B": "nic",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Niger-Kordofanian languages"
+    },
+    {
+      "Id": "niu",
+      "Part2B": "niu",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Niuean"
+    },
+    {
+      "Id": "nno",
+      "Part2B": "nno",
+      "Part2T": "",
+      "Part1": "nn",
+      "RefName": "Norwegian Nynorsk; Nynorsk, Norwegian"
+    },
+    {
+      "Id": "nob",
+      "Part2B": "nob",
+      "Part2T": "",
+      "Part1": "nb",
+      "RefName": "Bokm\u00E5l, Norwegian; Norwegian Bokm\u00E5l"
+    },
+    {
+      "Id": "nog",
+      "Part2B": "nog",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Nogai"
+    },
+    {
+      "Id": "non",
+      "Part2B": "non",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Norse, Old"
+    },
+    {
+      "Id": "nor",
+      "Part2B": "nor",
+      "Part2T": "",
+      "Part1": "no",
+      "RefName": "Norwegian"
+    },
+    {
+      "Id": "nqo",
+      "Part2B": "nqo",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "N\u0027Ko"
+    },
+    {
+      "Id": "nso",
+      "Part2B": "nso",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Pedi; Sepedi; Northern Sotho"
+    },
+    {
+      "Id": "nub",
+      "Part2B": "nub",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Nubian languages"
+    },
+    {
+      "Id": "nwc",
+      "Part2B": "nwc",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Classical Newari; Old Newari; Classical Nepal Bhasa"
+    },
+    {
+      "Id": "nya",
+      "Part2B": "nya",
+      "Part2T": "",
+      "Part1": "ny",
+      "RefName": "Chichewa; Chewa; Nyanja"
+    },
+    {
+      "Id": "nym",
+      "Part2B": "nym",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Nyamwezi"
+    },
+    {
+      "Id": "nyn",
+      "Part2B": "nyn",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Nyankole"
+    },
+    {
+      "Id": "nyo",
+      "Part2B": "nyo",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Nyoro"
+    },
+    {
+      "Id": "nzi",
+      "Part2B": "nzi",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Nzima"
+    },
+    {
+      "Id": "oci",
+      "Part2B": "oci",
+      "Part2T": "",
+      "Part1": "oc",
+      "RefName": "Occitan (post 1500)"
+    },
+    {
+      "Id": "oji",
+      "Part2B": "oji",
+      "Part2T": "",
+      "Part1": "oj",
+      "RefName": "Ojibwa"
+    },
+    {
+      "Id": "ori",
+      "Part2B": "ori",
+      "Part2T": "",
+      "Part1": "or",
+      "RefName": "Oriya"
+    },
+    {
+      "Id": "orm",
+      "Part2B": "orm",
+      "Part2T": "",
+      "Part1": "om",
+      "RefName": "Oromo"
+    },
+    {
+      "Id": "osa",
+      "Part2B": "osa",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Osage"
+    },
+    {
+      "Id": "oss",
+      "Part2B": "oss",
+      "Part2T": "",
+      "Part1": "os",
+      "RefName": "Ossetian; Ossetic"
+    },
+    {
+      "Id": "ota",
+      "Part2B": "ota",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Turkish, Ottoman (1500-1928)"
+    },
+    {
+      "Id": "oto",
+      "Part2B": "oto",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Otomian languages"
+    },
+    {
+      "Id": "paa",
+      "Part2B": "paa",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Papuan languages"
+    },
+    {
+      "Id": "pag",
+      "Part2B": "pag",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Pangasinan"
+    },
+    {
+      "Id": "pal",
+      "Part2B": "pal",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Pahlavi"
+    },
+    {
+      "Id": "pam",
+      "Part2B": "pam",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Pampanga; Kapampangan"
+    },
+    {
+      "Id": "pan",
+      "Part2B": "pan",
+      "Part2T": "",
+      "Part1": "pa",
+      "RefName": "Panjabi; Punjabi"
+    },
+    {
+      "Id": "pap",
+      "Part2B": "pap",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Papiamento"
+    },
+    {
+      "Id": "pau",
+      "Part2B": "pau",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Palauan"
+    },
+    {
+      "Id": "peo",
+      "Part2B": "peo",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Persian, Old (ca.600-400 B.C.)"
+    },
+    {
+      "Id": "per",
+      "Part2B": "per",
+      "Part2T": "fas",
+      "Part1": "fa",
+      "RefName": "Persian"
+    },
+    {
+      "Id": "phi",
+      "Part2B": "phi",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Philippine languages"
+    },
+    {
+      "Id": "phn",
+      "Part2B": "phn",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Phoenician"
+    },
+    {
+      "Id": "pli",
+      "Part2B": "pli",
+      "Part2T": "",
+      "Part1": "pi",
+      "RefName": "Pali"
+    },
+    {
+      "Id": "pol",
+      "Part2B": "pol",
+      "Part2T": "",
+      "Part1": "pl",
+      "RefName": "Polish"
+    },
+    {
+      "Id": "pon",
+      "Part2B": "pon",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Pohnpeian"
+    },
+    {
+      "Id": "por",
+      "Part2B": "por",
+      "Part2T": "",
+      "Part1": "pt",
+      "RefName": "Portuguese"
+    },
+    {
+      "Id": "pra",
+      "Part2B": "pra",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Prakrit languages"
+    },
+    {
+      "Id": "pro",
+      "Part2B": "pro",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Proven\u00E7al, Old (to 1500); Occitan, Old (to 1500)"
+    },
+    {
+      "Id": "pus",
+      "Part2B": "pus",
+      "Part2T": "",
+      "Part1": "ps",
+      "RefName": "Pushto; Pashto"
+    },
+    {
+      "Id": "qaa-qtz",
+      "Part2B": "qaa-qtz",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Reserved for local use"
+    },
+    {
+      "Id": "que",
+      "Part2B": "que",
+      "Part2T": "",
+      "Part1": "qu",
+      "RefName": "Quechua"
+    },
+    {
+      "Id": "raj",
+      "Part2B": "raj",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Rajasthani"
+    },
+    {
+      "Id": "rap",
+      "Part2B": "rap",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Rapanui"
+    },
+    {
+      "Id": "rar",
+      "Part2B": "rar",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Rarotongan; Cook Islands Maori"
+    },
+    {
+      "Id": "roa",
+      "Part2B": "roa",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Romance languages"
+    },
+    {
+      "Id": "roh",
+      "Part2B": "roh",
+      "Part2T": "",
+      "Part1": "rm",
+      "RefName": "Romansh"
+    },
+    {
+      "Id": "rom",
+      "Part2B": "rom",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Romany"
+    },
+    {
+      "Id": "rum",
+      "Part2B": "rum",
+      "Part2T": "ron",
+      "Part1": "ro",
+      "RefName": "Romanian; Moldavian; Moldovan"
+    },
+    {
+      "Id": "run",
+      "Part2B": "run",
+      "Part2T": "",
+      "Part1": "rn",
+      "RefName": "Rundi"
+    },
+    {
+      "Id": "rup",
+      "Part2B": "rup",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Aromanian; Arumanian; Macedo-Romanian"
+    },
+    {
+      "Id": "rus",
+      "Part2B": "rus",
+      "Part2T": "",
+      "Part1": "ru",
+      "RefName": "Russian"
+    },
+    {
+      "Id": "sad",
+      "Part2B": "sad",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Sandawe"
+    },
+    {
+      "Id": "sag",
+      "Part2B": "sag",
+      "Part2T": "",
+      "Part1": "sg",
+      "RefName": "Sango"
+    },
+    {
+      "Id": "sah",
+      "Part2B": "sah",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Yakut"
+    },
+    {
+      "Id": "sai",
+      "Part2B": "sai",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "South American Indian languages"
+    },
+    {
+      "Id": "sal",
+      "Part2B": "sal",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Salishan languages"
+    },
+    {
+      "Id": "sam",
+      "Part2B": "sam",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Samaritan Aramaic"
+    },
+    {
+      "Id": "san",
+      "Part2B": "san",
+      "Part2T": "",
+      "Part1": "sa",
+      "RefName": "Sanskrit"
+    },
+    {
+      "Id": "sas",
+      "Part2B": "sas",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Sasak"
+    },
+    {
+      "Id": "sat",
+      "Part2B": "sat",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Santali"
+    },
+    {
+      "Id": "scn",
+      "Part2B": "scn",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Sicilian"
+    },
+    {
+      "Id": "sco",
+      "Part2B": "sco",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Scots"
+    },
+    {
+      "Id": "sel",
+      "Part2B": "sel",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Selkup"
+    },
+    {
+      "Id": "sem",
+      "Part2B": "sem",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Semitic languages"
+    },
+    {
+      "Id": "sga",
+      "Part2B": "sga",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Irish, Old (to 900)"
+    },
+    {
+      "Id": "sgn",
+      "Part2B": "sgn",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Sign Languages"
+    },
+    {
+      "Id": "shn",
+      "Part2B": "shn",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Shan"
+    },
+    {
+      "Id": "sid",
+      "Part2B": "sid",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Sidamo"
+    },
+    {
+      "Id": "sin",
+      "Part2B": "sin",
+      "Part2T": "",
+      "Part1": "si",
+      "RefName": "Sinhala; Sinhalese"
+    },
+    {
+      "Id": "sio",
+      "Part2B": "sio",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Siouan languages"
+    },
+    {
+      "Id": "sit",
+      "Part2B": "sit",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Sino-Tibetan languages"
+    },
+    {
+      "Id": "sla",
+      "Part2B": "sla",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Slavic languages"
+    },
+    {
+      "Id": "slo",
+      "Part2B": "slo",
+      "Part2T": "slk",
+      "Part1": "sk",
+      "RefName": "Slovak"
+    },
+    {
+      "Id": "slv",
+      "Part2B": "slv",
+      "Part2T": "",
+      "Part1": "sl",
+      "RefName": "Slovenian"
+    },
+    {
+      "Id": "sma",
+      "Part2B": "sma",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Southern Sami"
+    },
+    {
+      "Id": "sme",
+      "Part2B": "sme",
+      "Part2T": "",
+      "Part1": "se",
+      "RefName": "Northern Sami"
+    },
+    {
+      "Id": "smi",
+      "Part2B": "smi",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Sami languages"
+    },
+    {
+      "Id": "smj",
+      "Part2B": "smj",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Lule Sami"
+    },
+    {
+      "Id": "smn",
+      "Part2B": "smn",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Inari Sami"
+    },
+    {
+      "Id": "smo",
+      "Part2B": "smo",
+      "Part2T": "",
+      "Part1": "sm",
+      "RefName": "Samoan"
+    },
+    {
+      "Id": "sms",
+      "Part2B": "sms",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Skolt Sami"
+    },
+    {
+      "Id": "sna",
+      "Part2B": "sna",
+      "Part2T": "",
+      "Part1": "sn",
+      "RefName": "Shona"
+    },
+    {
+      "Id": "snd",
+      "Part2B": "snd",
+      "Part2T": "",
+      "Part1": "sd",
+      "RefName": "Sindhi"
+    },
+    {
+      "Id": "snk",
+      "Part2B": "snk",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Soninke"
+    },
+    {
+      "Id": "sog",
+      "Part2B": "sog",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Sogdian"
+    },
+    {
+      "Id": "som",
+      "Part2B": "som",
+      "Part2T": "",
+      "Part1": "so",
+      "RefName": "Somali"
+    },
+    {
+      "Id": "son",
+      "Part2B": "son",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Songhai languages"
+    },
+    {
+      "Id": "sot",
+      "Part2B": "sot",
+      "Part2T": "",
+      "Part1": "st",
+      "RefName": "Sotho, Southern"
+    },
+    {
+      "Id": "spa",
+      "Part2B": "spa",
+      "Part2T": "",
+      "Part1": "es",
+      "RefName": "Spanish; Castilian"
+    },
+    {
+      "Id": "srd",
+      "Part2B": "srd",
+      "Part2T": "",
+      "Part1": "sc",
+      "RefName": "Sardinian"
+    },
+    {
+      "Id": "srn",
+      "Part2B": "srn",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Sranan Tongo"
+    },
+    {
+      "Id": "srp",
+      "Part2B": "srp",
+      "Part2T": "",
+      "Part1": "sr",
+      "RefName": "Serbian"
+    },
+    {
+      "Id": "srr",
+      "Part2B": "srr",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Serer"
+    },
+    {
+      "Id": "ssa",
+      "Part2B": "ssa",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Nilo-Saharan languages"
+    },
+    {
+      "Id": "ssw",
+      "Part2B": "ssw",
+      "Part2T": "",
+      "Part1": "ss",
+      "RefName": "Swati"
+    },
+    {
+      "Id": "suk",
+      "Part2B": "suk",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Sukuma"
+    },
+    {
+      "Id": "sun",
+      "Part2B": "sun",
+      "Part2T": "",
+      "Part1": "su",
+      "RefName": "Sundanese"
+    },
+    {
+      "Id": "sus",
+      "Part2B": "sus",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Susu"
+    },
+    {
+      "Id": "sux",
+      "Part2B": "sux",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Sumerian"
+    },
+    {
+      "Id": "swa",
+      "Part2B": "swa",
+      "Part2T": "",
+      "Part1": "sw",
+      "RefName": "Swahili"
+    },
+    {
+      "Id": "swe",
+      "Part2B": "swe",
+      "Part2T": "",
+      "Part1": "sv",
+      "RefName": "Swedish"
+    },
+    {
+      "Id": "syc",
+      "Part2B": "syc",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Classical Syriac"
+    },
+    {
+      "Id": "syr",
+      "Part2B": "syr",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Syriac"
+    },
+    {
+      "Id": "tah",
+      "Part2B": "tah",
+      "Part2T": "",
+      "Part1": "ty",
+      "RefName": "Tahitian"
+    },
+    {
+      "Id": "tai",
+      "Part2B": "tai",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Tai languages"
+    },
+    {
+      "Id": "tam",
+      "Part2B": "tam",
+      "Part2T": "",
+      "Part1": "ta",
+      "RefName": "Tamil"
+    },
+    {
+      "Id": "tat",
+      "Part2B": "tat",
+      "Part2T": "",
+      "Part1": "tt",
+      "RefName": "Tatar"
+    },
+    {
+      "Id": "tel",
+      "Part2B": "tel",
+      "Part2T": "",
+      "Part1": "te",
+      "RefName": "Telugu"
+    },
+    {
+      "Id": "tem",
+      "Part2B": "tem",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Timne"
+    },
+    {
+      "Id": "ter",
+      "Part2B": "ter",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Tereno"
+    },
+    {
+      "Id": "tet",
+      "Part2B": "tet",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Tetum"
+    },
+    {
+      "Id": "tgk",
+      "Part2B": "tgk",
+      "Part2T": "",
+      "Part1": "tg",
+      "RefName": "Tajik"
+    },
+    {
+      "Id": "tgl",
+      "Part2B": "tgl",
+      "Part2T": "",
+      "Part1": "tl",
+      "RefName": "Tagalog"
+    },
+    {
+      "Id": "tha",
+      "Part2B": "tha",
+      "Part2T": "",
+      "Part1": "th",
+      "RefName": "Thai"
+    },
+    {
+      "Id": "tib",
+      "Part2B": "tib",
+      "Part2T": "bod",
+      "Part1": "bo",
+      "RefName": "Tibetan"
+    },
+    {
+      "Id": "tig",
+      "Part2B": "tig",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Tigre"
+    },
+    {
+      "Id": "tir",
+      "Part2B": "tir",
+      "Part2T": "",
+      "Part1": "ti",
+      "RefName": "Tigrinya"
+    },
+    {
+      "Id": "tiv",
+      "Part2B": "tiv",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Tiv"
+    },
+    {
+      "Id": "tkl",
+      "Part2B": "tkl",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Tokelau"
+    },
+    {
+      "Id": "tlh",
+      "Part2B": "tlh",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Klingon; tlhIngan-Hol"
+    },
+    {
+      "Id": "tli",
+      "Part2B": "tli",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Tlingit"
+    },
+    {
+      "Id": "tmh",
+      "Part2B": "tmh",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Tamashek"
+    },
+    {
+      "Id": "tog",
+      "Part2B": "tog",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Tonga (Nyasa)"
+    },
+    {
+      "Id": "ton",
+      "Part2B": "ton",
+      "Part2T": "",
+      "Part1": "to",
+      "RefName": "Tonga (Tonga Islands)"
+    },
+    {
+      "Id": "tpi",
+      "Part2B": "tpi",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Tok Pisin"
+    },
+    {
+      "Id": "tsi",
+      "Part2B": "tsi",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Tsimshian"
+    },
+    {
+      "Id": "tsn",
+      "Part2B": "tsn",
+      "Part2T": "",
+      "Part1": "tn",
+      "RefName": "Tswana"
+    },
+    {
+      "Id": "tso",
+      "Part2B": "tso",
+      "Part2T": "",
+      "Part1": "ts",
+      "RefName": "Tsonga"
+    },
+    {
+      "Id": "tuk",
+      "Part2B": "tuk",
+      "Part2T": "",
+      "Part1": "tk",
+      "RefName": "Turkmen"
+    },
+    {
+      "Id": "tum",
+      "Part2B": "tum",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Tumbuka"
+    },
+    {
+      "Id": "tup",
+      "Part2B": "tup",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Tupi languages"
+    },
+    {
+      "Id": "tur",
+      "Part2B": "tur",
+      "Part2T": "",
+      "Part1": "tr",
+      "RefName": "Turkish"
+    },
+    {
+      "Id": "tut",
+      "Part2B": "tut",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Altaic languages"
+    },
+    {
+      "Id": "tvl",
+      "Part2B": "tvl",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Tuvalu"
+    },
+    {
+      "Id": "twi",
+      "Part2B": "twi",
+      "Part2T": "",
+      "Part1": "tw",
+      "RefName": "Twi"
+    },
+    {
+      "Id": "tyv",
+      "Part2B": "tyv",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Tuvinian"
+    },
+    {
+      "Id": "udm",
+      "Part2B": "udm",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Udmurt"
+    },
+    {
+      "Id": "uga",
+      "Part2B": "uga",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Ugaritic"
+    },
+    {
+      "Id": "uig",
+      "Part2B": "uig",
+      "Part2T": "",
+      "Part1": "ug",
+      "RefName": "Uighur; Uyghur"
+    },
+    {
+      "Id": "ukr",
+      "Part2B": "ukr",
+      "Part2T": "",
+      "Part1": "uk",
+      "RefName": "Ukrainian"
+    },
+    {
+      "Id": "umb",
+      "Part2B": "umb",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Umbundu"
+    },
+    {
+      "Id": "und",
+      "Part2B": "und",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Undetermined"
+    },
+    {
+      "Id": "urd",
+      "Part2B": "urd",
+      "Part2T": "",
+      "Part1": "ur",
+      "RefName": "Urdu"
+    },
+    {
+      "Id": "uzb",
+      "Part2B": "uzb",
+      "Part2T": "",
+      "Part1": "uz",
+      "RefName": "Uzbek"
+    },
+    {
+      "Id": "vai",
+      "Part2B": "vai",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Vai"
+    },
+    {
+      "Id": "ven",
+      "Part2B": "ven",
+      "Part2T": "",
+      "Part1": "ve",
+      "RefName": "Venda"
+    },
+    {
+      "Id": "vie",
+      "Part2B": "vie",
+      "Part2T": "",
+      "Part1": "vi",
+      "RefName": "Vietnamese"
+    },
+    {
+      "Id": "vol",
+      "Part2B": "vol",
+      "Part2T": "",
+      "Part1": "vo",
+      "RefName": "Volap\u00FCk"
+    },
+    {
+      "Id": "vot",
+      "Part2B": "vot",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Votic"
+    },
+    {
+      "Id": "wak",
+      "Part2B": "wak",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Wakashan languages"
+    },
+    {
+      "Id": "wal",
+      "Part2B": "wal",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Wolaitta; Wolaytta"
+    },
+    {
+      "Id": "war",
+      "Part2B": "war",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Waray"
+    },
+    {
+      "Id": "was",
+      "Part2B": "was",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Washo"
+    },
+    {
+      "Id": "wel",
+      "Part2B": "wel",
+      "Part2T": "cym",
+      "Part1": "cy",
+      "RefName": "Welsh"
+    },
+    {
+      "Id": "wen",
+      "Part2B": "wen",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Sorbian languages"
+    },
+    {
+      "Id": "wln",
+      "Part2B": "wln",
+      "Part2T": "",
+      "Part1": "wa",
+      "RefName": "Walloon"
+    },
+    {
+      "Id": "wol",
+      "Part2B": "wol",
+      "Part2T": "",
+      "Part1": "wo",
+      "RefName": "Wolof"
+    },
+    {
+      "Id": "xal",
+      "Part2B": "xal",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Kalmyk; Oirat"
+    },
+    {
+      "Id": "xho",
+      "Part2B": "xho",
+      "Part2T": "",
+      "Part1": "xh",
+      "RefName": "Xhosa"
+    },
+    {
+      "Id": "yao",
+      "Part2B": "yao",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Yao"
+    },
+    {
+      "Id": "yap",
+      "Part2B": "yap",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Yapese"
+    },
+    {
+      "Id": "yid",
+      "Part2B": "yid",
+      "Part2T": "",
+      "Part1": "yi",
+      "RefName": "Yiddish"
+    },
+    {
+      "Id": "yor",
+      "Part2B": "yor",
+      "Part2T": "",
+      "Part1": "yo",
+      "RefName": "Yoruba"
+    },
+    {
+      "Id": "ypk",
+      "Part2B": "ypk",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Yupik languages"
+    },
+    {
+      "Id": "zap",
+      "Part2B": "zap",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Zapotec"
+    },
+    {
+      "Id": "zbl",
+      "Part2B": "zbl",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Blissymbols; Blissymbolics; Bliss"
+    },
+    {
+      "Id": "zen",
+      "Part2B": "zen",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Zenaga"
+    },
+    {
+      "Id": "zgh",
+      "Part2B": "zgh",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Standard Moroccan Tamazight"
+    },
+    {
+      "Id": "zha",
+      "Part2B": "zha",
+      "Part2T": "",
+      "Part1": "za",
+      "RefName": "Zhuang; Chuang"
+    },
+    {
+      "Id": "znd",
+      "Part2B": "znd",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Zande languages"
+    },
+    {
+      "Id": "zul",
+      "Part2B": "zul",
+      "Part2T": "",
+      "Part1": "zu",
+      "RefName": "Zulu"
+    },
+    {
+      "Id": "zun",
+      "Part2B": "zun",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Zuni"
+    },
+    {
+      "Id": "zxx",
+      "Part2B": "zxx",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "No linguistic content; Not applicable"
+    },
+    {
+      "Id": "zza",
+      "Part2B": "zza",
+      "Part2T": "",
+      "Part1": "",
+      "RefName": "Zaza; Dimili; Dimli; Kirdki; Kirmanjki; Zazaki"
+    }
+  ]
+}

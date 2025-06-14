@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>LanguageTags</AssemblyName>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <Authors>Pieter Viljoen</Authors>
+    <Company>Pieter Viljoen</Company>
+    <Copyright>Pieter Viljoen</Copyright>
+    <Description>C# .NET library for ISO 639-2, ISO 639-3, RFC 5646 and BCP 47 language tags</Description>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <FileVersion>1.0.0.0</FileVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <NeutralLanguage>en</NeutralLanguage>
+    <PackageId>LanguageTags</PackageId>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/ptr727/LanguageTags</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <RootNamespace>ptr727.LanguageTags</RootNamespace>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <TargetFramework>net9.0</TargetFramework>
+    <Version>1.0.0.0</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+</Project>

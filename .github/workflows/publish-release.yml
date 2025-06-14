@@ -91,15 +91,6 @@ jobs:
             --api-key ${{ secrets.NUGET_API_KEY }}
             --skip-duplicate
 
-      # https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-nuget-registry
-      - name: Publish to GitHub NuGet Registry
-        if: github.event_name != 'pull_request'
-        run: >-
-            dotnet nuget push ${{ github.workspace }}/Publish/*.nupkg
-            --source https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
-            --api-key ${{ secrets.GITHUB_TOKEN }}
-            --skip-duplicate
-
       - name: Zip output
         if: github.event_name != 'pull_request'
         run: 7z a -t7z ./Publish/LanguageTags.7z ./Publish/*

@@ -1,0 +1,83 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"cSpell.words": [
+            "acrolanguage",
+            "arevela",
+            "CLDR",
+            "csdevkit",
+            "davidanson",
+            "derbend",
+            "dotnettools",
+            "extlang",
+            "gruntfuggly",
+            "istorical",
+            "iving",
+            "Jernej",
+            "jkporter",
+            "langcodes",
+            "languagetags",
+            "macrolanguage",
+            "mattcg",
+            "nbgv",
+            "ncient",
+            "ndividual",
+            "nedis",
+            "Nerdbank",
+            "nupkg",
+            "onstructed",
+            "pecial",
+            "Pieter",
+            "privateuse",
+            "rspeer",
+            "Serilog",
+            "Simoncic",
+            "snupkg",
+            "softprops",
+            "stefanzweifel",
+            "subtag",
+            "Subtags",
+            "templating",
+            "terminologic",
+            "triggerbuild",
+            "uncoded",
+            "Viljoen",
+            "winget",
+            "xtinct",
+            "xunit"
+        ],
+		"dotnet.defaultSolution": "LanguageTags.sln",
+        "files.trimTrailingWhitespace": true,
+        "files.trimTrailingWhitespaceInRegexAndStrings": false,
+        "[markdown]": {
+            "files.trimTrailingWhitespace": false,
+        },
+        "[plaintext]": {
+            "files.trimTrailingWhitespace": false,
+        },
+        "[csharp]": {
+            "editor.formatOnSave": true,
+            "editor.defaultFormatter": "csharpier.csharpier-vscode"
+        },
+        "diffEditor.ignoreTrimWhitespace": false,
+        "editor.renderWhitespace": "boundary",
+        "dotnet.formatting.organizeImportsOnFormat": true,
+        "csharp.debug.symbolOptions.searchNuGetOrgSymbolServer": true,
+        "csharp.debug.symbolOptions.searchMicrosoftSymbolServer": true,
+        "files.encoding": "utf8"
+	},
+	"extensions": {
+		"recommendations": [
+            "davidanson.vscode-markdownlint",
+            "gruntfuggly.todo-tree",
+            "streetsidesoftware.code-spell-checker",
+            "editorconfig.editorconfig",
+            "csharpier.csharpier-vscode",
+            "sanjulaganepola.github-local-actions"
+		]
+	}
+}

@@ -95,7 +95,9 @@ jobs:
 
       - name: Zip output
         if: github.event_name != 'pull_request'
-        run: 7z a -t7z ./Publish/LanguageTags.7z ./Publish/*
+        run: |
+          cp ./LanguageData/*.json ./Publish/
+          7z a -t7z ./Publish/LanguageTags.7z ./Publish/*
 
       # https://github.com/marketplace/actions/gh-release
       - name: Create GitHub release
@@ -107,4 +109,5 @@ jobs:
           prerelease: ${{ !endsWith(github.ref, 'refs/heads/main') }}
           files: |
             LICENSE
+            README.md
             ./Publish/LanguageTags.7z

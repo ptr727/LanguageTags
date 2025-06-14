@@ -11,7 +11,7 @@
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
     <NeutralLanguage>en</NeutralLanguage>
-    <PackageId>LanguageTagsTests</PackageId>
+    <PackageId>ptr727.LanguageTags.Tests</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/ptr727/LanguageTags</PackageProjectUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>

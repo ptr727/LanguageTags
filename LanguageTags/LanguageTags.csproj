@@ -5,16 +5,19 @@
     <Authors>Pieter Viljoen</Authors>
     <Company>Pieter Viljoen</Company>
     <Copyright>Pieter Viljoen</Copyright>
-    <Description>C# .NET library for ISO 639-2, ISO 639-3, RFC 5646 and BCP 47 language tags</Description>
+    <Description>C# .NET library for ISO 639-2, ISO 639-3, RFC 5646 / BCP 47 language tags</Description>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <FileVersion>1.0.0.0</FileVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
+    <InformationalVersion>1.0.0-pre</InformationalVersion>
     <NeutralLanguage>en</NeutralLanguage>
-    <PackageId>LanguageTags</PackageId>
+    <PackageId>ptr727.LanguageTags</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/ptr727/LanguageTags</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>ISO639 RFC5646 BCP47 LanguageTags</PackageTags>
+    <PackageVersion>1.0.0-pre</PackageVersion>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <RootNamespace>ptr727.LanguageTags</RootNamespace>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>

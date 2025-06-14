@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": ".NET Build",
+            "label": ".Net Build",
             "type": "dotnet",
             "task": "build",
             "group": "build",
@@ -13,7 +13,7 @@
             }
         },
         {
-            "label": ".NET Format",
+            "label": ".Net Format",
             "type": "process",
             "command": "dotnet",
             "args": [
@@ -36,7 +36,41 @@
             "command": "csharpier",
             "args": [
                 "format",
+                "--log-level=debug",
                 "."
+            ],
+            "problemMatcher": [
+                "$msCompile"
+            ],
+            "presentation": {
+                "showReuseMessage": false,
+                "clear": false
+            }
+        },
+        {
+            "label": ".Net Tool Update",
+            "type": "process",
+            "command": "dotnet",
+            "args": [
+                "tool",
+                "update",
+                "--all"
+            ],
+            "problemMatcher": [
+                "$msCompile"
+            ],
+            "presentation": {
+                "showReuseMessage": false,
+                "clear": false
+            }
+        },
+        {
+            "label": "Husky.Net Run",
+            "type": "process",
+            "command": "dotnet",
+            "args": [
+                "husky",
+                "run"
             ],
             "problemMatcher": [
                 "$msCompile"

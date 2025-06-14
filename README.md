@@ -124,11 +124,13 @@ languageLookup.IsMatch("zh-Hant", "zh-Hans"); // false
 
 - [AwesomeAssertions](https://awesomeassertions.org/)
 - [Bring Your Own Badge](https://github.com/marketplace/actions/bring-your-own-badge)
+- [CSharpier](https://csharpier.com/)
 - [Create Pull Request](https://github.com/marketplace/actions/create-pull-request)
 - [GH Release](https://github.com/marketplace/actions/gh-release)
 - [Git Auto Commit](https://github.com/marketplace/actions/git-auto-commit)
 - [GitHub Actions](https://github.com/actions)
 - [GitHub Dependabot](https://github.com/dependabot)
+- [Husky.Net](https://alirezanet.github.io/Husky.Net/)
 - [Nerdbank.GitVersioning](https://github.com/marketplace/actions/nerdbank-gitversioning)
 - [Serilog](https://serilog.net/)
 - [xUnit.Net](https://xunit.net/)

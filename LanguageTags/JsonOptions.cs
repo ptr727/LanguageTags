@@ -19,5 +19,6 @@ internal sealed class JsonOptions
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         IncludeFields = true,
         WriteIndented = true,
+        NewLine = "\r\n",
     };
 }

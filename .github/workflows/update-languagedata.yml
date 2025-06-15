@@ -49,4 +49,3 @@ jobs:
           body: 'This PR updates the language data files and regenerates the code.'
           commit-message: 'Update language data and generated files'
           delete-branch: true
-          labels: 'update-languagedata'

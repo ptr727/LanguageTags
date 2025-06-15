@@ -2,16 +2,11 @@
 
 C# .NET library for ISO 639-2, ISO 639-3, RFC 5646 / BCP 47 language tags.
 
-## License
-
-Licensed under the [MIT License](./LICENSE)\
-![GitHub](https://img.shields.io/github/license/ptr727/LanguageTags)
-
 ## Build Status
 
 Code and Pipeline is on [GitHub](https://github.com/ptr727/LanguageTags)\
 ![GitHub Last Commit](https://img.shields.io/github/last-commit/ptr727/LanguageTags?logo=github)\
-![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/ptr727/LanguageTags/BuildPublishPipeline.yml?logo=github)
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/ptr727/LanguageTags/publish-release.yml?logo=github)
 
 ## NuGet Package
 
@@ -141,3 +136,8 @@ languageLookup.IsMatch("zh-Hant", "zh-Hans"); // false
 - [github.com/jkporter/bcp47](https://github.com/jkporter/bcp47)
 - [github.com/mattcg/language-subtag-registry](https://github.com/mattcg/language-subtag-registry)
 - [github.com/rspeer/langcodes](https://github.com/rspeer/langcodes)
+
+## License
+
+Licensed under the [MIT License](./LICENSE)\
+![GitHub](https://img.shields.io/github/license/ptr727/LanguageTags)

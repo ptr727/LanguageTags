@@ -36,9 +36,8 @@ jobs:
 
       - name: CSharpier format code
         run: |
-          dotnet new tool-manifest
-          dotnet tool install csharpier
-          dotnet csharpier format .
+          dotnet tool restore
+          dotnet csharpier format --log-level=debug .
           git status
 
       # https://github.com/marketplace/actions/create-pull-request

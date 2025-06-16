@@ -11,6 +11,17 @@ namespace ptr727.LanguageTags;
 
 public partial class Iso6392
 {
+    internal static void WriteFile(string fileName, string value)
+    {
+        // Always write as CRLF with newline at the end
+        if (Environment.NewLine != "\r\n")
+        {
+            value = value.Replace("\n", "\r\n");
+        }
+        value = value.TrimEnd() + "\r\n";
+        File.WriteAllText(fileName, value);
+    }
+
     public const string DataUri = @"https://www.loc.gov/standards/iso639-2/ISO-639-2_utf-8.txt";
     public const string DataFileName = "iso6392";
 
@@ -107,8 +118,7 @@ public partial class Iso6392
             """
         );
 
-        // Write to file
-        File.WriteAllText(fileName, stringBuilder.ToString());
+        WriteFile(fileName, stringBuilder.ToString());
     }
 
     public class Record

@@ -53,6 +53,12 @@
 		"dotnet.defaultSolution": "LanguageTags.sln",
         "files.trimTrailingWhitespace": true,
         "files.trimTrailingWhitespaceInRegexAndStrings": false,
+        "diffEditor.ignoreTrimWhitespace": false,
+        "editor.renderWhitespace": "boundary",
+        "dotnet.formatting.organizeImportsOnFormat": true,
+        "csharp.debug.symbolOptions.searchNuGetOrgSymbolServer": true,
+        "csharp.debug.symbolOptions.searchMicrosoftSymbolServer": true,
+        "files.encoding": "utf8",
         "[markdown]": {
             "files.trimTrailingWhitespace": false,
         },
@@ -63,12 +69,6 @@
             "editor.formatOnSave": true,
             "editor.defaultFormatter": "csharpier.csharpier-vscode"
         },
-        "diffEditor.ignoreTrimWhitespace": false,
-        "editor.renderWhitespace": "boundary",
-        "dotnet.formatting.organizeImportsOnFormat": true,
-        "csharp.debug.symbolOptions.searchNuGetOrgSymbolServer": true,
-        "csharp.debug.symbolOptions.searchMicrosoftSymbolServer": true,
-        "files.encoding": "utf8"
 	},
 	"extensions": {
 		"recommendations": [
@@ -77,7 +77,11 @@
             "streetsidesoftware.code-spell-checker",
             "editorconfig.editorconfig",
             "csharpier.csharpier-vscode",
-            "sanjulaganepola.github-local-actions"
+            "github.vscode-github-actions",
+            "ms-azuretools.vscode-docker",
+            "ms-dotnettools.csdevkit",
+            "sanjulaganepola.github-local-actions",
+            "yzhang.markdown-all-in-one",
 		]
 	}
 }

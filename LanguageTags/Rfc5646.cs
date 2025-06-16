@@ -130,8 +130,7 @@ public partial class Rfc5646
             """
         );
 
-        // Write to file
-        File.WriteAllText(fileName, stringBuilder.ToString());
+        Iso6392.WriteFile(fileName, stringBuilder.ToString());
     }
 
     private sealed class Parser

@@ -124,8 +124,7 @@ public partial class Iso6393
             """
         );
 
-        // Write to file
-        File.WriteAllText(fileName, stringBuilder.ToString());
+        Iso6392.WriteFile(fileName, stringBuilder.ToString());
     }
 
     public class Record

@@ -10,7 +10,7 @@ using Serilog.Sinks.SystemConsole.Themes;
 
 namespace ptr727.LanguageTags.Create;
 
-public class Program
+public static class Program
 {
     private const string LanguageDataDirectory = "LanguageData";
     private const string LanguageTagsDirectory = "LanguageTags";
@@ -21,7 +21,7 @@ public class Program
     {
         Log.Information("Downloading \"{Uri}\" to \"{FileName}\" ...", uri.ToString(), fileName);
         Stream httpStream = await GetHttpClient().GetStreamAsync(uri);
-        using FileStream fileStream = File.Create(fileName);
+        await using FileStream fileStream = File.Create(fileName);
         await httpStream.CopyToAsync(fileStream);
     }
 
@@ -88,44 +88,59 @@ public class Program
 
         // Download all the data files
         Log.Information("Downloading all language tag data files ...");
-        Log.Information("Downloading Iso6392 data ...");
+        Log.Information("Downloading ISO 639-2 data ...");
         await DownloadFileAsync(
-            new Uri(Iso6392.DataUri),
-            Path.Combine(dataDirectory, Iso6392.DataFileName)
+            new Uri(Iso6392Data.DataUri),
+            Path.Combine(dataDirectory, Iso6392Data.DataFileName)
         );
-        Log.Information("Downloading Iso6393 data ...");
+        Log.Information("Downloading ISO 639-3 data ...");
         await DownloadFileAsync(
-            new Uri(Iso6393.DataUri),
-            Path.Combine(dataDirectory, Iso6393.DataFileName)
+            new Uri(Iso6393Data.DataUri),
+            Path.Combine(dataDirectory, Iso6393Data.DataFileName)
         );
-        Log.Information("Downloading Rfc5646 data ...");
+        Log.Information("Downloading RFC 5646 data ...");
         await DownloadFileAsync(
-            new Uri(Rfc5646.DataUri),
-            Path.Combine(dataDirectory, Rfc5646.DataFileName)
+            new Uri(Rfc5646Data.DataUri),
+            Path.Combine(dataDirectory, Rfc5646Data.DataFileName)
         );
         Log.Information("Language tag data files downloaded successfully.");
 
         // Convert data files to JSON
         Log.Information("Converting data files to JSON ...");
-        Log.Information("Converting Iso6392 data to JSON ...");
-        Iso6392 iso6392 = Iso6392.LoadData(Path.Combine(dataDirectory, Iso6392.DataFileName));
-        Iso6392.SaveJson(Path.Combine(dataDirectory, Iso6392.DataFileName + ".json"), iso6392);
-        Log.Information("Converting Iso6393 data to JSON ...");
-        Iso6393 iso6393 = Iso6393.LoadData(Path.Combine(dataDirectory, Iso6393.DataFileName));
-        Iso6393.SaveJson(Path.Combine(dataDirectory, Iso6393.DataFileName + ".json"), iso6393);
-        Log.Information("Converting Rfc5646 data to JSON ...");
-        Rfc5646 rfc5646 = Rfc5646.LoadData(Path.Combine(dataDirectory, Rfc5646.DataFileName));
-        Rfc5646.SaveJson(Path.Combine(dataDirectory, Rfc5646.DataFileName + ".json"), rfc5646);
+        Log.Information("Converting ISO 639-2 data to JSON ...");
+        Iso6392Data iso6392 = Iso6392Data.LoadData(
+            Path.Combine(dataDirectory, Iso6392Data.DataFileName)
+        );
+        Iso6392Data.SaveJson(
+            Path.Combine(dataDirectory, Iso6392Data.DataFileName + ".json"),
+            iso6392
+        );
+        Log.Information("Converting ISO 639-3 data to JSON ...");
+        Iso6393Data iso6393 = Iso6393Data.LoadData(
+            Path.Combine(dataDirectory, Iso6393Data.DataFileName)
+        );
+        Iso6393Data.SaveJson(
+            Path.Combine(dataDirectory, Iso6393Data.DataFileName + ".json"),
+            iso6393
+        );
+        Log.Information("Converting RFC 5646 data to JSON ...");
+        Rfc5646Data rfc5646 = Rfc5646Data.LoadData(
+            Path.Combine(dataDirectory, Rfc5646Data.DataFileName)
+        );
+        Rfc5646Data.SaveJson(
+            Path.Combine(dataDirectory, Rfc5646Data.DataFileName + ".json"),
+            rfc5646
+        );
         Log.Information("Data files converted to JSON successfully.");
 
         // Generate code files
         Log.Information("Generating code files ...");
-        Log.Information("Generating Iso6392 code ...");
-        Iso6392.GenCode(Path.Combine(codeDirectory, "Iso6392Gen.cs"), iso6392);
-        Log.Information("Generating Iso6393 code ...");
-        Iso6393.GenCode(Path.Combine(codeDirectory, "Iso6393Gen.cs"), iso6393);
-        Log.Information("Generating Rfc5646 code ...");
-        Rfc5646.GenCode(Path.Combine(codeDirectory, "Rfc5646Gen.cs"), rfc5646);
+        Log.Information("Generating ISO 639-2 code ...");
+        Iso6392Data.GenCode(Path.Combine(codeDirectory, nameof(Iso6392Data) + "Gen.cs"), iso6392);
+        Log.Information("Generating ISO 639-3 code ...");
+        Iso6393Data.GenCode(Path.Combine(codeDirectory, nameof(Iso6393Data) + "Gen.cs"), iso6393);
+        Log.Information("Generating RFC 5646 code ...");
+        Rfc5646Data.GenCode(Path.Combine(codeDirectory, nameof(Rfc5646Data) + "Gen.cs"), rfc5646);
 
         return 0;
     }

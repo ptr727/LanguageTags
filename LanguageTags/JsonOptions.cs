@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace ptr727.LanguageTags;
 
-internal sealed class JsonOptions
+internal static class JsonOptions
 {
     public static readonly JsonSerializerOptions JsonReadOptions = new()
     {
@@ -16,7 +16,7 @@ internal sealed class JsonOptions
 
     public static readonly JsonSerializerOptions JsonWriteOptions = new()
     {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
         IncludeFields = true,
         WriteIndented = true,
         NewLine = "\r\n",

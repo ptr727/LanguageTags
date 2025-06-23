@@ -1,3 +1,13 @@
+// dotnet new tool-manifest
+// dotnet tool install csharpier
+// dotnet tool install husky
+// dotnet husky install
+// dotnet husky add pre-commit -c "dotnet husky run"
+// winget install nektos.act
+
+// dotnet tool update --all
+// winget upgrade nektos.act
+
 {
     "version": "2.0.0",
     "tasks": [
@@ -28,7 +38,8 @@
             "presentation": {
                 "showReuseMessage": false,
                 "clear": false
-            }
+            },
+            "dependsOn": [".Net Build"]
         },
         {
             "label": "CSharpier Format",

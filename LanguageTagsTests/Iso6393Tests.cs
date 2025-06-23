@@ -11,22 +11,26 @@ public class Iso6393Tests(Fixture fixture) : IClassFixture<Fixture>
     public void Create()
     {
         // Create full list of languages
-        Iso6393 iso6393 = Iso6393.Create();
-        _ = iso6393.RecordList.Count.Should().BeGreaterThan(0);
+        Iso6393Data iso6393 = Iso6393Data.Create();
+        _ = iso6393.RecordList.Length.Should().BeGreaterThan(0);
     }
 
     [Fact]
     public void LoadData()
     {
-        Iso6393 iso6393 = Iso6393.LoadData(Fixture.GetDataFilePath(Iso6393.DataFileName));
+        Iso6393Data iso6393 = Iso6393Data.LoadData(
+            Fixture.GetDataFilePath(Iso6393Data.DataFileName)
+        );
         _ = iso6393.Should().NotBeNull();
-        _ = iso6393.RecordList.Count.Should().BeGreaterThan(0);
+        _ = iso6393.RecordList.Length.Should().BeGreaterThan(0);
     }
 
     [Fact]
     public void LoadJson()
     {
-        Iso6393 iso6393 = Iso6393.LoadJson(Fixture.GetDataFilePath(Iso6393.DataFileName + ".json"));
+        Iso6393Data iso6393 = Iso6393Data.LoadJson(
+            Fixture.GetDataFilePath(Iso6393Data.DataFileName + ".json")
+        );
         _ = iso6393.Should().NotBeNull();
     }
 
@@ -42,28 +46,30 @@ public class Iso6393Tests(Fixture fixture) : IClassFixture<Fixture>
     [InlineData("yue", false, "Yue Chinese")]
     [InlineData("zulu", true, "Zulu")]
     [InlineData("chamí", true, "Emberá-Chamí")]
-    public void Succeed_Find(string input, bool description, string output)
+    public void Find_Pass(string input, bool description, string output)
     {
         // Create full list of languages
-        Iso6393 iso6393 = Iso6393.Create();
-        _ = iso6393.RecordList.Count.Should().BeGreaterThan(0);
+        Iso6393Data iso6393 = Iso6393Data.Create();
+        _ = iso6393.RecordList.Length.Should().BeGreaterThan(0);
 
         // Find matching language
-        Iso6393.Record record = iso6393.Find(input, description);
+        Iso6393Data.Record record = iso6393.Find(input, description);
         _ = record.Should().NotBeNull();
         _ = record.RefName.Should().BeEquivalentTo(output);
     }
 
     [Theory]
+    [InlineData("xx")]
     [InlineData("xxx")]
-    public void Fail_Find(string input)
+    [InlineData("xxxx")]
+    public void Find_Fail(string input)
     {
         // Create full list of languages
-        Iso6393 iso6393 = Iso6393.Create();
-        _ = iso6393.RecordList.Count.Should().BeGreaterThan(0);
+        Iso6393Data iso6393 = Iso6393Data.Create();
+        _ = iso6393.RecordList.Length.Should().BeGreaterThan(0);
 
         // Fail to find matching language
-        Iso6393.Record record = iso6393.Find(input, false);
+        Iso6393Data.Record record = iso6393.Find(input, false);
         _ = record.Should().BeNull();
     }
 }

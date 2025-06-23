@@ -20,9 +20,11 @@ public class LanguageLookupTests(Fixture fixture) : IClassFixture<Fixture>
     [InlineData("und", "und")]
     [InlineData("", "und")]
     [InlineData("xxx", "und")]
-    public void Lookup_Ietf_From_Iso(string iso, string ietf)
+    [InlineData("custom_iso", "custom_ietf")]
+    public void GetIetfFromIso(string iso, string ietf)
     {
         LanguageLookup languageLookup = new();
+        languageLookup.Overrides.Add(("custom_ietf", "custom_iso"));
         _ = languageLookup.GetIetfFromIso(iso).Should().Be(ietf);
     }
 
@@ -40,9 +42,11 @@ public class LanguageLookupTests(Fixture fixture) : IClassFixture<Fixture>
     [InlineData("", "und")]
     [InlineData("und", "und")]
     [InlineData("xxx", "und")]
-    public void Lookup_Iso_From_Ietf(string ietf, string iso)
+    [InlineData("custom_ietf", "custom_iso")]
+    public void GetIsoFromIetf(string ietf, string iso)
     {
         LanguageLookup languageLookup = new();
+        languageLookup.Overrides.Add(("custom_ietf", "custom_iso"));
         _ = languageLookup.GetIsoFromIetf(ietf).Should().Be(iso);
     }
 
@@ -57,7 +61,7 @@ public class LanguageLookupTests(Fixture fixture) : IClassFixture<Fixture>
     [InlineData("zh", "en", false)]
     [InlineData("zha", "zh-Hans", false)]
     [InlineData("zh-Hant", "zh-Hans", false)]
-    public void Match_Language_Tags(string prefix, string tag, bool match)
+    public void IsMatch(string prefix, string tag, bool match)
     {
         LanguageLookup languageLookup = new();
         _ = languageLookup.IsMatch(prefix, tag).Should().Be(match);

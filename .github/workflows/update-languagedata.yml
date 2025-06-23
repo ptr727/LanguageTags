@@ -3,7 +3,7 @@ name: Update language data
 on:
     workflow_dispatch:
     schedule:
-      - cron: '0 2 * * *'
+      - cron: '0 2 * * MON'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

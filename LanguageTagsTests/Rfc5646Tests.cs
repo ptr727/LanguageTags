@@ -12,25 +12,29 @@ public class Rfc5646Tests(Fixture fixture) : IClassFixture<Fixture>
     public void Create()
     {
         // Create full list of languages
-        Rfc5646 rfc5646 = Rfc5646.Create();
+        Rfc5646Data rfc5646 = Rfc5646Data.Create();
         _ = rfc5646.Should().NotBeNull();
-        _ = rfc5646.RecordList.Count.Should().BeGreaterThan(0);
+        _ = rfc5646.RecordList.Length.Should().BeGreaterThan(0);
     }
 
     [Fact]
     public void LoadData()
     {
-        Rfc5646 rfc5646 = Rfc5646.LoadData(Fixture.GetDataFilePath(Rfc5646.DataFileName));
+        Rfc5646Data rfc5646 = Rfc5646Data.LoadData(
+            Fixture.GetDataFilePath(Rfc5646Data.DataFileName)
+        );
         _ = rfc5646.Should().NotBeNull();
-        _ = rfc5646.RecordList.Count.Should().BeGreaterThan(0);
+        _ = rfc5646.RecordList.Length.Should().BeGreaterThan(0);
     }
 
     [Fact]
     public void LoadJson()
     {
-        Rfc5646 rfc5646 = Rfc5646.LoadJson(Fixture.GetDataFilePath(Rfc5646.DataFileName + ".json"));
+        Rfc5646Data rfc5646 = Rfc5646Data.LoadJson(
+            Fixture.GetDataFilePath(Rfc5646Data.DataFileName + ".json")
+        );
         _ = rfc5646.Should().NotBeNull();
-        _ = rfc5646.RecordList.Count.Should().BeGreaterThan(0);
+        _ = rfc5646.RecordList.Length.Should().BeGreaterThan(0);
     }
 
     [Theory]
@@ -40,22 +44,23 @@ public class Rfc5646Tests(Fixture fixture) : IClassFixture<Fixture>
     [InlineData("yue", false, "Yue Chinese")]
     [InlineData("zh-cmn-Hant", false, "Mandarin Chinese (Traditional)")]
     [InlineData("cmn-Hant", false, "Mandarin Chinese (Traditional)")]
+    [InlineData("i-klingon", false, "Klingon")]
     [InlineData("zulu", true, "Zulu")]
     [InlineData(
         "language association",
         true,
         "Interlingua (International Auxiliary Language Association)"
     )]
-    public void Succeed_Find(string input, bool description, string output)
+    public void Find_Pass(string input, bool description, string output)
     {
         // Create full list of languages
-        Rfc5646 rfc5646 = Rfc5646.Create();
+        Rfc5646Data rfc5646 = Rfc5646Data.Create();
 
         _ = rfc5646.Should().NotBeNull();
-        _ = rfc5646.RecordList.Count.Should().BeGreaterThan(0);
+        _ = rfc5646.RecordList.Length.Should().BeGreaterThan(0);
 
         // Find matching language
-        Rfc5646.Record record = rfc5646.Find(input, description);
+        Rfc5646Data.Record record = rfc5646.Find(input, description);
         _ = record.Should().NotBeNull();
         _ = record
             .Description.Should()
@@ -63,16 +68,18 @@ public class Rfc5646Tests(Fixture fixture) : IClassFixture<Fixture>
     }
 
     [Theory]
+    [InlineData("xx")]
     [InlineData("xxx")]
-    public void Fail_Find(string input)
+    [InlineData("xxxx")]
+    public void Find_Fail(string input)
     {
         // Create full list of languages
-        Rfc5646 rfc5646 = Rfc5646.Create();
+        Rfc5646Data rfc5646 = Rfc5646Data.Create();
         _ = rfc5646.Should().NotBeNull();
-        _ = rfc5646.RecordList.Count.Should().BeGreaterThan(0);
+        _ = rfc5646.RecordList.Length.Should().BeGreaterThan(0);
 
         // Fail to find matching language
-        Rfc5646.Record record = rfc5646.Find(input, false);
+        Rfc5646Data.Record record = rfc5646.Find(input, false);
         _ = record.Should().BeNull();
     }
 }

@@ -7,7 +7,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
-		.github\dependabot.yml = .github\dependabot.yml
 		LICENSE = LICENSE
 		README.md = README.md
 		version.json = version.json
@@ -16,14 +15,19 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LanguageData", "LanguageData", "{7E189F23-48EE-44B2-A102-0FDF27BE9C88}"
 	ProjectSection(SolutionItems) = preProject
 		LanguageData\iso6392 = LanguageData\iso6392
+		LanguageData\iso6392.json = LanguageData\iso6392.json
 		LanguageData\iso6393 = LanguageData\iso6393
+		LanguageData\iso6393.json = LanguageData\iso6393.json
 		LanguageData\rfc5646 = LanguageData\rfc5646
+		LanguageData\rfc5646.json = LanguageData\rfc5646.json
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub Actions", "GitHub Actions", "{6AEC3BF4-00CE-4C23-A003-82F12FCBA630}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub", "GitHub", "{6AEC3BF4-00CE-4C23-A003-82F12FCBA630}"
 	ProjectSection(SolutionItems) = preProject
-		.github\workflows\BuildPublishPipeline.yml = .github\workflows\BuildPublishPipeline.yml
 		.github\dependabot.yml = .github\dependabot.yml
+		.github\workflows\merge-bot-pr.yml = .github\workflows\merge-bot-pr.yml
+		.github\workflows\publish-release.yml = .github\workflows\publish-release.yml
+		.github\workflows\update-languagedata.yml = .github\workflows\update-languagedata.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LanguageTags", "LanguageTags\LanguageTags.csproj", "{0C347342-311D-4EF8-839C-22D5E2B83345}"

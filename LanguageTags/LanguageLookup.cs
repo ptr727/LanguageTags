@@ -116,6 +116,8 @@ public class LanguageLookup
             return match.iso;
         }
 
+        // TODO: Conditional parse and normalize before processing
+
         // Find a matching subtag record
         Rfc5646Data.Record subtag = _rfc5646.Find(languageTag, false);
         if (subtag != null)
@@ -168,6 +170,8 @@ public class LanguageLookup
 
     public bool IsMatch(string prefix, string languageTag)
     {
+        // TODO: Conditional parse and normalize before processing
+
         // https://r12a.github.io/app-subtags/
         // zh match: zh: zh, zh-Hant, zh-Hans, zh-cmn-Hant
         // zho not: zh

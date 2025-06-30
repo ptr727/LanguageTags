@@ -9,7 +9,7 @@ public partial class Rfc5646Data
     public static Rfc5646Data Create() =>
         new()
         {
-            FileDate = new DateOnly(2025, 5, 15),
+            FileDate = new DateOnly(2025, 6, 23),
             RecordList =
             [
                 new()
@@ -84451,6 +84451,15 @@ public partial class Rfc5646Data
                         @"The subtag represents the old orthography of the Latvian language used during c. 1600s–1920s.",
                     ],
                     Prefix = [@"lv"],
+                },
+                new()
+                {
+                    Type = RecordType.Variant,
+                    SubTag = "viennese",
+                    Added = new DateOnly(2025, 6, 22),
+                    Description = [@"The Viennese dialect of German"],
+                    Comments = [],
+                    Prefix = [@"de"],
                 },
                 new()
                 {

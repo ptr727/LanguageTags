@@ -1,5 +1,5 @@
 {
-  "FileDate": "2025-05-15",
+  "FileDate": "2025-06-23",
   "RecordList": [
     {
       "Type": "Language",
@@ -94901,6 +94901,18 @@
       ],
       "Prefix": [
         "lv"
+      ]
+    },
+    {
+      "Type": "Variant",
+      "SubTag": "viennese",
+      "Description": [
+        "The Viennese dialect of German"
+      ],
+      "Added": "2025-06-22",
+      "Comments": [],
+      "Prefix": [
+        "de"
       ]
     },
     {

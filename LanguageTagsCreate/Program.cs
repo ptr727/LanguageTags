@@ -20,7 +20,7 @@ public static class Program
     private static async Task DownloadFileAsync(Uri uri, string fileName)
     {
         Log.Information("Downloading \"{Uri}\" to \"{FileName}\" ...", uri.ToString(), fileName);
-        Stream httpStream = await GetHttpClient().GetStreamAsync(uri);
+        await using Stream httpStream = await GetHttpClient().GetStreamAsync(uri);
         await using FileStream fileStream = File.Create(fileName);
         await httpStream.CopyToAsync(fileStream);
     }

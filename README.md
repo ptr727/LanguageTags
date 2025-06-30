@@ -166,9 +166,9 @@ IETF language tags are in the form of `[Language]-[Extended language]-[Script]-[
 
 Examples:
 
-- `pt` will match `pt` Portuguese, or `pt-BR` Brazilian Portuguese, or `pt-PT` European Portuguese.\
-- `pt-BR` will only match `pt-BR` Brazilian Portuguese.\
-- `zh` will match `zh` Chinese, or `zh-Hans` simplified Chinese, or `zh-Hant` for traditional Chinese, and other variants.\
+- `pt` will match `pt` Portuguese, or `pt-BR` Brazilian Portuguese, or `pt-PT` European Portuguese.
+- `pt-BR` will only match `pt-BR` Brazilian Portuguese\
+- `zh` will match `zh` Chinese, or `zh-Hans` simplified Chinese, or `zh-Hant` for traditional Chinese, and other variants.
 - `zh-Hans` will only match `zh-Hans` simplified Chinese.
 
 ```csharp

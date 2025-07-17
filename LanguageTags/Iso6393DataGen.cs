@@ -9265,7 +9265,7 @@ public partial class Iso6393Data
                     Id = "clm",
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Clallam",
+                    RefName = "Klallam",
                 },
                 new()
                 {
@@ -11357,7 +11357,7 @@ public partial class Iso6393Data
                     Part1 = "dv",
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Dhivehi",
+                    RefName = "Divehi",
                 },
                 new()
                 {
@@ -16630,7 +16630,7 @@ public partial class Iso6393Data
                     Id = "haa",
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Han",
+                    RefName = "Hän",
                 },
                 new()
                 {
@@ -24255,7 +24255,7 @@ public partial class Iso6393Data
                     Id = "kwk",
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Kwakiutl",
+                    RefName = "Kwak'wala",
                 },
                 new()
                 {
@@ -27138,7 +27138,7 @@ public partial class Iso6393Data
                 {
                     Id = "lut",
                     Scope = "I",
-                    LanguageType = "L",
+                    LanguageType = "E",
                     RefName = "Lushootseed",
                 },
                 new()
@@ -28680,7 +28680,7 @@ public partial class Iso6393Data
                     Id = "mhn",
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Mócheno",
+                    RefName = "Mòcheno",
                 },
                 new()
                 {
@@ -35113,7 +35113,7 @@ public partial class Iso6393Data
                     Part1 = "ny",
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Nyanja",
+                    RefName = "Chichewa",
                 },
                 new()
                 {
@@ -55875,7 +55875,7 @@ public partial class Iso6393Data
                     Id = "zmp",
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Mpuono",
+                    RefName = "Mbuun",
                 },
                 new()
                 {

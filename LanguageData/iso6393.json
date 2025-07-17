@@ -7957,7 +7957,7 @@
       "Id": "clm",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Clallam"
+      "RefName": "Klallam"
     },
     {
       "Id": "clo",
@@ -9756,7 +9756,7 @@
       "Part1": "dv",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Dhivehi"
+      "RefName": "Divehi"
     },
     {
       "Id": "diw",
@@ -14294,7 +14294,7 @@
       "Id": "haa",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Han"
+      "RefName": "H\u00E4n"
     },
     {
       "Id": "hab",
@@ -20854,7 +20854,7 @@
       "Id": "kwk",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Kwakiutl"
+      "RefName": "Kwak\u0027wala"
     },
     {
       "Id": "kwl",
@@ -23332,7 +23332,7 @@
     {
       "Id": "lut",
       "Scope": "I",
-      "LanguageType": "L",
+      "LanguageType": "E",
       "RefName": "Lushootseed"
     },
     {
@@ -24658,7 +24658,7 @@
       "Id": "mhn",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "M\u00F3cheno"
+      "RefName": "M\u00F2cheno"
     },
     {
       "Id": "mho",
@@ -30186,7 +30186,7 @@
       "Part1": "ny",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Nyanja"
+      "RefName": "Chichewa"
     },
     {
       "Id": "nyb",
@@ -48030,7 +48030,7 @@
       "Id": "zmp",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Mpuono"
+      "RefName": "Mbuun"
     },
     {
       "Id": "zmq",

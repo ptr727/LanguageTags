@@ -9,8 +9,7 @@ public partial class Rfc5646Data
     public static Rfc5646Data Create() =>
         new()
         {
-            FileDate = new DateOnly(2025, 6, 23),
-
+            FileDate = new DateOnly(2025, 7, 15),
             RecordList =
             [
                 new()
@@ -83162,6 +83161,15 @@ public partial class Rfc5646Data
                 new()
                 {
                     Type = RecordType.Variant,
+                    SubTag = "akhmimic",
+                    Added = new DateOnly(2025, 7, 14),
+                    Description = [@"Akhmimic dialect of Coptic"],
+                    Comments = [],
+                    Prefix = [@"cop"],
+                },
+                new()
+                {
+                    Type = RecordType.Variant,
                     SubTag = "akuapem",
                     Added = new DateOnly(2017, 6, 5),
                     Description = [@"Akuapem Twi"],
@@ -83399,6 +83407,15 @@ public partial class Rfc5646Data
                 new()
                 {
                     Type = RecordType.Variant,
+                    SubTag = "bohairic",
+                    Added = new DateOnly(2025, 7, 14),
+                    Description = [@"Bohairic dialect of Coptic"],
+                    Comments = [],
+                    Prefix = [@"cop"],
+                },
+                new()
+                {
+                    Type = RecordType.Variant,
                     SubTag = "bohoric",
                     Added = new DateOnly(2012, 6, 27),
                     Description = [@"Slovene in Bohorič alphabet"],
@@ -83509,6 +83526,15 @@ public partial class Rfc5646Data
                         @"Represents the standard written form of Ladin in Fascia which unified the three subvarieties Cazet, Brach and Moenat",
                     ],
                     Prefix = [@"lld"],
+                },
+                new()
+                {
+                    Type = RecordType.Variant,
+                    SubTag = "fayyumic",
+                    Added = new DateOnly(2025, 7, 14),
+                    Description = [@"Fayyumic dialect of Coptic"],
+                    Comments = [],
+                    Prefix = [@"cop"],
                 },
                 new()
                 {
@@ -83902,6 +83928,15 @@ public partial class Rfc5646Data
                 new()
                 {
                     Type = RecordType.Variant,
+                    SubTag = "lycopol",
+                    Added = new DateOnly(2025, 7, 14),
+                    Description = [@"Lycopolitan alias Subakhmimic dialect of Coptic"],
+                    Comments = [],
+                    Prefix = [@"cop"],
+                },
+                new()
+                {
+                    Type = RecordType.Variant,
                     SubTag = "mdcegyp",
                     Added = new DateOnly(2025, 2, 6),
                     Description = [@"Ancient Egyptian hieroglyphs encoded in Manuel de Codage"],
@@ -83916,6 +83951,15 @@ public partial class Rfc5646Data
                     Description = [@"Ancient Egyptian transliteration encoded in Manuel de Codage"],
                     Comments = [],
                     Prefix = [@"egy"],
+                },
+                new()
+                {
+                    Type = RecordType.Variant,
+                    SubTag = "mesokem",
+                    Added = new DateOnly(2025, 7, 14),
+                    Description = [@"Mesokemic alias Oxyrhynchite dialect of Coptic"],
+                    Comments = [],
+                    Prefix = [@"cop"],
                 },
                 new()
                 {
@@ -84187,6 +84231,15 @@ public partial class Rfc5646Data
                     Description = [@"Rumantsch Grischun"],
                     Comments = [@"Supraregional Romansh written standard"],
                     Prefix = [@"rm"],
+                },
+                new()
+                {
+                    Type = RecordType.Variant,
+                    SubTag = "sahidic",
+                    Added = new DateOnly(2025, 7, 14),
+                    Description = [@"Sahidic dialect of Coptic"],
+                    Comments = [],
+                    Prefix = [@"cop"],
                 },
                 new()
                 {

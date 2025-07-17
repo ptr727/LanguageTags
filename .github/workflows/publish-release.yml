@@ -19,30 +19,25 @@ jobs:
     name: Publish release
     runs-on: ubuntu-latest
     needs: test
-    if: github.event_name != 'pull_request'
     permissions:
       contents: write
 
     steps:
 
-      # https://github.com/marketplace/actions/setup-net-core-sdk
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.x
 
-      # https://github.com/marketplace/actions/checkout
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # https://github.com/marketplace/actions/nerdbank-gitversioning
       - name: Run Nerdbank.GitVersioning
         id: nbgv
         uses: dotnet/nbgv@master
 
-      # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-build
       - name: Build project
         run: >-
             dotnet build ./LanguageTags/LanguageTags.csproj
@@ -54,9 +49,7 @@ jobs:
             -property:InformationalVersion=${{ steps.nbgv.outputs.AssemblyInformationalVersion }}
             -property:PackageVersion=${{ steps.nbgv.outputs.SemVer2 }}
 
-      # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-nuget-push
       - name: Publish to NuGet.org
-        if: github.event_name != 'pull_request'
         run: >-
             dotnet nuget push ${{ github.workspace }}/Publish/*.nupkg
             --source https://api.nuget.org/v3/index.json
@@ -69,7 +62,6 @@ jobs:
           cp ./LanguageData/*.json ./Publish/
           7z a -t7z ./Publish/LanguageTags.7z ./Publish/*
 
-      # https://github.com/marketplace/actions/gh-release
       - name: Create GitHub release
         if: github.event_name != 'pull_request'
         uses: softprops/action-gh-release@v2

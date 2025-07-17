@@ -1,4 +1,4 @@
-name: Merge bot generated PR's
+name: Merge bot generated PRs
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ concurrency:
 jobs:
 
   merge-dependabot:
-    name: Merge dependabot PR's
+    name: Merge dependabot PRs
     runs-on: ubuntu-latest
     if: github.actor == 'dependabot[bot]'
     permissions:
@@ -42,7 +42,7 @@ jobs:
 
     steps:
 
-      - name: Merge language data PR's
+      - name: Merge language data PRs
         run: gh pr merge --auto --merge "$PR_URL"
         env:
           PR_URL: ${{github.event.pull_request.html_url}}

@@ -20,7 +20,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Checks code style
+      - name: Check code style
         run: |
           dotnet tool restore
           dotnet csharpier check --log-level=debug .

@@ -3,8 +3,6 @@ name: Publish release
 on:
   push:
     branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
   workflow_dispatch:
 
 concurrency:
@@ -14,34 +12,8 @@ concurrency:
 jobs:
 
   test:
-    name: Run tests
-    runs-on: ubuntu-latest
-
-    steps:
-
-      # https://github.com/marketplace/actions/setup-net-core-sdk
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 9.x
-
-      # https://github.com/marketplace/actions/checkout
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-build
-      - name: Build
-        run: dotnet build
-
-        # https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-test
-      - name: Run unit tests
-        run: dotnet test ./LanguageTagsTests/LanguageTagsTests.csproj
-
-      - name: Format checks
-        run: |
-          dotnet tool restore
-          dotnet csharpier check --log-level=debug .
-          dotnet format --verify-no-changes --severity=info --verbosity=detailed
+    uses: ./.github/workflows/test.yml
+    secrets: inherit
 
   publish:
     name: Publish release

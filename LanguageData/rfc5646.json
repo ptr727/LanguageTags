@@ -1,5 +1,5 @@
 {
-  "FileDate": "2025-06-23",
+  "FileDate": "2025-07-15",
   "RecordList": [
     {
       "Type": "Language",
@@ -93289,6 +93289,18 @@
     },
     {
       "Type": "Variant",
+      "SubTag": "akhmimic",
+      "Description": [
+        "Akhmimic dialect of Coptic"
+      ],
+      "Added": "2025-07-14",
+      "Comments": [],
+      "Prefix": [
+        "cop"
+      ]
+    },
+    {
+      "Type": "Variant",
       "SubTag": "akuapem",
       "Description": [
         "Akuapem Twi"
@@ -93588,6 +93600,18 @@
     },
     {
       "Type": "Variant",
+      "SubTag": "bohairic",
+      "Description": [
+        "Bohairic dialect of Coptic"
+      ],
+      "Added": "2025-07-14",
+      "Comments": [],
+      "Prefix": [
+        "cop"
+      ]
+    },
+    {
+      "Type": "Variant",
       "SubTag": "bohoric",
       "Description": [
         "Slovene in Bohori\u010D alphabet"
@@ -93732,6 +93756,18 @@
       ],
       "Prefix": [
         "lld"
+      ]
+    },
+    {
+      "Type": "Variant",
+      "SubTag": "fayyumic",
+      "Description": [
+        "Fayyumic dialect of Coptic"
+      ],
+      "Added": "2025-07-14",
+      "Comments": [],
+      "Prefix": [
+        "cop"
       ]
     },
     {
@@ -94217,6 +94253,18 @@
     },
     {
       "Type": "Variant",
+      "SubTag": "lycopol",
+      "Description": [
+        "Lycopolitan alias Subakhmimic dialect of Coptic"
+      ],
+      "Added": "2025-07-14",
+      "Comments": [],
+      "Prefix": [
+        "cop"
+      ]
+    },
+    {
+      "Type": "Variant",
       "SubTag": "mdcegyp",
       "Description": [
         "Ancient Egyptian hieroglyphs encoded in Manuel de Codage"
@@ -94237,6 +94285,18 @@
       "Comments": [],
       "Prefix": [
         "egy"
+      ]
+    },
+    {
+      "Type": "Variant",
+      "SubTag": "mesokem",
+      "Description": [
+        "Mesokemic alias Oxyrhynchite dialect of Coptic"
+      ],
+      "Added": "2025-07-14",
+      "Comments": [],
+      "Prefix": [
+        "cop"
       ]
     },
     {
@@ -94571,6 +94631,18 @@
       ],
       "Prefix": [
         "rm"
+      ]
+    },
+    {
+      "Type": "Variant",
+      "SubTag": "sahidic",
+      "Description": [
+        "Sahidic dialect of Coptic"
+      ],
+      "Added": "2025-07-14",
+      "Comments": [],
+      "Prefix": [
+        "cop"
       ]
     },
     {

@@ -57,13 +57,11 @@ jobs:
             --skip-duplicate
 
       - name: Zip output
-        if: github.event_name != 'pull_request'
         run: |
           cp ./LanguageData/*.json ./Publish/
           7z a -t7z ./Publish/LanguageTags.7z ./Publish/*
 
       - name: Create GitHub release
-        if: github.event_name != 'pull_request'
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true

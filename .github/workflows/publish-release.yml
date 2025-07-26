@@ -12,7 +12,8 @@ concurrency:
 jobs:
 
   test:
-    uses: ./.github/workflows/test.yml
+    name: Run tests
+    uses: ./.github/workflows/test-task.yml
     secrets: inherit
 
   publish:

@@ -10,7 +10,6 @@ public partial class Rfc5646Data
         new()
         {
             FileDate = new DateOnly(2025, 7, 15),
-
             RecordList =
             [
                 new()

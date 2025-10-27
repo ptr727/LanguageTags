@@ -1590,7 +1590,7 @@ diq				I	L	Dimli (individual language)
 dir				I	L	Dirim	
 dis				I	L	Dimasa	
 diu				I	L	Diriku	
-div	div	div	dv	I	L	Divehi	
+div	div	div	dv	I	L	Dhivehi	
 diw				I	L	Northwestern Dinka	
 dix				I	L	Dixon Reef	
 diy				I	L	Diuwe	
@@ -5018,6 +5018,7 @@ okv				I	L	Orokaiva
 okx				I	L	Okpe (Northwestern Edo)	
 okz				I	H	Old Khmer	
 ola				I	L	Walungge	
+olb				I	L	Oli-Bodiman	
 old				I	L	Mochi	
 ole				I	L	Olekha	
 olk				I	E	Olkol	
@@ -5089,11 +5090,12 @@ ory				I	L	Odia
 orz				I	L	Ormu	
 osa	osa	osa		I	L	Osage	
 osc				I	H	Oscan	
+osd				I	L	Digor Ossetic	
 osi				I	L	Osing	
 osn				I	H	Old Sundanese	
 oso				I	L	Ososo	
 osp				I	H	Old Spanish	
-oss	oss	oss	os	I	L	Ossetian	
+oss	oss	oss	os	I	L	Iron Ossetic	
 ost				I	L	Osatu	
 osu				I	L	Southern One	
 osx				I	H	Old Saxon	
@@ -5759,6 +5761,7 @@ scu				I	L	Shumcho
 scv				I	L	Sheni	
 scw				I	L	Sha	
 scx				I	H	Sicel	
+scz				I	L	Shaetlan	
 sda				I	L	Toraja-Sa'dan	
 sdb				I	L	Shabak	
 sdc				I	L	Sassarese Sardinian	
@@ -7652,7 +7655,6 @@ yob				I	E	Yoba
 yog				I	L	Yogad	
 yoi				I	L	Yonaguni	
 yok				I	L	Yokuts	
-yol				I	E	Yola	
 yom				I	L	Yombe	
 yon				I	L	Yongkom	
 yor	yor	yor	yo	I	L	Yoruba	

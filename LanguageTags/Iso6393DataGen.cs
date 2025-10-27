@@ -11357,7 +11357,7 @@ public partial class Iso6393Data
                     Part1 = "dv",
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Divehi",
+                    RefName = "Dhivehi",
                 },
                 new()
                 {
@@ -35838,6 +35838,13 @@ public partial class Iso6393Data
                 },
                 new()
                 {
+                    Id = "olb",
+                    Scope = "I",
+                    LanguageType = "L",
+                    RefName = "Oli-Bodiman",
+                },
+                new()
+                {
                     Id = "old",
                     Scope = "I",
                     LanguageType = "L",
@@ -36343,6 +36350,13 @@ public partial class Iso6393Data
                 },
                 new()
                 {
+                    Id = "osd",
+                    Scope = "I",
+                    LanguageType = "L",
+                    RefName = "Digor Ossetic",
+                },
+                new()
+                {
                     Id = "osi",
                     Scope = "I",
                     LanguageType = "L",
@@ -36377,7 +36391,7 @@ public partial class Iso6393Data
                     Part1 = "os",
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Ossetian",
+                    RefName = "Iron Ossetic",
                 },
                 new()
                 {
@@ -41113,6 +41127,13 @@ public partial class Iso6393Data
                     Scope = "I",
                     LanguageType = "H",
                     RefName = "Sicel",
+                },
+                new()
+                {
+                    Id = "scz",
+                    Scope = "I",
+                    LanguageType = "L",
+                    RefName = "Shaetlan",
                 },
                 new()
                 {
@@ -54578,13 +54599,6 @@ public partial class Iso6393Data
                     Scope = "I",
                     LanguageType = "L",
                     RefName = "Yokuts",
-                },
-                new()
-                {
-                    Id = "yol",
-                    Scope = "I",
-                    LanguageType = "E",
-                    RefName = "Yola",
                 },
                 new()
                 {

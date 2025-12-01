@@ -463,7 +463,7 @@ public partial class Iso6392Data
                     Part2B = "gre",
                     Part2T = "ell",
                     Part1 = "el",
-                    RefName = "Greek, Modern (1453-)",
+                    RefName = "Modern Greek (1453-)",
                 },
                 new()
                 {
@@ -891,13 +891,13 @@ public partial class Iso6392Data
                 {
                     Part2B = "nbl",
                     Part1 = "nr",
-                    RefName = "Ndebele, South; South Ndebele",
+                    RefName = "South Ndebele",
                 },
                 new()
                 {
                     Part2B = "nde",
                     Part1 = "nd",
-                    RefName = "Ndebele, North; North Ndebele",
+                    RefName = "North Ndebele",
                 },
                 new()
                 {
@@ -916,7 +916,7 @@ public partial class Iso6392Data
                     Part1 = "ne",
                     RefName = "Nepali",
                 },
-                new() { Part2B = "new", RefName = "Nepal Bhasa; Newari" },
+                new() { Part2B = "new", RefName = "Nepal Bhasa; Newar; Newari" },
                 new() { Part2B = "nia", RefName = "Nias" },
                 new() { Part2B = "nic", RefName = "Niger-Kordofanian languages" },
                 new() { Part2B = "niu", RefName = "Niuean" },
@@ -924,13 +924,13 @@ public partial class Iso6392Data
                 {
                     Part2B = "nno",
                     Part1 = "nn",
-                    RefName = "Norwegian Nynorsk; Nynorsk, Norwegian",
+                    RefName = "Norwegian Nynorsk",
                 },
                 new()
                 {
                     Part2B = "nob",
                     Part1 = "nb",
-                    RefName = "Bokmål, Norwegian; Norwegian Bokmål",
+                    RefName = "Norwegian Bokmål",
                 },
                 new() { Part2B = "nog", RefName = "Nogai" },
                 new() { Part2B = "non", RefName = "Norse, Old" },

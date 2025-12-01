@@ -9756,7 +9756,7 @@
       "Part1": "dv",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Divehi"
+      "RefName": "Dhivehi"
     },
     {
       "Id": "diw",
@@ -30809,6 +30809,12 @@
       "RefName": "Walungge"
     },
     {
+      "Id": "olb",
+      "Scope": "I",
+      "LanguageType": "L",
+      "RefName": "Oli-Bodiman"
+    },
+    {
       "Id": "old",
       "Scope": "I",
       "LanguageType": "L",
@@ -31243,6 +31249,12 @@
       "RefName": "Oscan"
     },
     {
+      "Id": "osd",
+      "Scope": "I",
+      "LanguageType": "L",
+      "RefName": "Digor Ossetic"
+    },
+    {
       "Id": "osi",
       "Scope": "I",
       "LanguageType": "L",
@@ -31273,7 +31285,7 @@
       "Part1": "os",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Ossetian"
+      "RefName": "Iron Ossetic"
     },
     {
       "Id": "ost",
@@ -35344,6 +35356,12 @@
       "Scope": "I",
       "LanguageType": "H",
       "RefName": "Sicel"
+    },
+    {
+      "Id": "scz",
+      "Scope": "I",
+      "LanguageType": "L",
+      "RefName": "Shaetlan"
     },
     {
       "Id": "sda",
@@ -46916,12 +46934,6 @@
       "Scope": "I",
       "LanguageType": "L",
       "RefName": "Yokuts"
-    },
-    {
-      "Id": "yol",
-      "Scope": "I",
-      "LanguageType": "E",
-      "RefName": "Yola"
     },
     {
       "Id": "yom",

@@ -1,5 +1,5 @@
 {
-  "FileDate": "2025-07-15",
+  "FileDate": "2025-08-25",
   "RecordList": [
     {
       "Type": "Language",
@@ -5939,7 +5939,8 @@
       "Type": "Language",
       "SubTag": "asb",
       "Description": [
-        "Assiniboine"
+        "Assiniboine",
+        "Nakoda Assiniboine"
       ],
       "Added": "2009-07-29",
       "Comments": [],
@@ -6266,7 +6267,8 @@
       "Type": "Language",
       "SubTag": "atj",
       "Description": [
-        "Atikamekw"
+        "Atikamekw",
+        "Nehirowimowin"
       ],
       "Added": "2009-07-29",
       "Comments": [],
@@ -15565,7 +15567,8 @@
       "Type": "Language",
       "SubTag": "clc",
       "Description": [
-        "Chilcotin"
+        "Chilcotin",
+        "Tsilhqot\u2019in"
       ],
       "Added": "2009-07-29",
       "Comments": [],
@@ -15646,6 +15649,7 @@
       "Type": "Language",
       "SubTag": "clm",
       "Description": [
+        "Klallam",
         "Clallam"
       ],
       "Added": "2009-07-29",
@@ -26419,7 +26423,7 @@
       "Type": "Language",
       "SubTag": "haa",
       "Description": [
-        "Han"
+        "H\u00E4n"
       ],
       "Added": "2009-07-29",
       "Comments": [],
@@ -37275,6 +37279,7 @@
       "Type": "Language",
       "SubTag": "kwk",
       "Description": [
+        "Kwak\u0027wala",
         "Kwakiutl"
       ],
       "Added": "2009-07-29",
@@ -43666,7 +43671,7 @@
       "Type": "Language",
       "SubTag": "mhn",
       "Description": [
-        "M\u00F3cheno"
+        "M\u00F2cheno"
       ],
       "Added": "2009-07-29",
       "Comments": [],
@@ -62151,7 +62156,8 @@
       "Type": "Language",
       "SubTag": "sec",
       "Description": [
-        "Sechelt"
+        "Sechelt",
+        "She shashishalhem"
       ],
       "Added": "2009-07-29",
       "Comments": [],
@@ -62840,7 +62846,8 @@
       "Type": "Language",
       "SubTag": "shs",
       "Description": [
-        "Shuswap"
+        "Shuswap",
+        "Secwepemcts\u00EDn"
       ],
       "Added": "2009-07-29",
       "Comments": [],
@@ -64836,7 +64843,8 @@
       "Type": "Language",
       "SubTag": "squ",
       "Description": [
-        "Squamish"
+        "Squamish",
+        "S\u1E35wx\u0331w\u00FA7mesh sn\u00EDchim"
       ],
       "Added": "2009-07-29",
       "Comments": [],
@@ -68100,7 +68108,9 @@
       "Type": "Language",
       "SubTag": "thp",
       "Description": [
-        "Thompson"
+        "Thompson",
+        "N\u0142e\u0294kepmxc\u00EDn",
+        "Thompson River Salish"
       ],
       "Added": "2009-07-29",
       "Comments": [],
@@ -68140,7 +68150,8 @@
       "Type": "Language",
       "SubTag": "tht",
       "Description": [
-        "Tahltan"
+        "Tahltan",
+        "T\u0101\u0142t\u0101n"
       ],
       "Added": "2009-07-29",
       "Comments": [],
@@ -83396,7 +83407,7 @@
       "Type": "Language",
       "SubTag": "zmp",
       "Description": [
-        "Mpuono"
+        "Mbuun"
       ],
       "Added": "2009-07-29",
       "Comments": [],

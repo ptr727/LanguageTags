@@ -21,12 +21,12 @@ jobs:
     steps:
 
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 9.x
 
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Download language data and generate code
         run: |
@@ -39,7 +39,7 @@ jobs:
           git status
 
       - name: Create pull request
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           branch: update-languagedata
           title: 'Update language data and generated files'

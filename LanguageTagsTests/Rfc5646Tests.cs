@@ -4,10 +4,8 @@ using Xunit;
 
 namespace ptr727.LanguageTags.Tests;
 
-public class Rfc5646Tests(Fixture fixture) : IClassFixture<Fixture>
+public class Rfc5646Tests
 {
-    private readonly Fixture _fixture = fixture;
-
     [Fact]
     public void Create()
     {
@@ -30,7 +28,7 @@ public class Rfc5646Tests(Fixture fixture) : IClassFixture<Fixture>
     [Fact]
     public void LoadJson()
     {
-        Rfc5646Data rfc5646 = Rfc5646Data.LoadJson(
+        Rfc5646Data? rfc5646 = Rfc5646Data.LoadJson(
             Fixture.GetDataFilePath(Rfc5646Data.DataFileName + ".json")
         );
         _ = rfc5646.Should().NotBeNull();
@@ -60,7 +58,7 @@ public class Rfc5646Tests(Fixture fixture) : IClassFixture<Fixture>
         _ = rfc5646.RecordList.Length.Should().BeGreaterThan(0);
 
         // Find matching language
-        Rfc5646Data.Record record = rfc5646.Find(input, description);
+        Rfc5646Record? record = rfc5646.Find(input, description);
         _ = record.Should().NotBeNull();
         _ = record
             .Description.Should()
@@ -79,7 +77,7 @@ public class Rfc5646Tests(Fixture fixture) : IClassFixture<Fixture>
         _ = rfc5646.RecordList.Length.Should().BeGreaterThan(0);
 
         // Fail to find matching language
-        Rfc5646Data.Record record = rfc5646.Find(input, false);
+        Rfc5646Record? record = rfc5646.Find(input, false);
         _ = record.Should().BeNull();
     }
 }

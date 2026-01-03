@@ -1,72 +1,143 @@
+using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 
 namespace ptr727.LanguageTags;
 
-public class LanguageTag
+/// <summary>
+/// Represents a language tag conforming to RFC 5646 / BCP 47.
+/// </summary>
+public class LanguageTag : IEquatable<LanguageTag>
 {
-    public LanguageTag()
+    internal LanguageTag()
     {
-        VariantList = [];
-        ExtensionList = [];
+        Language = string.Empty;
+        ExtendedLanguage = string.Empty;
+        Script = string.Empty;
+        Region = string.Empty;
+        _variants = [];
+        _extensions = [];
         PrivateUse = new PrivateUseTag();
     }
 
-    public LanguageTag(LanguageTag languageTag)
+    internal LanguageTag(LanguageTag languageTag)
     {
+        ArgumentNullException.ThrowIfNull(languageTag);
         Language = languageTag.Language;
         ExtendedLanguage = languageTag.ExtendedLanguage;
         Script = languageTag.Script;
         Region = languageTag.Region;
-        VariantList = [.. languageTag.VariantList];
-        ExtensionList = [];
-        languageTag.ExtensionList.ForEach(extension =>
-        {
-            ExtensionList.Add(new ExtensionTag(extension));
-        });
+        _variants = [.. languageTag._variants];
+        _extensions = [.. languageTag._extensions];
         PrivateUse = new PrivateUseTag(languageTag.PrivateUse);
     }
 
-    public class ExtensionTag
+    /// <summary>
+    /// Gets or sets the primary language subtag (ISO 639 language code).
+    /// </summary>
+    public string Language { get; internal set; }
+
+    /// <summary>
+    /// Gets or sets the extended language subtag.
+    /// </summary>
+    public string ExtendedLanguage { get; internal set; }
+
+    /// <summary>
+    /// Gets or sets the script subtag (ISO 15924 script code).
+    /// </summary>
+    public string Script { get; internal set; }
+
+    /// <summary>
+    /// Gets or sets the region subtag (ISO 3166-1 country code or UN M.49 region code).
+    /// </summary>
+    public string Region { get; internal set; }
+
+    /// <summary>
+    /// Gets the list of variant subtags.
+    /// </summary>
+    public ImmutableArray<string> Variants => [.. _variants];
+    internal List<string> _variants { get; init; }
+
+    /// <summary>
+    /// Gets the list of extension subtags.
+    /// </summary>
+    public ImmutableArray<ExtensionTag> Extensions => [.. _extensions];
+    internal List<ExtensionTag> _extensions { get; init; }
+
+    /// <summary>
+    /// Gets the private use subtag.
+    /// </summary>
+    public PrivateUseTag PrivateUse { get; init; }
+
+    /// <summary>
+    /// Parses a language tag string into a LanguageTag object.
+    /// </summary>
+    /// <param name="tag">The language tag string to parse (e.g., "en-US", "zh-Hans-CN").</param>
+    /// <returns>A parsed and normalized LanguageTag object, or null if parsing fails.</returns>
+    public static LanguageTag? Parse(string tag) => new LanguageTagParser().Parse(tag);
+
+    /// <summary>
+    /// Parses a language tag string, returning a default tag if parsing fails.
+    /// </summary>
+    /// <param name="tag">The language tag string to parse.</param>
+    /// <param name="defaultTag">The default tag to return if parsing fails (defaults to "und").</param>
+    /// <returns>The parsed tag or the default tag.</returns>
+    public static LanguageTag ParseOrDefault(string tag, LanguageTag? defaultTag = null)
     {
-        public ExtensionTag() => TagList = [];
-
-        public ExtensionTag(ExtensionTag extensionTag)
-        {
-            Prefix = extensionTag.Prefix;
-            TagList = [.. extensionTag.TagList];
-        }
-
-        public char Prefix { get; set; }
-        public List<string> TagList { get; init; }
-
-        public override string ToString() => $"{Prefix}-{string.Join('-', TagList)}";
+        LanguageTag? parsed = Parse(tag);
+        return parsed ?? defaultTag ?? Parse(LanguageLookup.Undetermined)!;
     }
 
-    public class PrivateUseTag
+    /// <summary>
+    /// Parses and normalizes a language tag string.
+    /// </summary>
+    /// <param name="tag">The language tag string.</param>
+    /// <returns>A normalized language tag or null if parsing/normalization fails.</returns>
+    public static LanguageTag? ParseAndNormalize(string tag) => Parse(tag)?.Normalize();
+
+    /// <summary>
+    /// Tries to parse a language tag string into a LanguageTag object.
+    /// </summary>
+    /// <param name="tag">The language tag string to parse (e.g., "en-US", "zh-Hans-CN").</param>
+    /// <param name="result">When this method returns, contains the parsed LanguageTag if successful, or null if parsing fails.</param>
+    /// <returns>true if the tag was successfully parsed; otherwise, false.</returns>
+    public static bool TryParse(string tag, [NotNullWhen(true)] out LanguageTag? result)
     {
-        public PrivateUseTag() => TagList = [];
-
-        public PrivateUseTag(PrivateUseTag privateUseTag) => TagList = [.. privateUseTag.TagList];
-
-        public const char Prefix = 'x';
-        public List<string> TagList { get; }
-
-        public override string ToString() => $"{Prefix}-{string.Join('-', TagList)}";
+        result = Parse(tag);
+        return result != null;
     }
 
-    public string Language { get; set; }
-    public string ExtendedLanguage { get; set; }
-    public string Script { get; set; }
-    public string Region { get; set; }
-    public List<string> VariantList { get; }
-    public List<ExtensionTag> ExtensionList { get; }
-    public PrivateUseTag PrivateUse { get; }
+    /// <summary>
+    /// Creates a new LanguageTagBuilder for fluent construction of language tags.
+    /// </summary>
+    /// <returns>A new LanguageTagBuilder instance.</returns>
+    public static LanguageTagBuilder CreateBuilder() => new();
 
+    /// <summary>
+    /// Validates this language tag.
+    /// </summary>
+    /// <returns>true if the tag is valid; otherwise, false.</returns>
     public bool Validate() => LanguageTagParser.Validate(this);
 
+    /// <summary>
+    /// Gets whether this language tag is valid according to RFC 5646 rules.
+    /// </summary>
+    public bool IsValid => Validate();
+
+    /// <summary>
+    /// Normalizes this language tag according to RFC 5646 rules.
+    /// </summary>
+    /// <returns>A normalized copy of this language tag.</returns>
+    public LanguageTag? Normalize() => new LanguageTagParser().Normalize(this);
+
+    /// <summary>
+    /// Converts this language tag to its string representation.
+    /// </summary>
+    /// <returns>A string representation of the language tag (e.g., "en-US", "zh-Hans-CN").</returns>
     public override string ToString()
     {
         StringBuilder stringBuilder = new();
@@ -86,21 +157,21 @@ public class LanguageTag
         {
             _ = stringBuilder.Append('-').Append(Region);
         }
-        if (VariantList.Count > 0)
+        if (_variants.Count > 0)
         {
             _ = stringBuilder.Append(
                 CultureInfo.InvariantCulture,
-                $"-{string.Join('-', VariantList)}"
+                $"-{string.Join('-', _variants)}"
             );
         }
-        if (ExtensionList.Count > 0)
+        if (_extensions.Count > 0)
         {
             _ = stringBuilder.Append(
                 CultureInfo.InvariantCulture,
-                $"-{string.Join('-', ExtensionList.Select(item => item.ToString()))}"
+                $"-{string.Join('-', _extensions.Select(item => item.ToString()))}"
             );
         }
-        if (PrivateUse.TagList.Count > 0)
+        if (PrivateUse._tags.Count > 0)
         {
             if (stringBuilder.Length > 0)
             {
@@ -110,4 +181,143 @@ public class LanguageTag
         }
         return stringBuilder.ToString();
     }
+
+    /// <summary>
+    /// Determines whether this instance is equal to another <see cref="LanguageTag"/>.
+    /// </summary>
+    /// <param name="other">The <see cref="LanguageTag"/> to compare with.</param>
+    /// <returns>true if the tags are equal (case-insensitive); otherwise, false.</returns>
+    public bool Equals(LanguageTag? other) =>
+        other is not null
+        && (
+            ReferenceEquals(this, other)
+            || string.Equals(ToString(), other.ToString(), StringComparison.OrdinalIgnoreCase)
+        );
+
+    /// <summary>
+    /// Determines whether this instance is equal to another object.
+    /// </summary>
+    /// <param name="obj">The object to compare with.</param>
+    /// <returns>true if the objects are equal; otherwise, false.</returns>
+    public override bool Equals(object? obj) => Equals(obj as LanguageTag);
+
+    /// <summary>
+    /// Returns the hash code for this language tag.
+    /// </summary>
+    /// <returns>A hash code for the current language tag.</returns>
+    public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(ToString());
+
+    /// <summary>
+    /// Determines whether two language tags are equal.
+    /// </summary>
+    /// <param name="left">The first language tag to compare.</param>
+    /// <param name="right">The second language tag to compare.</param>
+    /// <returns>true if the tags are equal; otherwise, false.</returns>
+    public static bool operator ==(LanguageTag? left, LanguageTag? right) =>
+        left?.Equals(right) ?? (right is null);
+
+    /// <summary>
+    /// Determines whether two language tags are not equal.
+    /// </summary>
+    /// <param name="left">The first language tag to compare.</param>
+    /// <param name="right">The second language tag to compare.</param>
+    /// <returns>true if the tags are not equal; otherwise, false.</returns>
+    public static bool operator !=(LanguageTag? left, LanguageTag? right) => !(left == right);
+
+    /// <summary>
+    /// Creates a simple language tag with just a language code.
+    /// </summary>
+    /// <param name="language">The ISO 639 language code.</param>
+    /// <returns>A new <see cref="LanguageTag"/> with the specified language.</returns>
+    public static LanguageTag FromLanguage(string language) =>
+        CreateBuilder().Language(language).Build();
+
+    /// <summary>
+    /// Creates a language tag with language and region.
+    /// </summary>
+    /// <param name="language">The ISO 639 language code.</param>
+    /// <param name="region">The ISO 3166-1 country code or UN M.49 region code.</param>
+    /// <returns>A new <see cref="LanguageTag"/> with the specified language and region.</returns>
+    public static LanguageTag FromLanguageRegion(string language, string region) =>
+        CreateBuilder().Language(language).Region(region).Build();
+
+    /// <summary>
+    /// Creates a language tag with language, script, and region.
+    /// </summary>
+    /// <param name="language">The ISO 639 language code.</param>
+    /// <param name="script">The ISO 15924 script code.</param>
+    /// <param name="region">The ISO 3166-1 country code or UN M.49 region code.</param>
+    /// <returns>A new <see cref="LanguageTag"/> with the specified language, script, and region.</returns>
+    public static LanguageTag FromLanguageScriptRegion(
+        string language,
+        string script,
+        string region
+    ) => CreateBuilder().Language(language).Script(script).Region(region).Build();
+}
+
+/// <summary>
+/// Represents an extension subtag in a language tag.
+/// </summary>
+public class ExtensionTag
+{
+    internal ExtensionTag()
+    {
+        Prefix = '\0';
+        _tags = [];
+    }
+
+    internal ExtensionTag(ExtensionTag extensionTag)
+    {
+        ArgumentNullException.ThrowIfNull(extensionTag);
+        Prefix = extensionTag.Prefix;
+        _tags = [.. extensionTag._tags];
+    }
+
+    /// <summary>
+    /// Gets or sets the single-character prefix for the extension (e.g., 'u' for Unicode extensions).
+    /// </summary>
+    public char Prefix { get; internal set; }
+
+    /// <summary>
+    /// Gets the list of extension subtag values.
+    /// </summary>
+    public ImmutableArray<string> Tags => [.. _tags];
+    internal List<string> _tags { get; init; }
+
+    /// <summary>
+    /// Converts this extension tag to its string representation.
+    /// </summary>
+    /// <returns>A string representation of the extension tag (e.g., "u-ca-buddhist").</returns>
+    public override string ToString() => $"{Prefix}-{string.Join('-', _tags)}";
+}
+
+/// <summary>
+/// Represents a private use subtag in a language tag.
+/// </summary>
+public class PrivateUseTag
+{
+    internal PrivateUseTag() => _tags = [];
+
+    internal PrivateUseTag(PrivateUseTag privateUseTag)
+    {
+        ArgumentNullException.ThrowIfNull(privateUseTag);
+        _tags = [.. privateUseTag._tags];
+    }
+
+    /// <summary>
+    /// The prefix character for private use subtags ('x').
+    /// </summary>
+    public const char Prefix = 'x';
+
+    /// <summary>
+    /// Gets the list of private use subtag values.
+    /// </summary>
+    public ImmutableArray<string> Tags => [.. _tags];
+    internal List<string> _tags { get; init; }
+
+    /// <summary>
+    /// Converts this private use tag to its string representation.
+    /// </summary>
+    /// <returns>A string representation of the private use tag (e.g., "x-private").</returns>
+    public override string ToString() => $"{Prefix}-{string.Join('-', _tags)}";
 }

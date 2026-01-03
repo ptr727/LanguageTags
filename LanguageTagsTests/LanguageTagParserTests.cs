@@ -3,10 +3,8 @@ using Xunit;
 
 namespace ptr727.LanguageTags.Tests;
 
-public class LanguageTagParserTests(Fixture fixture) : IClassFixture<Fixture>
+public class LanguageTagParserTests
 {
-    private readonly Fixture _fixture = fixture;
-
     [Theory]
     [InlineData("en-latn-gb-boont-r-extended-sequence-x-private")]
     [InlineData("en-a-bbb-x-a-ccc")]
@@ -17,7 +15,7 @@ public class LanguageTagParserTests(Fixture fixture) : IClassFixture<Fixture>
     [InlineData("x-a-private")]
     public void Parse_Pass(string tag)
     {
-        LanguageTag languageTag = new LanguageTagParser().Parse(tag);
+        LanguageTag? languageTag = new LanguageTagParser().Parse(tag);
         _ = languageTag.Should().NotBeNull();
         _ = languageTag.Validate().Should().BeTrue();
         _ = languageTag.ToString().Should().Be(tag);
@@ -31,7 +29,7 @@ public class LanguageTagParserTests(Fixture fixture) : IClassFixture<Fixture>
     [InlineData("zh-min-nan", "nan")]
     public void Normalize_Grandfathered_Pass(string tag, string parsed)
     {
-        LanguageTag languageTag = new LanguageTagParser().Normalize(tag);
+        LanguageTag? languageTag = new LanguageTagParser().Normalize(tag);
         _ = languageTag.Should().NotBeNull();
         _ = languageTag.Validate().Should().BeTrue();
         _ = languageTag.ToString().Should().Be(parsed);
@@ -47,7 +45,7 @@ public class LanguageTagParserTests(Fixture fixture) : IClassFixture<Fixture>
     )]
     public void Normalize_Case_Pass(string tag, string parsed)
     {
-        LanguageTag languageTag = new LanguageTagParser().Normalize(tag);
+        LanguageTag? languageTag = new LanguageTagParser().Normalize(tag);
         _ = languageTag.Should().NotBeNull();
         _ = languageTag.Validate().Should().BeTrue();
         _ = languageTag.ToString().Should().Be(parsed);
@@ -62,12 +60,12 @@ public class LanguageTagParserTests(Fixture fixture) : IClassFixture<Fixture>
     )]
     public void Normalize_Object(string tag, string parsed)
     {
-        LanguageTag languageTag = new LanguageTagParser().Parse(tag);
+        LanguageTag? languageTag = new LanguageTagParser().Parse(tag);
         _ = languageTag.Should().NotBeNull();
         _ = languageTag.Validate().Should().BeTrue();
         _ = languageTag.ToString().Should().NotBe(parsed);
 
-        LanguageTag normalizeTag = new LanguageTagParser().Normalize(languageTag);
+        LanguageTag? normalizeTag = new LanguageTagParser().Normalize(languageTag);
         _ = normalizeTag.Should().NotBeNull();
         _ = normalizeTag.Should().NotBe(languageTag);
         _ = normalizeTag.Validate().Should().BeTrue();
@@ -81,7 +79,7 @@ public class LanguageTagParserTests(Fixture fixture) : IClassFixture<Fixture>
     )]
     public void Normalize_Sort_Pass(string tag, string parsed)
     {
-        LanguageTag languageTag = new LanguageTagParser().Normalize(tag);
+        LanguageTag? languageTag = new LanguageTagParser().Normalize(tag);
         _ = languageTag.Should().NotBeNull();
         _ = languageTag.Validate().Should().BeTrue();
         _ = languageTag.ToString().Should().Be(parsed);
@@ -109,7 +107,8 @@ public class LanguageTagParserTests(Fixture fixture) : IClassFixture<Fixture>
     [InlineData("in", "id")] // Type = Language, SubTag = in, PreferredValue = id
     public void Normalize_Language(string tag, string normalized)
     {
-        LanguageTag languageTag = new LanguageTagParser().Normalize(tag);
+        LanguageTag? languageTag = new LanguageTagParser().Normalize(tag);
+        _ = languageTag.Should().NotBeNull();
         _ = languageTag.Validate().Should().BeTrue();
         _ = languageTag.ToString().Should().Be(normalized);
     }
@@ -119,7 +118,8 @@ public class LanguageTagParserTests(Fixture fixture) : IClassFixture<Fixture>
     [InlineData("zh-yue", "yue")] // Extended language, SubTag = yue, Prefix = zh, PreferredValue = yue
     public void Normalize_Extended_Language(string tag, string normalized)
     {
-        LanguageTag languageTag = new LanguageTagParser().Normalize(tag);
+        LanguageTag? languageTag = new LanguageTagParser().Normalize(tag);
+        _ = languageTag.Should().NotBeNull();
         _ = languageTag.Validate().Should().BeTrue();
         _ = languageTag.ToString().Should().Be(normalized);
     }
@@ -132,7 +132,8 @@ public class LanguageTagParserTests(Fixture fixture) : IClassFixture<Fixture>
     [InlineData("iu-latn", "iu-Latn")] // Type = Redundant, Tag = iu-Latn, PreferredValue = ?
     public void Normalize_Redundant(string tag, string normalized)
     {
-        LanguageTag languageTag = new LanguageTagParser().Normalize(tag);
+        LanguageTag? languageTag = new LanguageTagParser().Normalize(tag);
+        _ = languageTag.Should().NotBeNull();
         _ = languageTag.Validate().Should().BeTrue();
         _ = languageTag.ToString().Should().Be(normalized);
     }
@@ -142,7 +143,8 @@ public class LanguageTagParserTests(Fixture fixture) : IClassFixture<Fixture>
     [InlineData("en-latn", "en")] // Type = Language, SubTag = en, SuppressScript = Latn
     public void Normalize_Suppress_Script(string tag, string normalized)
     {
-        LanguageTag languageTag = new LanguageTagParser().Normalize(tag);
+        LanguageTag? languageTag = new LanguageTagParser().Normalize(tag);
+        _ = languageTag.Should().NotBeNull();
         _ = languageTag.Validate().Should().BeTrue();
         _ = languageTag.ToString().Should().Be(normalized);
     }

@@ -3,10 +3,8 @@ using Xunit;
 
 namespace ptr727.LanguageTags.Tests;
 
-public class Iso6392Tests(Fixture fixture) : IClassFixture<Fixture>
+public sealed class Iso6392Tests
 {
-    private readonly Fixture _fixture = fixture;
-
     [Fact]
     public void Create()
     {
@@ -28,7 +26,7 @@ public class Iso6392Tests(Fixture fixture) : IClassFixture<Fixture>
     [Fact]
     public void LoadJson()
     {
-        Iso6392Data iso6392 = Iso6392Data.LoadJson(
+        Iso6392Data? iso6392 = Iso6392Data.LoadJson(
             Fixture.GetDataFilePath(Iso6392Data.DataFileName + ".json")
         );
         _ = iso6392.Should().NotBeNull();
@@ -53,7 +51,7 @@ public class Iso6392Tests(Fixture fixture) : IClassFixture<Fixture>
         _ = iso6392.RecordList.Length.Should().BeGreaterThan(0);
 
         // Find matching language
-        Iso6392Data.Record record = iso6392.Find(input, description);
+        Iso6392Record? record = iso6392.Find(input, description);
         _ = record.Should().NotBeNull();
         _ = record.RefName.Should().BeEquivalentTo(output);
     }
@@ -69,7 +67,7 @@ public class Iso6392Tests(Fixture fixture) : IClassFixture<Fixture>
         _ = iso6392.RecordList.Length.Should().BeGreaterThan(0);
 
         // Fail to find matching language
-        Iso6392Data.Record record = iso6392.Find(input, false);
+        Iso6392Record? record = iso6392.Find(input, false);
         _ = record.Should().BeNull();
     }
 }

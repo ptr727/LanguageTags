@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "LanguageTagsCreate": {
+      "commandName": "Project",
+      "commandLineArgs": "$(SolutionDir)"
+    }
+  }
+}

@@ -1,23 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <AnalysisLevel>latest-all</AnalysisLevel>
     <AssemblyName>LanguageTagsCreate</AssemblyName>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <Authors>Pieter Viljoen</Authors>
     <Company>Pieter Viljoen</Company>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <Copyright>Pieter Viljoen</Copyright>
     <Description>LanguageTags create utility</Description>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <FileVersion>1.0.0.0</FileVersion>
     <IncludeSymbols>true</IncludeSymbols>
     <NeutralLanguage>en</NeutralLanguage>
+    <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
     <PackageId>ptr727.LanguageTags.Create</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/ptr727/LanguageTags</PackageProjectUrl>
+    <PublishAot>true</PublishAot>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <RootNamespace>ptr727.LanguageTags.Create</RootNamespace>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Version>1.0.0.0</Version>
   </PropertyGroup>
   <ItemGroup>

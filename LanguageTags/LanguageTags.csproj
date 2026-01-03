@@ -1,9 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <AnalysisLevel>latest-all</AnalysisLevel>
     <AssemblyName>LanguageTags</AssemblyName>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <Authors>Pieter Viljoen</Authors>
     <Company>Pieter Viljoen</Company>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <Copyright>Pieter Viljoen</Copyright>
     <Description>C# .NET library for ISO 639-2, ISO 639-3, RFC 5646 / BCP 47 language tags</Description>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
@@ -11,7 +13,10 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
     <InformationalVersion>1.0.0-pre</InformationalVersion>
+    <IsAotCompatible>true</IsAotCompatible>
     <NeutralLanguage>en</NeutralLanguage>
+    <Nullable>enable</Nullable>
+    <VerifyReferenceAotCompatibility>true</VerifyReferenceAotCompatibility>
     <PackageId>ptr727.LanguageTags</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/ptr727/LanguageTags</PackageProjectUrl>
@@ -21,13 +26,30 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <RootNamespace>ptr727.LanguageTags</RootNamespace>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <Version>1.0.0.0</Version>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="LanguageTagsCreate" />
+    <InternalsVisibleTo Include="LanguageTagsTests" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="..\README.md" Pack="true" PackagePath="" />
   </ItemGroup>
+  <Target Name="Husky" BeforeTargets="Restore;CollectPackageReferences" Condition="'$(HUSKY)' != 0">
+    <Exec
+      Command="dotnet tool restore"
+      StandardOutputImportance="Low"
+      StandardErrorImportance="High"
+    />
+    <Exec
+      Command="dotnet husky install"
+      StandardOutputImportance="Low"
+      StandardErrorImportance="High"
+      WorkingDirectory=".."
+    />
+  </Target>
 </Project>

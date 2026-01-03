@@ -20,11 +20,11 @@ namespace ptr727.LanguageTags;
 
 // TODO: Implement subtag content validation by comparing values with the registry data
 
-public class LanguageTagParser
+internal class LanguageTagParser
 {
     private readonly Rfc5646Data _rfc5646 = Rfc5646Data.Create();
     private readonly List<string> _tagList = [];
-    private LanguageTag _languageTag;
+    private LanguageTag _languageTag = new();
 
     private string ParseGrandfathered(string languageTag)
     {
@@ -33,39 +33,41 @@ public class LanguageTagParser
 
         // Search tag registry
         // Type = Grandfathered, Tag = i-navajo, PreferredValue = nv
-        List<Rfc5646Data.Record> recordList =
+        List<Rfc5646Record> recordList =
         [
             .. _rfc5646.RecordList.Where(record =>
-                record.Type == Rfc5646Data.RecordType.Grandfathered
+                record.Type == Rfc5646Record.RecordType.Grandfathered
                 && !string.IsNullOrEmpty(record.Tag)
                 && record.Tag.Equals(languageTag, StringComparison.OrdinalIgnoreCase)
             ),
         ];
+        Debug.Assert(recordList.Count <= 1);
         if (recordList.Count == 1)
         {
-            return recordList[0].PreferredValue;
+            Debug.Assert(!string.IsNullOrEmpty(recordList[0].PreferredValue));
+            return recordList[0].PreferredValue!;
         }
-        Debug.Assert(recordList.Count is 0 or 1);
 
         // No match
         return languageTag;
     }
 
+#pragma warning disable CA1308
     private static void SetCase(LanguageTag languageTag)
     {
-        // Language
+        // Language lowercase
         if (!string.IsNullOrEmpty(languageTag.Language))
         {
             languageTag.Language = languageTag.Language.ToLowerInvariant();
         }
 
-        // Extended language
+        // Extended language lowercase
         if (!string.IsNullOrEmpty(languageTag.ExtendedLanguage))
         {
             languageTag.ExtendedLanguage = languageTag.ExtendedLanguage.ToLowerInvariant();
         }
 
-        // Script
+        // Script title case
         if (!string.IsNullOrEmpty(languageTag.Script))
         {
             languageTag.Script =
@@ -74,48 +76,47 @@ public class LanguageTagParser
                 );
         }
 
-        // Region
+        // Region uppercase
         if (!string.IsNullOrEmpty(languageTag.Region))
         {
             languageTag.Region = languageTag.Region.ToUpperInvariant();
         }
 
-        // Variants
-        for (int i = 0; i < languageTag.VariantList.Count; i++)
+        // Variants lowercase
+        for (int i = 0; i < languageTag._variants.Count; i++)
         {
-            languageTag.VariantList[i] = languageTag.VariantList[i].ToLowerInvariant();
+            languageTag._variants[i] = languageTag._variants[i].ToLowerInvariant();
         }
 
-        // Extensions
-        foreach (LanguageTag.ExtensionTag extension in languageTag.ExtensionList)
+        // Extensions lowercase
+        foreach (ExtensionTag extension in languageTag._extensions)
         {
             extension.Prefix = char.ToLowerInvariant(extension.Prefix);
-            for (int i = 0; i < extension.TagList.Count; i++)
+            for (int i = 0; i < extension._tags.Count; i++)
             {
-                extension.TagList[i] = extension.TagList[i].ToLowerInvariant();
+                extension._tags[i] = extension._tags[i].ToLowerInvariant();
             }
         }
 
-        // Private use
-        for (int i = 0; i < languageTag.PrivateUse.TagList.Count; i++)
+        // Private use lowercase
+        for (int i = 0; i < languageTag.PrivateUse._tags.Count; i++)
         {
-            languageTag.PrivateUse.TagList[i] = languageTag
-                .PrivateUse.TagList[i]
-                .ToLowerInvariant();
+            languageTag.PrivateUse._tags[i] = languageTag.PrivateUse._tags[i].ToLowerInvariant();
         }
     }
+#pragma warning restore CA1308
 
     private static void Sort(LanguageTag languageTag)
     {
         // Sort variants
-        languageTag.VariantList.Sort();
+        languageTag._variants.Sort();
 
         // Sort extensions by prefix
-        languageTag.ExtensionList.Sort((x, y) => x.Prefix.CompareTo(y.Prefix));
+        languageTag._extensions.Sort((x, y) => x.Prefix.CompareTo(y.Prefix));
 
         // Sort extensions and private use tags
-        languageTag.ExtensionList.ForEach(extension => extension.TagList.Sort());
-        languageTag.PrivateUse.TagList.Sort();
+        languageTag._extensions.ForEach(extension => extension._tags.Sort());
+        languageTag.PrivateUse._tags.Sort();
     }
 
     private static bool ValidateLanguage(string tag) =>
@@ -280,13 +281,13 @@ public class LanguageTagParser
             }
 
             // Variant may not repeat
-            if (_languageTag.VariantList.Contains(_tagList[0], StringComparer.OrdinalIgnoreCase))
+            if (_languageTag._variants.Contains(_tagList[0], StringComparer.OrdinalIgnoreCase))
             {
                 return false;
             }
 
             // Add variant tag
-            _languageTag.VariantList.Add(_tagList[0]);
+            _languageTag._variants.Add(_tagList[0]);
             _tagList.RemoveAt(0);
         }
 
@@ -296,9 +297,7 @@ public class LanguageTagParser
 
     private static bool ValidateExtensionPrefix(string tag) =>
         // 1 char not x
-        !string.IsNullOrEmpty(tag)
-        && tag.Length == 1
-        && tag[0] != LanguageTag.PrivateUseTag.Prefix;
+        !string.IsNullOrEmpty(tag) && tag.Length == 1 && tag[0] != PrivateUseTag.Prefix;
 
     private static bool ValidateExtension(string tag) =>
         // 2 - 8 chars
@@ -327,12 +326,12 @@ public class LanguageTagParser
             }
 
             // Prefix may not repeat
-            if (_languageTag.ExtensionList.Any(item => item.Prefix == _tagList[0][0]))
+            if (_languageTag._extensions.Any(item => item.Prefix == _tagList[0][0]))
             {
                 return false;
             }
 
-            LanguageTag.ExtensionTag extensionTag = new() { Prefix = _tagList[0][0] };
+            ExtensionTag extensionTag = new() { Prefix = _tagList[0][0] };
             _tagList.RemoveAt(0);
 
             // 1 or more tags remaining
@@ -346,24 +345,24 @@ public class LanguageTagParser
             while (_tagList.Count > 0 && ValidateExtension(_tagList[0]))
             {
                 // Tag may not repeat
-                if (extensionTag.TagList.Contains(_tagList[0], StringComparer.OrdinalIgnoreCase))
+                if (extensionTag._tags.Contains(_tagList[0], StringComparer.OrdinalIgnoreCase))
                 {
                     return false;
                 }
 
                 // Add extension tag
-                extensionTag.TagList.Add(_tagList[0]);
+                extensionTag._tags.Add(_tagList[0]);
                 _tagList.RemoveAt(0);
             }
 
             // Must have some matches
-            if (extensionTag.TagList.Count == 0)
+            if (extensionTag._tags.Count == 0)
             {
                 return false;
             }
 
             // Add extension tag
-            _languageTag.ExtensionList.Add(extensionTag);
+            _languageTag._extensions.Add(extensionTag);
         }
 
         // Done
@@ -372,9 +371,7 @@ public class LanguageTagParser
 
     private static bool ValidatePrivateUsePrefix(string tag) =>
         // x
-        !string.IsNullOrEmpty(tag)
-        && tag.Length == 1
-        && tag[0] == LanguageTag.PrivateUseTag.Prefix;
+        !string.IsNullOrEmpty(tag) && tag.Length == 1 && tag[0] == PrivateUseTag.Prefix;
 
     private static bool ValidatePrivateUse(string tag) =>
         // 1 to 8 chars
@@ -397,7 +394,7 @@ public class LanguageTagParser
         }
 
         // Prefix may not repeat
-        if (_languageTag.PrivateUse.TagList.Count > 0)
+        if (_languageTag.PrivateUse._tags.Count > 0)
         {
             return false;
         }
@@ -423,7 +420,7 @@ public class LanguageTagParser
 
             // Tag may not repeat
             if (
-                _languageTag.PrivateUse.TagList.Contains(
+                _languageTag.PrivateUse._tags.Contains(
                     _tagList[0],
                     StringComparer.OrdinalIgnoreCase
                 )
@@ -433,12 +430,12 @@ public class LanguageTagParser
             }
 
             // Add private use tag
-            _languageTag.PrivateUse.TagList.Add(_tagList[0]);
+            _languageTag.PrivateUse._tags.Add(_tagList[0]);
             _tagList.RemoveAt(0);
         }
 
         // Must have some matches
-        if (_languageTag.PrivateUse.TagList.Count == 0)
+        if (_languageTag.PrivateUse._tags.Count == 0)
         {
             return false;
         }
@@ -447,7 +444,7 @@ public class LanguageTagParser
         return true;
     }
 
-    public LanguageTag Parse(string languageTag)
+    internal LanguageTag? Parse(string languageTag)
     {
         // Parse the tag per RFC 5646 2.1
         // https://www.rfc-editor.org/rfc/rfc5646#section-2.1
@@ -582,13 +579,13 @@ public class LanguageTagParser
         return null;
     }
 
-    public LanguageTag Normalize(string languageTag)
+    internal LanguageTag? Normalize(string languageTag)
     {
-        LanguageTag parsedTag = Parse(languageTag);
+        LanguageTag? parsedTag = Parse(languageTag);
         return parsedTag == null ? null : Normalize(parsedTag);
     }
 
-    public LanguageTag Normalize(LanguageTag languageTag)
+    internal LanguageTag? Normalize(LanguageTag languageTag)
     {
         // Canonicalization of Language Tags
         // https://www.rfc-editor.org/rfc/rfc5646#section-4.5
@@ -607,10 +604,10 @@ public class LanguageTagParser
         if (!string.IsNullOrEmpty(normalizeTag.Language))
         {
             // Type = Language, SubTag = iw, PreferredValue = he
-            List<Rfc5646Data.Record> recordList =
+            List<Rfc5646Record> recordList =
             [
                 .. _rfc5646.RecordList.Where(record =>
-                    record.Type == Rfc5646Data.RecordType.Language
+                    record.Type == Rfc5646Record.RecordType.Language
                     && !string.IsNullOrEmpty(record.PreferredValue)
                     && normalizeTag.Language.Equals(
                         record.SubTag,
@@ -618,10 +615,11 @@ public class LanguageTagParser
                     )
                 ),
             ];
-            Debug.Assert(recordList.Count is 0 or 1);
+            Debug.Assert(recordList.Count <= 1);
             if (recordList.Count == 1)
             {
-                normalizeTag.Language = recordList[0].PreferredValue;
+                Debug.Assert(!string.IsNullOrEmpty(recordList[0].PreferredValue));
+                normalizeTag.Language = recordList[0].PreferredValue!;
             }
         }
 
@@ -634,10 +632,11 @@ public class LanguageTagParser
         )
         {
             // Type = ExtLanguage, Prefix = ar, SubTag = afb, PreferredValue = afb
-            List<Rfc5646Data.Record> recordList =
+            List<Rfc5646Record> recordList =
             [
                 .. _rfc5646.RecordList.Where(record =>
-                    record.Type == Rfc5646Data.RecordType.ExtLanguage
+                    record.Type == Rfc5646Record.RecordType.ExtLanguage
+                    && !string.IsNullOrEmpty(record.PreferredValue)
                     && string.Equals(
                         record.SubTag,
                         normalizeTag.ExtendedLanguage,
@@ -648,11 +647,12 @@ public class LanguageTagParser
                     )
                 ),
             ];
-            Debug.Assert(recordList.Count is 0 or 1);
+            Debug.Assert(recordList.Count <= 1);
             if (recordList.Count == 1)
             {
-                normalizeTag.Language = recordList[0].PreferredValue;
-                normalizeTag.ExtendedLanguage = null;
+                Debug.Assert(!string.IsNullOrEmpty(recordList[0].PreferredValue));
+                normalizeTag.Language = recordList[0].PreferredValue!;
+                normalizeTag.ExtendedLanguage = string.Empty;
             }
         }
 
@@ -665,27 +665,33 @@ public class LanguageTagParser
         // de-CH-1901 -> ?
         // iu-Latn -> ?
         string tagString = normalizeTag.ToString();
-        if (tagString.Contains('-'))
+        if (tagString.Contains('-', StringComparison.Ordinal))
         {
             // Type = Redundant, Tag = zh-cmn-Hant, PreferredValue = cmn-Hant
-            List<Rfc5646Data.Record> recordList =
+            List<Rfc5646Record> recordList =
             [
                 .. _rfc5646.RecordList.Where(record =>
-                    record.Type == Rfc5646Data.RecordType.Redundant
+                    record.Type == Rfc5646Record.RecordType.Redundant
                     && !string.IsNullOrEmpty(record.PreferredValue)
+                    && !string.IsNullOrEmpty(record.Tag)
                     && tagString.StartsWith(record.Tag, StringComparison.OrdinalIgnoreCase)
                 ),
             ];
-            Debug.Assert(recordList.Count is 0 or 1);
+            Debug.Assert(recordList.Count <= 1);
             if (recordList.Count == 1)
             {
-                // Replace the tag with the preferred value and re-parse the full tag
+                // Replace the tag with the preferred value
+                Debug.Assert(!string.IsNullOrEmpty(recordList[0].Tag));
+                Debug.Assert(!string.IsNullOrEmpty(recordList[0].PreferredValue));
                 tagString = tagString.Replace(
-                    recordList[0].Tag,
+                    recordList[0].Tag!,
                     recordList[0].PreferredValue,
                     StringComparison.OrdinalIgnoreCase
                 );
-                LanguageTag preferredTag = Parse(tagString);
+
+                // Reparse the new tag string
+                LanguageTag? preferredTag = Parse(tagString);
+                Debug.Assert(preferredTag != null);
                 normalizeTag.Language = preferredTag.Language;
                 normalizeTag.ExtendedLanguage = preferredTag.ExtendedLanguage;
                 normalizeTag.Script = preferredTag.Script;
@@ -702,10 +708,10 @@ public class LanguageTagParser
         )
         {
             // Type = Language, SubTag = en, SuppressScript = Latn
-            List<Rfc5646Data.Record> recordList =
+            List<Rfc5646Record> recordList =
             [
                 .. _rfc5646.RecordList.Where(record =>
-                    record.Type == Rfc5646Data.RecordType.Language
+                    record.Type == Rfc5646Record.RecordType.Language
                     && !string.IsNullOrEmpty(record.SuppressScript)
                     && normalizeTag.Language.Equals(
                         record.SubTag,
@@ -713,10 +719,10 @@ public class LanguageTagParser
                     )
                 ),
             ];
-            Debug.Assert(recordList.Count is 0 or 1);
+            Debug.Assert(recordList.Count <= 1);
             if (recordList.Count == 1)
             {
-                normalizeTag.Script = null;
+                normalizeTag.Script = string.Empty;
             }
         }
 
@@ -731,7 +737,7 @@ public class LanguageTagParser
         return normalizeTag;
     }
 
-    public static bool Validate(LanguageTag languageTag)
+    internal static bool Validate(LanguageTag languageTag)
     {
         // Classes of Conformance
         // https://www.rfc-editor.org/rfc/rfc5646#section-2.2.9
@@ -761,26 +767,26 @@ public class LanguageTagParser
         {
             return false;
         }
-        if (languageTag.VariantList.Any(tag => !ValidateVariant(tag)))
+        if (languageTag._variants.Any(tag => !ValidateVariant(tag)))
         {
             return false;
         }
         if (
-            languageTag.ExtensionList.Any(extension =>
+            languageTag._extensions.Any(extension =>
                 !ValidateExtensionPrefix(extension.Prefix.ToString())
-                || extension.TagList.Any(tag => !ValidateExtension(tag))
+                || extension._tags.Any(tag => !ValidateExtension(tag))
             )
         )
         {
             return false;
         }
-        if (languageTag.PrivateUse.TagList.Any(tag => !ValidatePrivateUse(tag)))
+        if (languageTag.PrivateUse._tags.Any(tag => !ValidatePrivateUse(tag)))
         {
             return false;
         }
 
         // No duplicate variants
-        if (languageTag.VariantList.GroupBy(tag => tag).Any(group => group.Count() > 1))
+        if (languageTag._variants.GroupBy(tag => tag).Any(group => group.Count() > 1))
         {
             return false;
         }
@@ -788,7 +794,7 @@ public class LanguageTagParser
         // No duplicate extension prefixes
         if (
             languageTag
-                .ExtensionList.GroupBy(extension => extension.Prefix)
+                ._extensions.GroupBy(extension => extension.Prefix)
                 .Any(group => group.Count() > 1)
         )
         {
@@ -797,8 +803,8 @@ public class LanguageTagParser
 
         // No duplicate extensions per prefix
         if (
-            languageTag.ExtensionList.Any(extension =>
-                extension.TagList.GroupBy(tag => tag).Any(group => group.Count() > 1)
+            languageTag._extensions.Any(extension =>
+                extension._tags.GroupBy(tag => tag).Any(group => group.Count() > 1)
             )
         )
         {
@@ -806,7 +812,7 @@ public class LanguageTagParser
         }
 
         // No duplicate private use tags
-        if (languageTag.PrivateUse.TagList.GroupBy(tag => tag).Any(group => group.Count() > 1))
+        if (languageTag.PrivateUse._tags.GroupBy(tag => tag).Any(group => group.Count() > 1))
         {
             return false;
         }

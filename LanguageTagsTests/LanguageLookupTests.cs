@@ -3,10 +3,8 @@ using Xunit;
 
 namespace ptr727.LanguageTags.Tests;
 
-public class LanguageLookupTests(Fixture fixture) : IClassFixture<Fixture>
+public sealed class LanguageLookupTests
 {
-    private readonly Fixture _fixture = fixture;
-
     [Theory]
     [InlineData("afr", "af")]
     [InlineData("ger", "de")]

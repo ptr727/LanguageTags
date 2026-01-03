@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -10,22 +9,20 @@ using System.Text.Json;
 
 namespace ptr727.LanguageTags;
 
+/// <summary>
+/// Provides access to ISO 639-2 language code data.
+/// </summary>
 public partial class Iso6392Data
 {
-    internal static void WriteFile(string fileName, string value)
-    {
-        // Always write as CRLF with newline at the end
-        if (value.Contains('\n') && !value.Contains('\r'))
-        {
-            value = value.Replace("\n", "\r\n");
-        }
-        value = value.TrimEnd() + "\r\n";
-        File.WriteAllText(fileName, value);
-    }
+    internal const string DataUri = "https://www.loc.gov/standards/iso639-2/ISO-639-2_utf-8.txt";
+    internal const string DataFileName = "iso6392";
 
-    public const string DataUri = "https://www.loc.gov/standards/iso639-2/ISO-639-2_utf-8.txt";
-    public const string DataFileName = "iso6392";
-
+    /// <summary>
+    /// Loads ISO 639-2 data from a file.
+    /// </summary>
+    /// <param name="fileName">The path to the data file.</param>
+    /// <returns>The loaded <see cref="Iso6392Data"/>.</returns>
+    /// <exception cref="InvalidDataException">Thrown when the file contains invalid data.</exception>
     public static Iso6392Data LoadData(string fileName)
     {
         // https://www.loc.gov/standards/iso639-2/ascii_8bits.html
@@ -38,44 +35,56 @@ public partial class Iso6392Data
         // LF line terminator
 
         // Read line by line
-        List<Record> recordList = [];
+        List<Iso6392Record> recordList = [];
         using StreamReader lineReader = new(File.OpenRead(fileName));
         while (lineReader.ReadLine() is { } line)
         {
             // Parse using pipe character
             List<string> records = [.. line.Split('|').Select(item => item.Trim())];
-            Debug.Assert(records.Count == 5);
+            if (records.Count != 5)
+            {
+                throw new InvalidDataException($"Invalid data found in ISO 639-2 record: {line}");
+            }
 
             // Populate record
-            Record record = new()
+            Iso6392Record record = new()
             {
                 Part2B = string.IsNullOrEmpty(records[0]) ? null : records[0],
                 Part2T = string.IsNullOrEmpty(records[1]) ? null : records[1],
                 Part1 = string.IsNullOrEmpty(records[2]) ? null : records[2],
                 RefName = string.IsNullOrEmpty(records[3]) ? null : records[3],
             };
-            Debug.Assert(!string.IsNullOrEmpty(record.Part2B));
-            Debug.Assert(!string.IsNullOrEmpty(record.RefName));
+            if (string.IsNullOrEmpty(record.Part2B) || string.IsNullOrEmpty(record.RefName))
+            {
+                throw new InvalidDataException($"Invalid data found in ISO 639-2 record: {line}");
+            }
             recordList.Add(record);
         }
-
-        return new Iso6392Data { RecordList = [.. recordList] };
+        return recordList.Count == 0
+            ? throw new InvalidDataException($"No data found in ISO 639-2 file: {fileName}")
+            : new Iso6392Data { RecordList = [.. recordList] };
     }
 
-    public static Iso6392Data LoadJson(string fileName) =>
-        JsonSerializer.Deserialize<Iso6392Data>(
+    /// <summary>
+    /// Loads ISO 639-2 data from a JSON file.
+    /// </summary>
+    /// <param name="fileName">The path to the JSON file.</param>
+    /// <returns>The loaded <see cref="Iso6392Data"/> or null if deserialization fails.</returns>
+    public static Iso6392Data? LoadJson(string fileName) =>
+        JsonSerializer.Deserialize(
             File.ReadAllText(fileName),
-            JsonOptions.JsonReadOptions
+            LanguageJsonContext.Default.Iso6392Data
         );
 
-    public static void SaveJson(string fileName, Iso6392Data iso6392) =>
+    internal static void SaveJson(string fileName, Iso6392Data iso6392) =>
         File.WriteAllText(
             fileName,
-            JsonSerializer.Serialize(iso6392, JsonOptions.JsonWriteOptions)
+            JsonSerializer.Serialize(iso6392, LanguageJsonContext.Default.Iso6392Data)
         );
 
-    public static void GenCode(string fileName, Iso6392Data iso6392)
+    internal static void GenCode(string fileName, Iso6392Data iso6392)
     {
+        ArgumentNullException.ThrowIfNull(iso6392);
         StringBuilder stringBuilder = new();
         _ = stringBuilder
             .Append(
@@ -95,7 +104,7 @@ public partial class Iso6392Data
             )
             .Append("\r\n");
 
-        foreach (Record record in iso6392.RecordList)
+        foreach (Iso6392Record record in iso6392.RecordList)
         {
             _ = stringBuilder
                 .Append(
@@ -103,49 +112,12 @@ public partial class Iso6392Data
                     $$"""
                                     new()
                                     {
-                    """
-                )
-                .Append("\r\n");
-            if (!string.IsNullOrEmpty(record.Part2B))
-            {
-                _ = stringBuilder
-                    .Append(
-                        CultureInfo.InvariantCulture,
-                        $"                    Part2B = \"{record.Part2B}\","
-                    )
-                    .Append("\r\n");
-            }
-            if (!string.IsNullOrEmpty(record.Part2T))
-            {
-                _ = stringBuilder
-                    .Append(
-                        CultureInfo.InvariantCulture,
-                        $"                    Part2T = \"{record.Part2T}\","
-                    )
-                    .Append("\r\n");
-            }
-            if (!string.IsNullOrEmpty(record.Part1))
-            {
-                _ = stringBuilder
-                    .Append(
-                        CultureInfo.InvariantCulture,
-                        $"                    Part1 = \"{record.Part1}\","
-                    )
-                    .Append("\r\n");
-            }
-            if (!string.IsNullOrEmpty(record.RefName))
-            {
-                _ = stringBuilder
-                    .Append(
-                        CultureInfo.InvariantCulture,
-                        $"                    RefName = \"{record.RefName}\","
-                    )
-                    .Append("\r\n");
-            }
-            _ = stringBuilder
-                .Append(
-                    CultureInfo.InvariantCulture,
-                    $$"""
+                                        Part2B = {{LanguageSchema.GetCodeGenString(record.Part2B)}},
+                                        Part2T = {{LanguageSchema.GetCodeGenString(record.Part2T)}},
+                                        Part1 = {{LanguageSchema.GetCodeGenString(record.Part1)}},
+                                        RefName = {{LanguageSchema.GetCodeGenString(
+                        record.RefName
+                    )}},
                                     },
                     """
                 )
@@ -161,30 +133,29 @@ public partial class Iso6392Data
             )
             .Append("\r\n");
 
-        WriteFile(fileName, stringBuilder.ToString());
+        LanguageSchema.WriteFile(fileName, stringBuilder.ToString());
     }
 
-    public record Record
+    /// <summary>
+    /// Gets the collection of ISO 639-2 language records.
+    /// </summary>
+    public required ImmutableArray<Iso6392Record> RecordList { get; init; }
+
+    /// <summary>
+    /// Finds an ISO 639-2 language record by language code or description.
+    /// </summary>
+    /// <param name="languageTag">The language code or description to search for.</param>
+    /// <param name="includeDescription">If true, searches in the reference name field; otherwise, only searches language codes.</param>
+    /// <returns>The matching <see cref="Iso6392Record"/> or null if not found.</returns>
+    public Iso6392Record? Find(string? languageTag, bool includeDescription)
     {
-        // 639-2 Bibliographic
-        public string Part2B { get; init; }
+        if (string.IsNullOrEmpty(languageTag))
+        {
+            return null;
+        }
 
-        // 639-2 Terminology
-        public string Part2T { get; init; }
-
-        // 639-1
-        public string Part1 { get; init; }
-
-        // English name
-        public string RefName { get; init; }
-    }
-
-    public ImmutableArray<Record> RecordList { get; init; }
-
-    public Record Find(string languageTag, bool includeDescription)
-    {
         // Find the matching language entry
-        Record record = null;
+        Iso6392Record? record = null;
 
         // 693 3 letter form
         if (languageTag.Length == 3)
@@ -251,4 +222,30 @@ public partial class Iso6392Data
         // Not found
         return null;
     }
+}
+
+/// <summary>
+/// Represents an ISO 639-2 language code record.
+/// </summary>
+public record Iso6392Record
+{
+    /// <summary>
+    /// Gets the ISO 639-2/B bibliographic code (3 letters).
+    /// </summary>
+    public string? Part2B { get; init; }
+
+    /// <summary>
+    /// Gets the ISO 639-2/T terminology code (3 letters).
+    /// </summary>
+    public string? Part2T { get; init; }
+
+    /// <summary>
+    /// Gets the ISO 639-1 code (2 letters).
+    /// </summary>
+    public string? Part1 { get; init; }
+
+    /// <summary>
+    /// Gets the English reference name of the language.
+    /// </summary>
+    public string? RefName { get; init; }
 }

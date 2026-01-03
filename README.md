@@ -13,6 +13,14 @@ Code and Pipeline is on [GitHub](https://github.com/ptr727/LanguageTags)\
 Packages published on [NuGet](https://www.nuget.org/packages/ptr727.LanguageTags/)\
 ![NuGet](https://img.shields.io/nuget/v/ptr727.LanguageTags?logo=nuget)
 
+## Version History
+
+- v1.1:
+  - AOT support.
+  - Refactored public surfaces to minimize internals exposure.
+- v1.0:
+  - Initial standalone release.
+
 ## Introduction
 
 This project serves two primary purposes:

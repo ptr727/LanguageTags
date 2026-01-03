@@ -16,7 +16,7 @@ Packages published on [NuGet](https://www.nuget.org/packages/ptr727.LanguageTags
 ## Version History
 
 - v1.1:
-  - AOT support.
+  - .NET 10 and AOT support.
   - Refactored public surfaces to minimize internals exposure.
 - v1.0:
   - Initial standalone release.

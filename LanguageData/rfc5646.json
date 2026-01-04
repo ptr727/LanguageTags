@@ -104042,6 +104042,7 @@
     },
     {
       "Type": "Grandfathered",
+      "Tag": "art-lojban",
       "Description": [
         "Lojban"
       ],
@@ -104050,11 +104051,11 @@
       "Deprecated": "2003-09-02",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "jbo",
-      "Tag": "art-lojban"
+      "PreferredValue": "jbo"
     },
     {
       "Type": "Grandfathered",
+      "Tag": "cel-gaulish",
       "Description": [
         "Gaulish"
       ],
@@ -104064,11 +104065,11 @@
       "Comments": [
         "see xcg, xga, xtg"
       ],
-      "Prefix": [],
-      "Tag": "cel-gaulish"
+      "Prefix": []
     },
     {
       "Type": "Grandfathered",
+      "Tag": "en-GB-oed",
       "Description": [
         "English, Oxford English Dictionary spelling"
       ],
@@ -104077,11 +104078,11 @@
       "Deprecated": "2015-04-17",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "en-GB-oxendict",
-      "Tag": "en-GB-oed"
+      "PreferredValue": "en-GB-oxendict"
     },
     {
       "Type": "Grandfathered",
+      "Tag": "i-ami",
       "Description": [
         "Amis"
       ],
@@ -104090,11 +104091,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "ami",
-      "Tag": "i-ami"
+      "PreferredValue": "ami"
     },
     {
       "Type": "Grandfathered",
+      "Tag": "i-bnn",
       "Description": [
         "Bunun"
       ],
@@ -104103,22 +104104,22 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "bnn",
-      "Tag": "i-bnn"
+      "PreferredValue": "bnn"
     },
     {
       "Type": "Grandfathered",
+      "Tag": "i-default",
       "Description": [
         "Default Language"
       ],
       "Added": "1998-03-10",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "i-default"
+      "Prefix": []
     },
     {
       "Type": "Grandfathered",
+      "Tag": "i-enochian",
       "Description": [
         "Enochian"
       ],
@@ -104126,11 +104127,11 @@
       "Scope": "None",
       "Deprecated": "2015-03-29",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "i-enochian"
+      "Prefix": []
     },
     {
       "Type": "Grandfathered",
+      "Tag": "i-hak",
       "Description": [
         "Hakka"
       ],
@@ -104139,11 +104140,11 @@
       "Deprecated": "2000-01-10",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "hak",
-      "Tag": "i-hak"
+      "PreferredValue": "hak"
     },
     {
       "Type": "Grandfathered",
+      "Tag": "i-klingon",
       "Description": [
         "Klingon"
       ],
@@ -104152,11 +104153,11 @@
       "Deprecated": "2004-02-24",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "tlh",
-      "Tag": "i-klingon"
+      "PreferredValue": "tlh"
     },
     {
       "Type": "Grandfathered",
+      "Tag": "i-lux",
       "Description": [
         "Luxembourgish"
       ],
@@ -104165,22 +104166,22 @@
       "Deprecated": "1998-09-09",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "lb",
-      "Tag": "i-lux"
+      "PreferredValue": "lb"
     },
     {
       "Type": "Grandfathered",
+      "Tag": "i-mingo",
       "Description": [
         "Mingo"
       ],
       "Added": "1997-09-19",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "i-mingo"
+      "Prefix": []
     },
     {
       "Type": "Grandfathered",
+      "Tag": "i-navajo",
       "Description": [
         "Navajo"
       ],
@@ -104189,11 +104190,11 @@
       "Deprecated": "2000-02-18",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "nv",
-      "Tag": "i-navajo"
+      "PreferredValue": "nv"
     },
     {
       "Type": "Grandfathered",
+      "Tag": "i-pwn",
       "Description": [
         "Paiwan"
       ],
@@ -104202,11 +104203,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "pwn",
-      "Tag": "i-pwn"
+      "PreferredValue": "pwn"
     },
     {
       "Type": "Grandfathered",
+      "Tag": "i-tao",
       "Description": [
         "Tao"
       ],
@@ -104215,11 +104216,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "tao",
-      "Tag": "i-tao"
+      "PreferredValue": "tao"
     },
     {
       "Type": "Grandfathered",
+      "Tag": "i-tay",
       "Description": [
         "Tayal"
       ],
@@ -104228,11 +104229,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "tay",
-      "Tag": "i-tay"
+      "PreferredValue": "tay"
     },
     {
       "Type": "Grandfathered",
+      "Tag": "i-tsu",
       "Description": [
         "Tsou"
       ],
@@ -104241,11 +104242,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "tsu",
-      "Tag": "i-tsu"
+      "PreferredValue": "tsu"
     },
     {
       "Type": "Grandfathered",
+      "Tag": "no-bok",
       "Description": [
         "Norwegian Bokmal"
       ],
@@ -104254,11 +104255,11 @@
       "Deprecated": "2000-02-18",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "nb",
-      "Tag": "no-bok"
+      "PreferredValue": "nb"
     },
     {
       "Type": "Grandfathered",
+      "Tag": "no-nyn",
       "Description": [
         "Norwegian Nynorsk"
       ],
@@ -104267,11 +104268,11 @@
       "Deprecated": "2000-02-18",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "nn",
-      "Tag": "no-nyn"
+      "PreferredValue": "nn"
     },
     {
       "Type": "Grandfathered",
+      "Tag": "sgn-BE-FR",
       "Description": [
         "Belgian-French Sign Language"
       ],
@@ -104280,11 +104281,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "sfb",
-      "Tag": "sgn-BE-FR"
+      "PreferredValue": "sfb"
     },
     {
       "Type": "Grandfathered",
+      "Tag": "sgn-BE-NL",
       "Description": [
         "Belgian-Flemish Sign Language"
       ],
@@ -104293,11 +104294,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "vgt",
-      "Tag": "sgn-BE-NL"
+      "PreferredValue": "vgt"
     },
     {
       "Type": "Grandfathered",
+      "Tag": "sgn-CH-DE",
       "Description": [
         "Swiss German Sign Language"
       ],
@@ -104306,11 +104307,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "sgg",
-      "Tag": "sgn-CH-DE"
+      "PreferredValue": "sgg"
     },
     {
       "Type": "Grandfathered",
+      "Tag": "zh-guoyu",
       "Description": [
         "Mandarin or Standard Chinese"
       ],
@@ -104319,11 +104320,11 @@
       "Deprecated": "2005-07-15",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "cmn",
-      "Tag": "zh-guoyu"
+      "PreferredValue": "cmn"
     },
     {
       "Type": "Grandfathered",
+      "Tag": "zh-hakka",
       "Description": [
         "Hakka"
       ],
@@ -104332,11 +104333,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "hak",
-      "Tag": "zh-hakka"
+      "PreferredValue": "hak"
     },
     {
       "Type": "Grandfathered",
+      "Tag": "zh-min",
       "Description": [
         "Min, Fuzhou, Hokkien, Amoy, or Taiwanese"
       ],
@@ -104346,11 +104347,11 @@
       "Comments": [
         "see cdo, cpx, czo, mnp, nan"
       ],
-      "Prefix": [],
-      "Tag": "zh-min"
+      "Prefix": []
     },
     {
       "Type": "Grandfathered",
+      "Tag": "zh-min-nan",
       "Description": [
         "Minnan, Hokkien, Amoy, Taiwanese, Southern Min, Southern Fujian, Hoklo, Southern Fukien, Ho-lo"
       ],
@@ -104359,11 +104360,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "nan",
-      "Tag": "zh-min-nan"
+      "PreferredValue": "nan"
     },
     {
       "Type": "Grandfathered",
+      "Tag": "zh-xiang",
       "Description": [
         "Xiang or Hunanese"
       ],
@@ -104372,242 +104373,242 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "hsn",
-      "Tag": "zh-xiang"
+      "PreferredValue": "hsn"
     },
     {
       "Type": "Redundant",
+      "Tag": "az-Arab",
       "Description": [
         "Azerbaijani in Arabic script"
       ],
       "Added": "2003-05-30",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "az-Arab"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "az-Cyrl",
       "Description": [
         "Azerbaijani in Cyrillic script"
       ],
       "Added": "2003-05-30",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "az-Cyrl"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "az-Latn",
       "Description": [
         "Azerbaijani in Latin script"
       ],
       "Added": "2003-05-30",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "az-Latn"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "be-Latn",
       "Description": [
         "Belarusian in Latin script"
       ],
       "Added": "2005-01-06",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "be-Latn"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "bs-Cyrl",
       "Description": [
         "Bosnian in Cyrillic script"
       ],
       "Added": "2005-02-17",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "bs-Cyrl"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "bs-Latn",
       "Description": [
         "Bosnian in Latin script"
       ],
       "Added": "2005-02-17",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "bs-Latn"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "de-1901",
       "Description": [
         "German, traditional orthography"
       ],
       "Added": "2001-07-17",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "de-1901"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "de-1996",
       "Description": [
         "German, orthography of 1996"
       ],
       "Added": "2001-07-17",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "de-1996"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "de-AT-1901",
       "Description": [
         "German, Austrian variant, traditional orthography"
       ],
       "Added": "2001-07-17",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "de-AT-1901"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "de-AT-1996",
       "Description": [
         "German, Austrian variant, orthography of 1996"
       ],
       "Added": "2001-07-17",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "de-AT-1996"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "de-CH-1901",
       "Description": [
         "German, Swiss variant, traditional orthography"
       ],
       "Added": "2001-07-17",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "de-CH-1901"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "de-CH-1996",
       "Description": [
         "German, Swiss variant, orthography of 1996"
       ],
       "Added": "2001-07-17",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "de-CH-1996"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "de-DE-1901",
       "Description": [
         "German, German variant, traditional orthography"
       ],
       "Added": "2001-07-17",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "de-DE-1901"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "de-DE-1996",
       "Description": [
         "German, German variant, orthography of 1996"
       ],
       "Added": "2001-07-17",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "de-DE-1996"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "en-boont",
       "Description": [
         "Boontling"
       ],
       "Added": "2003-02-14",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "en-boont"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "en-scouse",
       "Description": [
         "Scouse"
       ],
       "Added": "2000-05-25",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "en-scouse"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "es-419",
       "Description": [
         "Latin American Spanish"
       ],
       "Added": "2005-07-15",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "es-419"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "iu-Cans",
       "Description": [
         "Inuktitut in Canadian Aboriginal Syllabic script"
       ],
       "Added": "2005-02-17",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "iu-Cans"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "iu-Latn",
       "Description": [
         "Inuktitut in Latin script"
       ],
       "Added": "2005-02-17",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "iu-Latn"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "mn-Cyrl",
       "Description": [
         "Mongolian in Cyrillic script"
       ],
       "Added": "2005-02-17",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "mn-Cyrl"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "mn-Mong",
       "Description": [
         "Mongolian in Mongolian script"
       ],
       "Added": "2005-02-17",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "mn-Mong"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "sgn-BR",
       "Description": [
         "Brazilian Sign Language"
       ],
@@ -104616,11 +104617,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "bzs",
-      "Tag": "sgn-BR"
+      "PreferredValue": "bzs"
     },
     {
       "Type": "Redundant",
+      "Tag": "sgn-CO",
       "Description": [
         "Colombian Sign Language"
       ],
@@ -104629,11 +104630,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "csn",
-      "Tag": "sgn-CO"
+      "PreferredValue": "csn"
     },
     {
       "Type": "Redundant",
+      "Tag": "sgn-DE",
       "Description": [
         "German Sign Language"
       ],
@@ -104642,11 +104643,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "gsg",
-      "Tag": "sgn-DE"
+      "PreferredValue": "gsg"
     },
     {
       "Type": "Redundant",
+      "Tag": "sgn-DK",
       "Description": [
         "Danish Sign Language"
       ],
@@ -104655,11 +104656,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "dsl",
-      "Tag": "sgn-DK"
+      "PreferredValue": "dsl"
     },
     {
       "Type": "Redundant",
+      "Tag": "sgn-ES",
       "Description": [
         "Spanish Sign Language"
       ],
@@ -104668,11 +104669,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "ssp",
-      "Tag": "sgn-ES"
+      "PreferredValue": "ssp"
     },
     {
       "Type": "Redundant",
+      "Tag": "sgn-FR",
       "Description": [
         "French Sign Language"
       ],
@@ -104681,11 +104682,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "fsl",
-      "Tag": "sgn-FR"
+      "PreferredValue": "fsl"
     },
     {
       "Type": "Redundant",
+      "Tag": "sgn-GB",
       "Description": [
         "British Sign Language"
       ],
@@ -104694,11 +104695,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "bfi",
-      "Tag": "sgn-GB"
+      "PreferredValue": "bfi"
     },
     {
       "Type": "Redundant",
+      "Tag": "sgn-GR",
       "Description": [
         "Greek Sign Language"
       ],
@@ -104707,11 +104708,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "gss",
-      "Tag": "sgn-GR"
+      "PreferredValue": "gss"
     },
     {
       "Type": "Redundant",
+      "Tag": "sgn-IE",
       "Description": [
         "Irish Sign Language"
       ],
@@ -104720,11 +104721,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "isg",
-      "Tag": "sgn-IE"
+      "PreferredValue": "isg"
     },
     {
       "Type": "Redundant",
+      "Tag": "sgn-IT",
       "Description": [
         "Italian Sign Language"
       ],
@@ -104733,11 +104734,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "ise",
-      "Tag": "sgn-IT"
+      "PreferredValue": "ise"
     },
     {
       "Type": "Redundant",
+      "Tag": "sgn-JP",
       "Description": [
         "Japanese Sign Language"
       ],
@@ -104746,11 +104747,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "jsl",
-      "Tag": "sgn-JP"
+      "PreferredValue": "jsl"
     },
     {
       "Type": "Redundant",
+      "Tag": "sgn-MX",
       "Description": [
         "Mexican Sign Language"
       ],
@@ -104759,11 +104760,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "mfs",
-      "Tag": "sgn-MX"
+      "PreferredValue": "mfs"
     },
     {
       "Type": "Redundant",
+      "Tag": "sgn-NI",
       "Description": [
         "Nicaraguan Sign Language"
       ],
@@ -104772,11 +104773,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "ncs",
-      "Tag": "sgn-NI"
+      "PreferredValue": "ncs"
     },
     {
       "Type": "Redundant",
+      "Tag": "sgn-NL",
       "Description": [
         "Dutch Sign Language"
       ],
@@ -104785,11 +104786,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "dse",
-      "Tag": "sgn-NL"
+      "PreferredValue": "dse"
     },
     {
       "Type": "Redundant",
+      "Tag": "sgn-NO",
       "Description": [
         "Norwegian Sign Language"
       ],
@@ -104798,11 +104799,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "nsl",
-      "Tag": "sgn-NO"
+      "PreferredValue": "nsl"
     },
     {
       "Type": "Redundant",
+      "Tag": "sgn-PT",
       "Description": [
         "Portuguese Sign Language"
       ],
@@ -104811,11 +104812,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "psr",
-      "Tag": "sgn-PT"
+      "PreferredValue": "psr"
     },
     {
       "Type": "Redundant",
+      "Tag": "sgn-SE",
       "Description": [
         "Swedish Sign Language"
       ],
@@ -104824,11 +104825,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "swl",
-      "Tag": "sgn-SE"
+      "PreferredValue": "swl"
     },
     {
       "Type": "Redundant",
+      "Tag": "sgn-US",
       "Description": [
         "American Sign Language"
       ],
@@ -104837,11 +104838,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "ase",
-      "Tag": "sgn-US"
+      "PreferredValue": "ase"
     },
     {
       "Type": "Redundant",
+      "Tag": "sgn-ZA",
       "Description": [
         "South African Sign Language"
       ],
@@ -104850,110 +104851,110 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "sfs",
-      "Tag": "sgn-ZA"
+      "PreferredValue": "sfs"
     },
     {
       "Type": "Redundant",
+      "Tag": "sl-nedis",
       "Description": [
         "Natisone dialect, Nadiza dialect"
       ],
       "Added": "2004-06-01",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "sl-nedis"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "sl-rozaj",
       "Description": [
         "Resian, Resianic, Rezijan"
       ],
       "Added": "2003-10-09",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "sl-rozaj"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "sr-Cyrl",
       "Description": [
         "Serbian in Cyrillic script"
       ],
       "Added": "2003-05-30",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "sr-Cyrl"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "sr-Latn",
       "Description": [
         "Serbian in Latin script"
       ],
       "Added": "2003-05-30",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "sr-Latn"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "tg-Arab",
       "Description": [
         "Tajik in Arabic script"
       ],
       "Added": "2005-02-17",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "tg-Arab"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "tg-Cyrl",
       "Description": [
         "Tajik in Cyrillic script"
       ],
       "Added": "2005-02-17",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "tg-Cyrl"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "uz-Cyrl",
       "Description": [
         "Uzbek in Cyrillic script"
       ],
       "Added": "2003-05-30",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "uz-Cyrl"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "uz-Latn",
       "Description": [
         "Uzbek in Latin script"
       ],
       "Added": "2003-05-30",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "uz-Latn"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "yi-Latn",
       "Description": [
         "Yiddish, in Latin script"
       ],
       "Added": "2003-01-07",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "yi-Latn"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "zh-cmn",
       "Description": [
         "Mandarin Chinese"
       ],
@@ -104962,11 +104963,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "cmn",
-      "Tag": "zh-cmn"
+      "PreferredValue": "cmn"
     },
     {
       "Type": "Redundant",
+      "Tag": "zh-cmn-Hans",
       "Description": [
         "Mandarin Chinese (Simplified)"
       ],
@@ -104975,11 +104976,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "cmn-Hans",
-      "Tag": "zh-cmn-Hans"
+      "PreferredValue": "cmn-Hans"
     },
     {
       "Type": "Redundant",
+      "Tag": "zh-cmn-Hant",
       "Description": [
         "Mandarin Chinese (Traditional)"
       ],
@@ -104988,11 +104989,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "cmn-Hant",
-      "Tag": "zh-cmn-Hant"
+      "PreferredValue": "cmn-Hant"
     },
     {
       "Type": "Redundant",
+      "Tag": "zh-gan",
       "Description": [
         "Kan or Gan"
       ],
@@ -105001,143 +105002,143 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "gan",
-      "Tag": "zh-gan"
+      "PreferredValue": "gan"
     },
     {
       "Type": "Redundant",
+      "Tag": "zh-Hans",
       "Description": [
         "simplified Chinese"
       ],
       "Added": "2003-05-30",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "zh-Hans"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "zh-Hans-CN",
       "Description": [
         "PRC Mainland Chinese in simplified script"
       ],
       "Added": "2005-04-13",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "zh-Hans-CN"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "zh-Hans-HK",
       "Description": [
         "Hong Kong Chinese in simplified script"
       ],
       "Added": "2005-04-11",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "zh-Hans-HK"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "zh-Hans-MO",
       "Description": [
         "Macao Chinese in simplified script"
       ],
       "Added": "2005-04-11",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "zh-Hans-MO"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "zh-Hans-SG",
       "Description": [
         "Singapore Chinese in simplified script"
       ],
       "Added": "2005-04-11",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "zh-Hans-SG"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "zh-Hans-TW",
       "Description": [
         "Taiwan Chinese in simplified script"
       ],
       "Added": "2005-04-11",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "zh-Hans-TW"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "zh-Hant",
       "Description": [
         "traditional Chinese"
       ],
       "Added": "2003-05-30",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "zh-Hant"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "zh-Hant-CN",
       "Description": [
         "PRC Mainland Chinese in traditional script"
       ],
       "Added": "2005-04-13",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "zh-Hant-CN"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "zh-Hant-HK",
       "Description": [
         "Hong Kong Chinese in traditional script"
       ],
       "Added": "2005-04-11",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "zh-Hant-HK"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "zh-Hant-MO",
       "Description": [
         "Macao Chinese in traditional script"
       ],
       "Added": "2005-04-11",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "zh-Hant-MO"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "zh-Hant-SG",
       "Description": [
         "Singapore Chinese in traditional script"
       ],
       "Added": "2005-04-11",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "zh-Hant-SG"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "zh-Hant-TW",
       "Description": [
         "Taiwan Chinese in traditional script"
       ],
       "Added": "2005-04-11",
       "Scope": "None",
       "Comments": [],
-      "Prefix": [],
-      "Tag": "zh-Hant-TW"
+      "Prefix": []
     },
     {
       "Type": "Redundant",
+      "Tag": "zh-wuu",
       "Description": [
         "Shanghaiese or Wu"
       ],
@@ -105146,11 +105147,11 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "wuu",
-      "Tag": "zh-wuu"
+      "PreferredValue": "wuu"
     },
     {
       "Type": "Redundant",
+      "Tag": "zh-yue",
       "Description": [
         "Cantonese"
       ],
@@ -105159,8 +105160,7 @@
       "Deprecated": "2009-07-29",
       "Comments": [],
       "Prefix": [],
-      "PreferredValue": "yue",
-      "Tag": "zh-yue"
+      "PreferredValue": "yue"
     }
   ]
 }

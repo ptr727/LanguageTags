@@ -13,6 +13,14 @@ Code and Pipeline is on [GitHub](https://github.com/ptr727/LanguageTags)\
 Packages published on [NuGet](https://www.nuget.org/packages/ptr727.LanguageTags/)\
 ![NuGet](https://img.shields.io/nuget/v/ptr727.LanguageTags?logo=nuget)
 
+## Version History
+
+- v1.1:
+  - .NET 10 and AOT support.
+  - Refactored public surfaces to minimize internals exposure.
+- v1.0:
+  - Initial standalone release.
+
 ## Introduction
 
 This project serves two primary purposes:
@@ -106,36 +114,36 @@ This is mostly a convenience function and specific use cases should use specific
 
 ```csharp
 Iso6392Data iso6392 = Iso6392Data.Create();
-Iso6392Data.Record record = iso6392.Find("afr", false)
-// record.Part2B = afr
-// record.RefName = Afrikaans
-record = iso6392.Find("zulu", true)
-// record.Part2B = zul
-// record.RefName = Zulu
+Iso6392Record? record = iso6392.Find("afr", false);
+// record.Part2B = "afr"
+// record.RefName = "Afrikaans"
+record = iso6392.Find("zulu", true);
+// record.Part2B = "zul"
+// record.RefName = "Zulu"
 ```
 
 ```csharp
 Iso6393Data iso6393 = Iso6393Data.LoadData("iso6393");
-Iso6393Data.Record record = iso6393.Find("zh", false)
-// record.Id = zho
-// record.Part1 = zh
-// record.RefName = Chinese
-record = iso6392.Find("yue chinese", true)
-// record.Id = yue
-// record.RefName = Yue Chinese
+Iso6393Record? record = iso6393.Find("zh", false);
+// record.Id = "zho"
+// record.Part1 = "zh"
+// record.RefName = "Chinese"
+record = iso6393.Find("yue chinese", true);
+// record.Id = "yue"
+// record.RefName = "Yue Chinese"
 ```
 
 ```csharp
-Rfc5646 rfc5646 = Rfc5646.LoadJson("rfc5646.json");
-Rfc5646.Record record = rfc5646.Find("de", false)
-// record.SubTag = de
-// record.Description = German
-record = iso6392.Find("zh-cmn-Hant", false)
-// record.Tag = zh-cmn-Hant
-// record.Description = Mandarin Chinese (Traditional)
-record = iso6392.Find("Inuktitut in Canadian", true)
-// record.Tag = iu-Cans
-// record.Description = Inuktitut in Canadian Aboriginal Syllabic script
+Rfc5646Data rfc5646 = Rfc5646Data.LoadJson("rfc5646.json");
+Rfc5646Record? record = rfc5646.Find("de", false);
+// record.SubTag = "de"
+// record.Description[0] = "German"
+record = rfc5646.Find("zh-cmn-Hant", false);
+// record.Tag = "zh-cmn-Hant"
+// record.Description[0] = "Mandarin Chinese (Traditional)"
+record = rfc5646.Find("Inuktitut in Canadian", true);
+// record.Tag = "iu-Cans"
+// record.Description[0] = "Inuktitut in Canadian Aboriginal Syllabic script"
 ```
 
 ### Tag Conversion
@@ -146,15 +154,15 @@ If a match is not found the undetermined `und` tag will be returned.
 
 ```csharp
 LanguageLookup languageLookup = new();
-languageLookup.GetIetfFromIso("afr"); // af
-languageLookup.GetIetfFromIso("zho"); // zh
+string ietf = languageLookup.GetIetfFromIso("afr"); // "af"
+ietf = languageLookup.GetIetfFromIso("zho"); // "zh"
 ```
 
 ```csharp
 LanguageLookup languageLookup = new();
-languageLookup.GetIsoFromIetf("af"); // afr
-languageLookup.GetIsoFromIetf("zh-cmn-Hant"); // chi
-languageLookup.GetIsoFromIetf("cmn-Hant"); // chi
+string iso = languageLookup.GetIsoFromIetf("af"); // "afr"
+iso = languageLookup.GetIsoFromIetf("zh-cmn-Hant"); // "chi"
+iso = languageLookup.GetIsoFromIetf("cmn-Hant"); // "chi"
 ```
 
 ### Tag Matching
@@ -173,11 +181,11 @@ Examples:
 
 ```csharp
 LanguageLookup languageLookup = new();
-languageLookup.IsMatch("en", "en-US"); // true
-languageLookup.IsMatch("zh", "zh-cmn-Hant"); // true
-languageLookup.IsMatch("sr-Latn", "sr-Latn-RS"); // true
-languageLookup.IsMatch("zha", "zh-Hans"); // false
-languageLookup.IsMatch("zh-Hant", "zh-Hans"); // false
+bool match = languageLookup.IsMatch("en", "en-US"); // true
+match = languageLookup.IsMatch("zh", "zh-cmn-Hant"); // true
+match = languageLookup.IsMatch("sr-Latn", "sr-Latn-RS"); // true
+match = languageLookup.IsMatch("zha", "zh-Hans"); // false
+match = languageLookup.IsMatch("zh-Hant", "zh-Hans"); // false
 ```
 
 ### Tag Builder
@@ -190,39 +198,39 @@ Use the `Validate()` method to test for shape correctness. See [Tag Validation](
 The `Normalize()` method will build the tag and perform validation and normalization. See [Tag Normalization](#tag-normalization) for details.
 
 ```csharp
-LanguageTag languageTag = new LanguageTagBuilder()
-    .PrimaryLanguage("en")
+LanguageTag languageTag = LanguageTag.CreateBuilder()
+    .Language("en")
     .Script("latn")
     .Region("gb")
-    .Variant("boont")
-    .ExtensionsPrefix('r')
-    .ExtensionsAdd("extended")
-    .ExtensionsAdd("sequence")
+    .VariantAdd("boont")
+    .ExtensionAdd('r', ["extended", "sequence"])
     .PrivateUseAdd("private")
     .Build();
-languageTag.ToString(); // en-latn-gb-boont-r-extended-sequence-x-private
+string tag = languageTag.ToString(); // "en-latn-gb-boont-r-extended-sequence-x-private"
 ```
 
 ```csharp
-LanguageTag languageTag = new LanguageTagBuilder()
+LanguageTag languageTag = LanguageTag.CreateBuilder()
     .PrivateUseAddRange(["private", "use"])
     .Build();
-languageTag.ToString(); // x-private-use
+string tag = languageTag.ToString(); // "x-private-use"
 ```
 
 ```csharp
-LanguageTag languageTag = new LanguageTagBuilder()
+LanguageTag? languageTag = LanguageTag.CreateBuilder()
     .Language("ar")
-    .ExtendedLanguage("latn")
+    .ExtendedLanguage("arb")
+    .Script("latn")
     .Region("de")
-    .Variant("nedis")
+    .VariantAdd("nedis")
+    .VariantAdd("foobar")
     .Normalize();
-languageTag.ToString(); // arb-Latn-DE-nedis
+string tag = languageTag?.ToString(); // "arb-Latn-DE-foobar-nedis"
 ```
 
 ### Tag Parser
 
-The `LanguageTagParser` class `Parse()` method will parse the text form language tag and return a constructed `LanguageTag` class, or `null` in case of parsing failure.
+The `LanguageTag` class static `Parse()` method will parse the text form language tag and return a constructed `LanguageTag` object, or `null` in case of parsing failure.
 
 Parsing will validate all subtags for correctness in type, length, and position, but not value, and case will not be modified.
 
@@ -232,29 +240,29 @@ E.g. `en-gb-oed` -> `en-GB-oxendict`, `i-klingon` -> `tlh`.
 The `Normalize()` method will parse the text tag, and perform validation and normalization. See [Tag Normalization](#tag-normalization) for details.
 
 ```csharp
-LanguageTag languageTag = new LanguageTagParser()
-    .Parse("en-latn-gb-boont-r-extended-sequence-x-private");
-// languageTag.Language = en
-// languageTag.Script = latn
-// languageTag.Region = gb
-// languageTag.VariantList = [ boont ]
-// languageTag.ExtensionList = [ Prefix: r, TagList: [ extended, sequence ] ]
-// languageTag.PrivateUse = [ Prefix: x, TagList: [ private ] ]
-languageTag.ToString(); // en-latn-gb-boont-r-extended-sequence-x-private
+LanguageTag? languageTag = LanguageTag.Parse("en-latn-gb-boont-r-extended-sequence-x-private");
+// languageTag.Language = "en"
+// languageTag.Script = "latn"
+// languageTag.Region = "gb"
+// languageTag.Variants[0] = "boont"
+// languageTag.Extensions[0].Prefix = 'r'
+// languageTag.Extensions[0].Tags[0] = "extended"
+// languageTag.Extensions[0].Tags[1] = "sequence"
+// languageTag.PrivateUse.Tags[0] = "private"
+string tag = languageTag?.ToString(); // "en-latn-gb-boont-r-extended-sequence-x-private"
 ```
 
 ```csharp
-LanguageTag languageTag = new LanguageTagParser()
-    .Parse("en-gb-oed"); // Grandfathered
-// languageTag.Language = en
-// languageTag.Region = gb
-// languageTag.VariantList = [ oxendict ]
-languageTag.ToString(); // en-gb-oxendict
+LanguageTag? languageTag = LanguageTag.Parse("en-gb-oed"); // Grandfathered
+// languageTag.Language = "en"
+// languageTag.Region = "GB"
+// languageTag.Variants[0] = "oxendict"
+string tag = languageTag?.ToString(); // "en-GB-oxendict"
 ```
 
 ### Tag Normalization
 
-The `LanguageTagParser` class `Normalize()` method will convert tags to their canonical form.\
+The `LanguageTag` instance `Normalize()` method will convert tags to their canonical form.\
 See [RFC 5646 Section 4.5 for details](https://www.rfc-editor.org/rfc/rfc5646#section-4.5)
 
 Normalization includes the following:
@@ -277,35 +285,31 @@ Normalization includes the following:
   - Sort private use subtags by value.
 
 ```csharp
-languageTag = new LanguageTagBuilder()
+LanguageTag? languageTag = LanguageTag.CreateBuilder()
     .Language("en")
     .ExtensionAdd('b', ["ccc"]) // Add b before a to force a sort
     .ExtensionAdd('a', ["bbb", "aaa"]) // Add bbb before aaa to force a sort
     .PrivateUseAddRange(["ccc", "a"]) // Add ccc before a to force a sort
     .Normalize();
-languageTag.ToString(); // en-a-aaa-bbb-b-ccc-x-a-ccc
-
+string tag = languageTag?.ToString(); // "en-a-aaa-bbb-b-ccc-x-a-ccc"
 ```
 
 ```csharp
-LanguageTag languageTag = new LanguageTagParser()
-    .Normalize("en-latn-gb-boont-r-sequence-extended-x-private");
-languageTag.ToString(); // en-GB-boont-r-extended-sequence-x-private
+LanguageTag? languageTag = LanguageTag.ParseAndNormalize("en-latn-gb-boont-r-sequence-extended-x-private");
+string tag = languageTag?.ToString(); // "en-GB-boont-r-extended-sequence-x-private"
 ```
 
 ```csharp
-LanguageTag languageTag = new LanguageTagParser()
-    .Parse("ar-arb-latn-de-nedis-foobar");
-languageTag.ToString(); // ar-arb-latn-de-nedis-foobar
+LanguageTag? languageTag = LanguageTag.Parse("ar-arb-latn-de-nedis-foobar");
+string tag = languageTag?.ToString(); // "ar-arb-latn-de-nedis-foobar"
 
-LanguageTag normalizeTag = new LanguageTagParser()
-    .Normalize(languageTag);
-normalizeTag.ToString(); // arb-Latn-DE-foobar-nedis
+LanguageTag? normalizedTag = languageTag?.Normalize();
+string normalizedString = normalizedTag?.ToString(); // "arb-Latn-DE-foobar-nedis"
 ```
 
 ### Tag Validation
 
-The `LanguageTagParser` and `LanguageTag` class `Validate()` method will verify subtags for correctness.\
+The `LanguageTag` class `Validate()` method will verify subtags for correctness.\
 See [RFC 5646 Section 2.1](https://www.rfc-editor.org/rfc/rfc5646#section-2.1) and [RFC 5646 Section 2.2.9](https://www.rfc-editor.org/rfc/rfc5646#section-2.2.9) for details. Refer to [Tag Format](#tag-format) for a summary.
 
 Note that `LanguageTag` objects created by `Parse()` or `Normalize()` are already verified for form correctness during parsing, and `Validate()` is primarily of use when using the `LanguageTagBuilder` `Build()` method directly.
@@ -315,6 +319,16 @@ Validation includes the following:
 - Subtag shape correctness, see [Tag Format](#tag-format) for a summary.
 - No duplicate variants, extension prefixes, extension tags, or private tags.
 - No missing subtags.
+
+```csharp
+LanguageTag languageTag = LanguageTag.CreateBuilder()
+    .Language("en")
+    .Region("US")
+    .Build();
+bool isValid = languageTag.Validate(); // true
+// Or use the IsValid property
+isValid = languageTag.IsValid; // true
+```
 
 ## Testing
 

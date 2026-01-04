@@ -5,16 +5,22 @@ using System.Linq;
 
 namespace ptr727.LanguageTags;
 
+/// <summary>
+/// Provides language code lookup and conversion functionality between IETF and ISO standards.
+/// </summary>
 public class LanguageLookup
 {
-    // Undetermined
+    /// <summary>
+    /// The language code for undetermined languages ("und").
+    /// </summary>
     public const string Undetermined = "und";
 
     private readonly Iso6392Data _iso6392 = Iso6392Data.Create();
     private readonly Iso6393Data _iso6393 = Iso6393Data.Create();
     private readonly Rfc5646Data _rfc5646 = Rfc5646Data.Create();
+    private readonly List<(string ietf, string iso)> _overrides = [];
 
-    private static CultureInfo CreateCultureInfo(string languageTag)
+    private static CultureInfo? CreateCultureInfo(string languageTag)
     {
         // Cultures are created on the fly in .NET, we can't rely on an exception
         // RFC 5646 defines Zzzz as "Code for uncoded script"
@@ -42,8 +48,16 @@ public class LanguageLookup
         return null;
     }
 
-    public List<(string ietf, string iso)> Overrides { get; } = [];
+    /// <summary>
+    /// Gets the list of manual override mappings between IETF and ISO language codes.
+    /// </summary>
+    public IList<(string ietf, string iso)> Overrides => _overrides;
 
+    /// <summary>
+    /// Converts an ISO language code to its IETF BCP 47 equivalent.
+    /// </summary>
+    /// <param name="languageTag">The ISO language code to convert.</param>
+    /// <returns>The IETF BCP 47 language tag, or "und" if the conversion fails.</returns>
     public string GetIetfFromIso(string languageTag)
     {
         // Undetermined
@@ -53,7 +67,7 @@ public class LanguageLookup
         }
 
         // Manual overrides
-        (string ietf, string iso) match = Overrides.FirstOrDefault(item =>
+        (string ietf, string iso) match = _overrides.FirstOrDefault(item =>
             item.iso.Equals(languageTag, StringComparison.OrdinalIgnoreCase)
         );
         if (match != default)
@@ -62,14 +76,14 @@ public class LanguageLookup
         }
 
         // Find a matching subtag record
-        Rfc5646Data.Record subtag = _rfc5646.Find(languageTag, false);
+        Rfc5646Record? subtag = _rfc5646.Find(languageTag, false);
         if (subtag != null)
         {
-            return subtag.TagAny;
+            return subtag.TagValue;
         }
 
         // Find a matching ISO 639-3 record
-        Iso6393Data.Record iso6393 = _iso6393.Find(languageTag, false);
+        Iso6393Record? iso6393 = _iso6393.Find(languageTag, false);
         if (iso6393 != null)
         {
             // Find a matching subtag record from the ISO 639-3 or ISO 639-1 tag
@@ -77,12 +91,12 @@ public class LanguageLookup
             subtag ??= _rfc5646.Find(iso6393.Part1, false);
             if (subtag != null)
             {
-                return subtag.TagAny;
+                return subtag.TagValue;
             }
         }
 
         // Find a matching ISO 639-2 record
-        Iso6392Data.Record iso6392 = _iso6392.Find(languageTag, false);
+        Iso6392Record? iso6392 = _iso6392.Find(languageTag, false);
         if (iso6392 != null)
         {
             // Find a matching RFC 5646 record from the ISO 639-2 or ISO 639-1 tag
@@ -90,15 +104,20 @@ public class LanguageLookup
             subtag ??= _rfc5646.Find(iso6392.Part1, false);
             if (subtag != null)
             {
-                return subtag.TagAny;
+                return subtag.TagValue;
             }
         }
 
         // Try CultureInfo
-        CultureInfo cultureInfo = CreateCultureInfo(languageTag);
+        CultureInfo? cultureInfo = CreateCultureInfo(languageTag);
         return cultureInfo != null ? cultureInfo.IetfLanguageTag : Undetermined;
     }
 
+    /// <summary>
+    /// Converts an IETF BCP 47 language tag to its ISO equivalent.
+    /// </summary>
+    /// <param name="languageTag">The IETF BCP 47 language tag to convert.</param>
+    /// <returns>The ISO language code, or "und" if the conversion fails.</returns>
     public string GetIsoFromIetf(string languageTag)
     {
         // Undetermined
@@ -108,7 +127,7 @@ public class LanguageLookup
         }
 
         // Manual overrides
-        (string ietf, string iso) match = Overrides.FirstOrDefault(item =>
+        (string ietf, string iso) match = _overrides.FirstOrDefault(item =>
             item.ietf.Equals(languageTag, StringComparison.OrdinalIgnoreCase)
         );
         if (match != default)
@@ -119,12 +138,12 @@ public class LanguageLookup
         // TODO: Conditional parse and normalize before processing
 
         // Find a matching subtag record
-        Rfc5646Data.Record subtag = _rfc5646.Find(languageTag, false);
+        Rfc5646Record? subtag = _rfc5646.Find(languageTag, false);
         if (subtag != null)
         {
             // Use expanded form if Redundant, or just use TagAny
             // E.g. cmn-Hant -> zh-cmn-Hant
-            languageTag = subtag.TagAny;
+            languageTag = subtag.TagValue;
         }
 
         // TODO: Convert to use Parse()
@@ -136,23 +155,23 @@ public class LanguageLookup
         languageTag = parts[0];
 
         // Get ISO 639-3 record
-        Iso6393Data.Record iso6393 = _iso6393.Find(languageTag, false);
+        Iso6393Record? iso6393 = _iso6393.Find(languageTag, false);
         if (iso6393 != null)
         {
             // Return the Part 2B code
-            return iso6393.Part2B;
+            return iso6393.Part2B!;
         }
 
         // Get ISO 639-2 record
-        Iso6392Data.Record iso6392 = _iso6392.Find(languageTag, false);
+        Iso6392Record? iso6392 = _iso6392.Find(languageTag, false);
         if (iso6392 != null)
         {
             // Return the Part 2B code
-            return iso6392.Part2B;
+            return iso6392.Part2B!;
         }
 
         // Try cultureInfo
-        CultureInfo cultureInfo = CreateCultureInfo(languageTag);
+        CultureInfo? cultureInfo = CreateCultureInfo(languageTag);
         if (cultureInfo == null)
         {
             return Undetermined;
@@ -163,13 +182,23 @@ public class LanguageLookup
         if (iso6393 != null)
         {
             // Return the Part 2B code
-            return iso6393.Part2B;
+            return iso6393.Part2B!;
         }
         return Undetermined;
     }
 
+    /// <summary>
+    /// Determines whether a language tag matches or starts with the specified prefix.
+    /// </summary>
+    /// <param name="prefix">The prefix to match against.</param>
+    /// <param name="languageTag">The language tag to test.</param>
+    /// <returns>true if the language tag matches or starts with the prefix; otherwise, false.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="prefix"/> or <paramref name="languageTag"/> is null.</exception>
     public bool IsMatch(string prefix, string languageTag)
     {
+        ArgumentNullException.ThrowIfNull(prefix);
+        ArgumentNullException.ThrowIfNull(languageTag);
+
         // TODO: Conditional parse and normalize before processing
 
         // https://r12a.github.io/app-subtags/
@@ -200,14 +229,16 @@ public class LanguageLookup
             // E.g. cmn-Hant should be expanded to zh-cmn-Hant else zh will not match
 
             // Find a matching subtag record
-            Rfc5646Data.Record subtag = _rfc5646.Find(languageTag, false);
+            Rfc5646Record? subtag = _rfc5646.Find(languageTag, false);
             if (subtag != null)
             {
                 // If the subtag is different then rematch
-                if (!string.Equals(languageTag, subtag.TagAny, StringComparison.OrdinalIgnoreCase))
+                if (
+                    !string.Equals(languageTag, subtag.TagValue, StringComparison.OrdinalIgnoreCase)
+                )
                 {
-                    // rematch
-                    languageTag = subtag.TagAny;
+                    // Rematch
+                    languageTag = subtag.TagValue;
                     continue;
                 }
             }
@@ -215,5 +246,22 @@ public class LanguageLookup
             // No match
             return false;
         }
+    }
+
+    /// <summary>
+    /// Determines if two language tags are equivalent (case-insensitive).
+    /// </summary>
+    public static bool AreEquivalent(string tag1, string tag2) =>
+        string.Equals(tag1, tag2, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Normalizes and compares two language tags for equivalence.
+    /// </summary>
+    public static bool AreEquivalentNormalized(string tag1, string tag2)
+    {
+        LanguageTag? parsed1 = LanguageTag.Parse(tag1)?.Normalize();
+        LanguageTag? parsed2 = LanguageTag.Parse(tag2)?.Normalize();
+        return parsed1?.ToString().Equals(parsed2?.ToString(), StringComparison.OrdinalIgnoreCase)
+            ?? false;
     }
 }

@@ -1,0 +1,28 @@
+<Solution>
+    <Folder Name="/GitHub/">
+        <File Path=".github/dependabot.yml" />
+        <File Path=".github/workflows/merge-bot-pr.yml" />
+        <File Path=".github/workflows/publish-release.yml" />
+        <File Path=".github/workflows/update-languagedata.yml" />
+    </Folder>
+    <Folder Name="/LanguageData/">
+        <File Path="LanguageData/iso6392" />
+        <File Path="LanguageData/iso6392.json" />
+        <File Path="LanguageData/iso6393" />
+        <File Path="LanguageData/iso6393.json" />
+        <File Path="LanguageData/rfc5646" />
+        <File Path="LanguageData/rfc5646.json" />
+    </Folder>
+    <Folder Name="/Solution Items/">
+        <File Path=".gitattributes" />
+        <File Path=".gitignore" />
+        <File Path="LICENSE" />
+        <File Path="README.md" />
+        <File Path="version.json" />
+    </Folder>
+    <Project Path="LanguageTags/LanguageTags.csproj" />
+    <Project Path="LanguageTagsCreate/LanguageTagsCreate.csproj" />
+    <Project Path="LanguageTagsTests/LanguageTagsTests.csproj">
+        <BuildDependency Project="LanguageTags/LanguageTags.csproj" />
+    </Project>
+</Solution>

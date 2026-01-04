@@ -6,11 +6,11 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": ".Net Build",
-            "program": "${workspaceFolder}/LanguageTagsCreate/bin/Debug/net9.0/LanguageTagsCreate.dll",
+            "program": "${workspaceFolder}/LanguageTagsCreate/bin/Debug/net10.0/LanguageTagsCreate.dll",
             "args": [
                 "${workspaceFolder}",
             ],
-            "cwd": "${workspaceFolder}/LanguageTagsCreate/bin/Debug/net9.0",
+            "cwd": "${workspaceFolder}/LanguageTagsCreate/bin/Debug/net10.0",
             "console": "internalConsole",
             "stopAtEntry": false
         }

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -11,12 +10,21 @@ using System.Text.Json.Serialization;
 
 namespace ptr727.LanguageTags;
 
+/// <summary>
+/// Provides access to RFC 5646 / BCP 47 language subtag registry data.
+/// </summary>
 public partial class Rfc5646Data
 {
-    public const string DataUri =
+    internal const string DataUri =
         "https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry";
-    public const string DataFileName = "rfc5646";
+    internal const string DataFileName = "rfc5646";
 
+    /// <summary>
+    /// Loads RFC 5646 data from a file.
+    /// </summary>
+    /// <param name="fileName">The path to the data file.</param>
+    /// <returns>The loaded <see cref="Rfc5646Data"/>.</returns>
+    /// <exception cref="InvalidDataException">Thrown when the file contains invalid data.</exception>
     public static Rfc5646Data LoadData(string fileName)
     {
         // File Format
@@ -25,7 +33,7 @@ public partial class Rfc5646Data
         // https://www.w3.org/International/articles/language-tags
         // https://datatracker.ietf.org/doc/html/draft-phillips-record-jar-02
 
-        List<Record> recordList = [];
+        List<Rfc5646Record> recordList = [];
         Parser parser = new();
         using StreamReader lineReader = new(File.OpenRead(fileName));
 
@@ -43,20 +51,27 @@ public partial class Rfc5646Data
         return new Rfc5646Data { FileDate = fileDate, RecordList = [.. recordList] };
     }
 
-    public static Rfc5646Data LoadJson(string fileName) =>
-        JsonSerializer.Deserialize<Rfc5646Data>(
+    /// <summary>
+    /// Loads RFC 5646 data from a JSON file.
+    /// </summary>
+    /// <param name="fileName">The path to the JSON file.</param>
+    /// <returns>The loaded <see cref="Rfc5646Data"/> or null if deserialization fails.</returns>
+    public static Rfc5646Data? LoadJson(string fileName) =>
+        JsonSerializer.Deserialize(
             File.ReadAllText(fileName),
-            JsonOptions.JsonReadOptions
+            LanguageJsonContext.Default.Rfc5646Data
         );
 
-    public static void SaveJson(string fileName, Rfc5646Data rfc5646) =>
+    internal static void SaveJson(string fileName, Rfc5646Data rfc5646) =>
         File.WriteAllText(
             fileName,
-            JsonSerializer.Serialize(rfc5646, JsonOptions.JsonWriteOptions)
+            JsonSerializer.Serialize(rfc5646, LanguageJsonContext.Default.Rfc5646Data)
         );
 
-    public static void GenCode(string fileName, Rfc5646Data rfc5646)
+    internal static void GenCode(string fileName, Rfc5646Data rfc5646)
     {
+        ArgumentNullException.ThrowIfNull(rfc5646);
+
         StringBuilder stringBuilder = new();
         _ = stringBuilder
             .Append(
@@ -73,128 +88,49 @@ public partial class Rfc5646Data
                     public static Rfc5646Data Create() =>
                         new()
                         {
-                            FileDate = new DateOnly({{rfc5646.FileDate.Year}}, {{rfc5646.FileDate.Month}}, {{rfc5646.FileDate.Day}}),
+                            FileDate = {{LanguageSchema.GetCodeGenString(rfc5646.FileDate)}},
                             RecordList =
                             [
                 """
             )
             .Append("\r\n");
 
-        foreach (Record record in rfc5646.RecordList)
+        foreach (Rfc5646Record record in rfc5646.RecordList)
         {
             _ = stringBuilder
                 .Append(
                     CultureInfo.InvariantCulture,
                     $$"""
-                                    new()
-                                    {
-                                        Type = RecordType.{{record.Type.ToString()}},
+                                   new()
+                                   {
+                                       Type = {{LanguageSchema.GetCodeGenString(record.Type)}},
+                                       SubTag = {{LanguageSchema.GetCodeGenString(record.SubTag)}},
+                                       Added = {{LanguageSchema.GetCodeGenString(record.Added)}},
+                                       SuppressScript = {{LanguageSchema.GetCodeGenString(
+                        record.SuppressScript
+                    )}},
+                                       Scope = {{LanguageSchema.GetCodeGenString(record.Scope)}},
+                                       MacroLanguage = {{LanguageSchema.GetCodeGenString(
+                        record.MacroLanguage
+                    )}},
+                                       Deprecated = {{LanguageSchema.GetCodeGenString(
+                        record.Deprecated
+                    )}},
+                                       PreferredValue = {{LanguageSchema.GetCodeGenString(
+                        record.PreferredValue
+                    )}},
+                                       Tag = {{LanguageSchema.GetCodeGenString(record.Tag)}},
+                                       Description = {{LanguageSchema.GetCodeGenString(
+                        record.Description
+                    )}},
+                                       Comments = {{LanguageSchema.GetCodeGenString(
+                        record.Comments
+                    )}},
+                                       Prefix = {{LanguageSchema.GetCodeGenString(record.Prefix)}},
+                                   },
                     """
                 )
                 .Append("\r\n");
-            if (!string.IsNullOrEmpty(record.SubTag))
-            {
-                _ = stringBuilder
-                    .Append(
-                        CultureInfo.InvariantCulture,
-                        $"                    SubTag = \"{record.SubTag}\","
-                    )
-                    .Append("\r\n");
-            }
-            if (record.Added != DateOnly.MinValue)
-            {
-                _ = stringBuilder
-                    .Append(
-                        CultureInfo.InvariantCulture,
-                        $"                    Added = new DateOnly({record.Added.Year}, {record.Added.Month}, {record.Added.Day}),"
-                    )
-                    .Append("\r\n");
-            }
-            if (!string.IsNullOrEmpty(record.SuppressScript))
-            {
-                _ = stringBuilder
-                    .Append(
-                        CultureInfo.InvariantCulture,
-                        $"                    SuppressScript = \"{record.SuppressScript}\","
-                    )
-                    .Append("\r\n");
-            }
-            if (record.Scope != RecordScope.None)
-            {
-                _ = stringBuilder
-                    .Append(
-                        CultureInfo.InvariantCulture,
-                        $"                    Scope = RecordScope.{record.Scope.ToString()},"
-                    )
-                    .Append("\r\n");
-            }
-            if (!string.IsNullOrEmpty(record.MacroLanguage))
-            {
-                _ = stringBuilder
-                    .Append(
-                        CultureInfo.InvariantCulture,
-                        $"                    MacroLanguage = \"{record.MacroLanguage}\","
-                    )
-                    .Append("\r\n");
-            }
-            if (record.Deprecated != DateOnly.MinValue)
-            {
-                _ = stringBuilder
-                    .Append(
-                        CultureInfo.InvariantCulture,
-                        $"                    Deprecated = new DateOnly({record.Deprecated.Year}, {record.Deprecated.Month}, {record.Deprecated.Day}),"
-                    )
-                    .Append("\r\n");
-            }
-            if (!string.IsNullOrEmpty(record.PreferredValue))
-            {
-                _ = stringBuilder
-                    .Append(
-                        CultureInfo.InvariantCulture,
-                        $"                    PreferredValue = \"{record.PreferredValue}\","
-                    )
-                    .Append("\r\n");
-            }
-            if (!string.IsNullOrEmpty(record.Tag))
-            {
-                _ = stringBuilder
-                    .Append(
-                        CultureInfo.InvariantCulture,
-                        $"                    Tag = \"{record.Tag}\","
-                    )
-                    .Append("\r\n");
-            }
-            _ = stringBuilder
-                .Append(
-                    "                    Description = ["
-                        + string.Join(
-                            ", ",
-                            record.Description.Select(item => $"@\"{item.Replace("\"", "\"\"")}\"")
-                        )
-                        + "],"
-                )
-                .Append("\r\n");
-            _ = stringBuilder
-                .Append(
-                    "                    Comments = ["
-                        + string.Join(
-                            ", ",
-                            record.Comments.Select(item => $"@\"{item.Replace("\"", "\"\"")}\"")
-                        )
-                        + "],"
-                )
-                .Append("\r\n");
-            _ = stringBuilder
-                .Append(
-                    "                    Prefix = ["
-                        + string.Join(
-                            ", ",
-                            record.Prefix.Select(item => $"@\"{item.Replace("\"", "\"\"")}\"")
-                        )
-                        + "],"
-                )
-                .Append("\r\n");
-            _ = stringBuilder.Append("                },").Append("\r\n");
         }
         _ = stringBuilder
             .Append(
@@ -206,10 +142,10 @@ public partial class Rfc5646Data
             )
             .Append("\r\n");
 
-        Iso6392Data.WriteFile(fileName, stringBuilder.ToString());
+        LanguageSchema.WriteFile(fileName, stringBuilder.ToString());
     }
 
-    private sealed class Parser
+    internal sealed class Parser
     {
         private readonly List<KeyValuePair<string, string>> _attributeList = [];
 
@@ -221,7 +157,7 @@ public partial class Rfc5646Data
             while (true)
             {
                 // Read next line
-                string line = lineReader.ReadLine();
+                string? line = lineReader.ReadLine();
                 if (string.IsNullOrEmpty(line))
                 {
                     // End of file
@@ -235,7 +171,12 @@ public partial class Rfc5646Data
                 }
 
                 // First line should not be multiline
-                Debug.Assert(!line.StartsWith("  ", StringComparison.Ordinal));
+                if (line.StartsWith("  ", StringComparison.Ordinal))
+                {
+                    throw new InvalidDataException(
+                        $"Invalid data found in RFC 5646 record: {line}"
+                    );
+                }
 
                 // Multiline record starts with two spaces
                 // Peek at the next line an look for a space
@@ -251,13 +192,21 @@ public partial class Rfc5646Data
                     }
 
                     // Append the next line to the current line
-                    string multiLine = lineReader.ReadLine();
-                    Debug.Assert(multiLine.StartsWith("  ", StringComparison.Ordinal));
+                    string? multiLine = lineReader.ReadLine();
+                    if (
+                        string.IsNullOrEmpty(multiLine)
+                        || !multiLine.StartsWith("  ", StringComparison.Ordinal)
+                    )
+                    {
+                        throw new InvalidDataException(
+                            $"Invalid data found in RFC 5646 record: {line}"
+                        );
+                    }
                     line = $"{line.Trim()} {multiLine.Trim()}";
                 }
 
                 // Create attribute pair
-                int divider = line.IndexOf(':');
+                int divider = line.IndexOf(':', StringComparison.Ordinal);
                 string key = line[..divider];
                 string value = line[(divider + 1)..].Trim();
 
@@ -268,185 +217,172 @@ public partial class Rfc5646Data
             return !eof;
         }
 
-        public Record GetRecord()
+        public Rfc5646Record GetRecord()
         {
             // Create a mutable tuple as placeholder
             (
-                RecordType Type,
-                string SubTag,
+                Rfc5646Record.RecordType Type,
+                string? SubTag,
                 List<string> Description,
-                DateOnly Added,
-                string SuppressScript,
-                RecordScope Scope,
-                string MacroLanguage,
-                DateOnly Deprecated,
+                DateOnly? Added,
+                string? SuppressScript,
+                Rfc5646Record.RecordScope Scope,
+                string? MacroLanguage,
+                DateOnly? Deprecated,
                 List<string> Comments,
                 List<string> Prefix,
-                string PreferredValue,
-                string Tag
+                string? PreferredValue,
+                string? Tag
             ) record = (
-                Type: RecordType.None,
+                Type: Rfc5646Record.RecordType.None,
                 SubTag: null,
                 Description: [],
-                Added: DateOnly.MinValue,
+                Added: null,
                 SuppressScript: null,
-                Scope: RecordScope.None,
+                Scope: Rfc5646Record.RecordScope.None,
                 MacroLanguage: null,
-                Deprecated: DateOnly.MinValue,
+                Deprecated: null,
                 Comments: [],
                 Prefix: [],
                 PreferredValue: null,
                 Tag: null
             );
 
-            Debug.Assert(_attributeList.Count > 0);
+            if (_attributeList.Count == 0)
+            {
+                throw new InvalidDataException("No data found in RFC 5646 record.");
+            }
             foreach (KeyValuePair<string, string> pair in _attributeList)
             {
-                switch (pair.Key.ToLowerInvariant())
+                switch (pair.Key.ToUpperInvariant())
                 {
-                    case "type":
+                    case "TYPE":
                         record.Type = TypeFromString(pair.Value);
                         break;
-                    case "subtag":
+                    case "SUBTAG":
                         record.SubTag = pair.Value;
                         break;
-                    case "description":
+                    case "DESCRIPTION":
                         record.Description.Add(pair.Value);
                         break;
-                    case "added":
+                    case "ADDED":
                         record.Added = DateFromString(pair.Value);
                         break;
-                    case "suppress-script":
+                    case "SUPPRESS-SCRIPT":
                         record.SuppressScript = pair.Value;
                         break;
-                    case "scope":
+                    case "SCOPE":
                         record.Scope = ScopeFromString(pair.Value);
                         break;
-                    case "macrolanguage":
+                    case "MACROLANGUAGE":
                         record.MacroLanguage = pair.Value;
                         break;
-                    case "deprecated":
+                    case "DEPRECATED":
                         record.Deprecated = DateFromString(pair.Value);
                         break;
-                    case "comments":
+                    case "COMMENTS":
                         record.Comments.Add(pair.Value);
                         break;
-                    case "prefix":
+                    case "PREFIX":
                         record.Prefix.Add(pair.Value);
                         break;
-                    case "preferred-value":
+                    case "PREFERRED-VALUE":
                         record.PreferredValue = pair.Value;
                         break;
-                    case "tag":
+                    case "TAG":
                         record.Tag = pair.Value;
                         break;
                     default:
-                        throw new NotImplementedException();
+                        throw new InvalidDataException(
+                            $"Invalid data found in RFC 5646 record: {pair.Key}"
+                        );
                 }
             }
-            Debug.Assert(record.Type != RecordType.None);
-            Debug.Assert(!string.IsNullOrEmpty(record.Tag) || !string.IsNullOrEmpty(record.SubTag));
-            return new Record
-            {
-                Type = record.Type,
-                SubTag = record.SubTag,
-                Description = [.. record.Description],
-                Added = record.Added,
-                SuppressScript = record.SuppressScript,
-                Scope = record.Scope,
-                MacroLanguage = record.MacroLanguage,
-                Deprecated = record.Deprecated,
-                Comments = [.. record.Comments],
-                Prefix = [.. record.Prefix],
-                PreferredValue = record.PreferredValue,
-                Tag = record.Tag,
-            };
+            return
+                record.Type == Rfc5646Record.RecordType.None
+                || (string.IsNullOrEmpty(record.Tag) && string.IsNullOrEmpty(record.SubTag))
+                || record.Description.Count == 0
+                ? throw new InvalidDataException("Invalid data found in RFC 5646 record")
+                : new Rfc5646Record
+                {
+                    Type = record.Type,
+                    SubTag = record.SubTag,
+                    Description = [.. record.Description],
+                    Added = record.Added,
+                    SuppressScript = record.SuppressScript,
+                    Scope = record.Scope,
+                    MacroLanguage = record.MacroLanguage,
+                    Deprecated = record.Deprecated,
+                    Comments = [.. record.Comments],
+                    Prefix = [.. record.Prefix],
+                    PreferredValue = record.PreferredValue,
+                    Tag = record.Tag,
+                };
         }
 
         public DateOnly GetFileDate()
         {
+            // First attribute is the date
             KeyValuePair<string, string> pair = _attributeList.First();
-            Debug.Assert(pair.Key.Equals("File-Date", StringComparison.Ordinal));
-            return DateFromString(pair.Value);
+            return !pair.Key.Equals("File-Date", StringComparison.Ordinal)
+                ? throw new InvalidDataException(
+                    $"Invalid data found in RFC 5646 record: {pair.Key}"
+                )
+                : DateFromString(pair.Value);
         }
 
         private static DateOnly DateFromString(string value) =>
             DateOnly.ParseExact(value, "yyyy-MM-dd", CultureInfo.InvariantCulture);
     }
 
-    public enum RecordType
-    {
-        None,
-        Language,
-        ExtLanguage,
-        Script,
-        Variant,
-        Grandfathered,
-        Region,
-        Redundant,
-    }
+    /// <summary>
+    /// Gets the file date of the language subtag registry.
+    /// </summary>
+    public required DateOnly? FileDate { get; init; }
 
-    public enum RecordScope
-    {
-        None,
-        MacroLanguage,
-        Collection,
-        Special,
-        PrivateUse,
-    }
+    /// <summary>
+    /// Gets the collection of RFC 5646 language subtag records.
+    /// </summary>
+    public ImmutableArray<Rfc5646Record> RecordList { get; init; }
 
-    public record Record
-    {
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public RecordType Type { get; init; }
-        public string SubTag { get; init; }
-        public ImmutableArray<string> Description { get; init; }
-        public DateOnly Added { get; init; }
-        public string SuppressScript { get; init; }
-
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public RecordScope Scope { get; init; }
-        public string MacroLanguage { get; init; }
-        public DateOnly Deprecated { get; init; }
-        public ImmutableArray<string> Comments { get; init; }
-        public ImmutableArray<string> Prefix { get; init; }
-        public string PreferredValue { get; init; }
-        public string Tag { get; init; }
-
-        [JsonIgnore]
-        public string TagAny => string.IsNullOrEmpty(SubTag) ? Tag : SubTag;
-    }
-
-    public DateOnly FileDate { get; init; }
-    public ImmutableArray<Record> RecordList { get; init; }
-
-    private static RecordType TypeFromString(string value) =>
-        value.ToLowerInvariant() switch
+    private static Rfc5646Record.RecordType TypeFromString(string value) =>
+        value.ToUpperInvariant() switch
         {
-            "language" => RecordType.Language,
-            "extlang" => RecordType.ExtLanguage,
-            "script" => RecordType.Script,
-            "variant" => RecordType.Variant,
-            "grandfathered" => RecordType.Grandfathered,
-            "region" => RecordType.Region,
-            "redundant" => RecordType.Redundant,
-            _ => throw new NotImplementedException(),
+            "LANGUAGE" => Rfc5646Record.RecordType.Language,
+            "EXTLANG" => Rfc5646Record.RecordType.ExtLanguage,
+            "SCRIPT" => Rfc5646Record.RecordType.Script,
+            "VARIANT" => Rfc5646Record.RecordType.Variant,
+            "GRANDFATHERED" => Rfc5646Record.RecordType.Grandfathered,
+            "REGION" => Rfc5646Record.RecordType.Region,
+            "REDUNDANT" => Rfc5646Record.RecordType.Redundant,
+            _ => throw new InvalidDataException($"Invalid data found in RFC 5646 record: {value}"),
         };
 
-    private static RecordScope ScopeFromString(string value) =>
-        value.ToLowerInvariant() switch
+    private static Rfc5646Record.RecordScope ScopeFromString(string value) =>
+        value.ToUpperInvariant() switch
         {
-            "macrolanguage" => RecordScope.MacroLanguage,
-            "collection" => RecordScope.Collection,
-            "special" => RecordScope.Special,
-            "private-use" => RecordScope.PrivateUse,
-            _ => throw new NotImplementedException(),
+            "MACROLANGUAGE" => Rfc5646Record.RecordScope.MacroLanguage,
+            "COLLECTION" => Rfc5646Record.RecordScope.Collection,
+            "SPECIAL" => Rfc5646Record.RecordScope.Special,
+            "PRIVATE-USE" => Rfc5646Record.RecordScope.PrivateUse,
+            _ => throw new InvalidDataException($"Invalid data found in RFC 5646 record: {value}"),
         };
 
-    public Record Find(string languageTag, bool includeDescription)
+    /// <summary>
+    /// Finds a language subtag record by tag, subtag, preferred value, or description.
+    /// </summary>
+    /// <param name="languageTag">The language tag, subtag, or description to search for.</param>
+    /// <param name="includeDescription">If true, searches in the description field; otherwise, only searches tags and subtags.</param>
+    /// <returns>The matching <see cref="Rfc5646Record"/> or null if not found.</returns>
+    public Rfc5646Record? Find(string? languageTag, bool includeDescription)
     {
+        if (string.IsNullOrEmpty(languageTag))
+        {
+            return null;
+        }
+
         // Find the matching language entry
-        Record record = null;
+        Rfc5646Record? record = null;
 
         // Tag
         record = RecordList.FirstOrDefault(item =>
@@ -507,4 +443,129 @@ public partial class Rfc5646Data
         // Not found
         return null;
     }
+}
+
+/// <summary>
+/// Represents a record from the RFC 5646 / BCP 47 language subtag registry.
+/// </summary>
+public record Rfc5646Record
+{
+    /// <summary>
+    /// Defines the type of language subtag record.
+    /// </summary>
+    public enum RecordType
+    {
+        /// <summary>No type specified.</summary>
+        None,
+
+        /// <summary>Primary language subtag.</summary>
+        Language,
+
+        /// <summary>Extended language subtag.</summary>
+        ExtLanguage,
+
+        /// <summary>Script subtag (ISO 15924).</summary>
+        Script,
+
+        /// <summary>Variant subtag.</summary>
+        Variant,
+
+        /// <summary>Grandfathered tag.</summary>
+        Grandfathered,
+
+        /// <summary>Region subtag (ISO 3166-1 or UN M.49).</summary>
+        Region,
+
+        /// <summary>Redundant tag.</summary>
+        Redundant,
+    }
+
+    /// <summary>
+    /// Defines the scope of a language subtag.
+    /// </summary>
+    public enum RecordScope
+    {
+        /// <summary>No scope specified.</summary>
+        None,
+
+        /// <summary>Macrolanguage scope.</summary>
+        MacroLanguage,
+
+        /// <summary>Collection scope.</summary>
+        Collection,
+
+        /// <summary>Special scope.</summary>
+        Special,
+
+        /// <summary>Private use scope.</summary>
+        PrivateUse,
+    }
+
+    /// <summary>
+    /// Gets the type of this record (Language, Script, Region, etc.).
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter<RecordType>))]
+    public RecordType Type { get; init; }
+
+    /// <summary>
+    /// Gets the complete tag for grandfathered or redundant entries.
+    /// </summary>
+    public string? Tag { get; init; }
+
+    /// <summary>
+    /// Gets the subtag value (for language, script, region, variant, or extended language).
+    /// </summary>
+    public string? SubTag { get; init; }
+
+    /// <summary>
+    /// Gets the human-readable description(s) of this subtag.
+    /// </summary>
+    public ImmutableArray<string> Description { get; init; }
+
+    /// <summary>
+    /// Gets the date this subtag was added to the registry.
+    /// </summary>
+    public DateOnly? Added { get; init; }
+
+    /// <summary>
+    /// Gets the script that should be suppressed when used with this language.
+    /// </summary>
+    public string? SuppressScript { get; init; }
+
+    /// <summary>
+    /// Gets the scope of this subtag (macrolanguage, collection, special, or private use).
+    /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter<RecordScope>))]
+    public RecordScope Scope { get; init; }
+
+    /// <summary>
+    /// Gets the macrolanguage this subtag belongs to.
+    /// </summary>
+    public string? MacroLanguage { get; init; }
+
+    /// <summary>
+    /// Gets the date this subtag was deprecated (if applicable).
+    /// </summary>
+    public DateOnly? Deprecated { get; init; }
+
+    /// <summary>
+    /// Gets additional comments about this subtag.
+    /// </summary>
+    public ImmutableArray<string> Comments { get; init; }
+
+    /// <summary>
+    /// Gets the prefix values that constrain where this subtag can be used.
+    /// </summary>
+    public ImmutableArray<string> Prefix { get; init; }
+
+    /// <summary>
+    /// Gets the preferred value to use instead of this subtag (for deprecated tags).
+    /// </summary>
+    public string? PreferredValue { get; init; }
+
+    /// <summary>
+    /// Gets either the Tag or SubTag value, whichever is set.
+    /// </summary>
+    [JsonIgnore]
+    public string TagValue => string.IsNullOrEmpty(SubTag) ? Tag! : SubTag!;
 }

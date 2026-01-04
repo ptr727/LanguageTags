@@ -3,10 +3,8 @@ using Xunit;
 
 namespace ptr727.LanguageTags.Tests;
 
-public class LanguageTagBuilderTests(Fixture fixture) : IClassFixture<Fixture>
+public sealed class LanguageTagBuilderTests
 {
-    private readonly Fixture _fixture = fixture;
-
     [Fact]
     public void Build_Pass()
     {
@@ -66,7 +64,7 @@ public class LanguageTagBuilderTests(Fixture fixture) : IClassFixture<Fixture>
     public void Normalize_Pass()
     {
         // en-Latn-GB-boont-r-extended-sequence-x-private
-        LanguageTag languageTag = new LanguageTagBuilder()
+        LanguageTag? languageTag = new LanguageTagBuilder()
             .Language("en")
             .Script("latn")
             .Region("gb")
@@ -74,11 +72,13 @@ public class LanguageTagBuilderTests(Fixture fixture) : IClassFixture<Fixture>
             .ExtensionAdd('r', ["extended", "sequence"])
             .PrivateUseAdd("private")
             .Normalize();
+        _ = languageTag.Should().NotBeNull();
         _ = languageTag.Validate().Should().BeTrue();
         _ = languageTag.ToString().Should().Be("en-GB-boont-r-extended-sequence-x-private");
 
         // sr-Latn
         languageTag = new LanguageTagBuilder().Language("sr").Script("latn").Normalize();
+        _ = languageTag.Should().NotBeNull();
         _ = languageTag.Validate().Should().BeTrue();
         _ = languageTag.ToString().Should().Be("sr-Latn");
 
@@ -89,6 +89,7 @@ public class LanguageTagBuilderTests(Fixture fixture) : IClassFixture<Fixture>
             .ExtensionAdd('a', ["bbb", "aaa"]) // Add bbb before aaa to force a sort
             .PrivateUseAddRange(["ccc", "a"]) // Add ccc before a to force a sort
             .Normalize();
+        _ = languageTag.Should().NotBeNull();
         _ = languageTag.Validate().Should().BeTrue();
         _ = languageTag.ToString().Should().Be("en-a-aaa-bbb-b-ccc-x-a-ccc");
     }

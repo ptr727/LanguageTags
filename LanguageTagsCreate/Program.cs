@@ -10,19 +10,25 @@ using Serilog.Sinks.SystemConsole.Themes;
 
 namespace ptr727.LanguageTags.Create;
 
-public static class Program
+internal static class Program
 {
     private const string LanguageDataDirectory = "LanguageData";
     private const string LanguageTagsDirectory = "LanguageTags";
 
-    private static HttpClient s_httpClient;
+    private static HttpClient? s_httpClient;
 
     private static async Task DownloadFileAsync(Uri uri, string fileName)
     {
         Log.Information("Downloading \"{Uri}\" to \"{FileName}\" ...", uri.ToString(), fileName);
-        await using Stream httpStream = await GetHttpClient().GetStreamAsync(uri);
-        await using FileStream fileStream = File.Create(fileName);
-        await httpStream.CopyToAsync(fileStream);
+        Stream httpStream = await GetHttpClient().GetStreamAsync(uri).ConfigureAwait(false);
+        await using (httpStream.ConfigureAwait(false))
+        {
+            FileStream fileStream = File.Create(fileName);
+            await using (fileStream.ConfigureAwait(false))
+            {
+                await httpStream.CopyToAsync(fileStream).ConfigureAwait(false);
+            }
+        }
     }
 
     private static HttpClient GetHttpClient()
@@ -34,14 +40,14 @@ public static class Program
         s_httpClient = new() { Timeout = TimeSpan.FromSeconds(120) };
         s_httpClient.DefaultRequestHeaders.UserAgent.Add(
             new ProductInfoHeaderValue(
-                Assembly.GetExecutingAssembly().GetName().Name,
-                Assembly.GetExecutingAssembly().GetName().Version.ToString()
+                Assembly.GetExecutingAssembly().GetName().Name!,
+                Assembly.GetExecutingAssembly().GetName().Version?.ToString()
             )
         );
         return s_httpClient;
     }
 
-    public static async Task<int> Main(string[] args)
+    internal static async Task<int> Main(string[] args)
     {
         Log.Logger = new LoggerConfiguration()
             .WriteTo.Console(
@@ -63,9 +69,7 @@ public static class Program
         }
         else
         {
-            Assembly entryAssembly = Assembly.GetEntryAssembly();
-            string assemblyDirectory = Path.GetDirectoryName(entryAssembly.Location);
-            rootDirectory = Path.GetFullPath(assemblyDirectory);
+            rootDirectory = Path.GetFullPath(AppContext.BaseDirectory);
         }
 
         // Code directory
@@ -90,19 +94,22 @@ public static class Program
         Log.Information("Downloading all language tag data files ...");
         Log.Information("Downloading ISO 639-2 data ...");
         await DownloadFileAsync(
-            new Uri(Iso6392Data.DataUri),
-            Path.Combine(dataDirectory, Iso6392Data.DataFileName)
-        );
+                new Uri(Iso6392Data.DataUri),
+                Path.Combine(dataDirectory, Iso6392Data.DataFileName)
+            )
+            .ConfigureAwait(false);
         Log.Information("Downloading ISO 639-3 data ...");
         await DownloadFileAsync(
-            new Uri(Iso6393Data.DataUri),
-            Path.Combine(dataDirectory, Iso6393Data.DataFileName)
-        );
+                new Uri(Iso6393Data.DataUri),
+                Path.Combine(dataDirectory, Iso6393Data.DataFileName)
+            )
+            .ConfigureAwait(false);
         Log.Information("Downloading RFC 5646 data ...");
         await DownloadFileAsync(
-            new Uri(Rfc5646Data.DataUri),
-            Path.Combine(dataDirectory, Rfc5646Data.DataFileName)
-        );
+                new Uri(Rfc5646Data.DataUri),
+                Path.Combine(dataDirectory, Rfc5646Data.DataFileName)
+            )
+            .ConfigureAwait(false);
         Log.Information("Language tag data files downloaded successfully.");
 
         // Convert data files to JSON

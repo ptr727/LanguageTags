@@ -35,6 +35,7 @@ jobs:
       - name: Format code
         run: |
           dotnet tool restore
+          dotnet husky install
           dotnet csharpier format --log-level=debug .
           git status
 

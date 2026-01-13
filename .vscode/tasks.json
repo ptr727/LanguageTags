@@ -13,10 +13,17 @@
     "tasks": [
         {
             "label": ".Net Build",
-            "type": "dotnet",
-            "task": "build",
+            "type": "process",
+            "command": "dotnet",
+            "args": [
+                "build",
+                "${workspaceFolder}",
+                "--verbosity=diagnostic"
+            ],
             "group": "build",
-            "problemMatcher": ["$msCompile"],
+            "problemMatcher": [
+                "$msCompile"
+            ],
             "presentation": {
                 "showReuseMessage": false,
                 "clear": false
@@ -40,7 +47,10 @@
                 "showReuseMessage": false,
                 "clear": false
             },
-            "dependsOn": [".Net Build"]
+            "dependsOn": [
+                "CSharpier Format",
+                ".Net Build"
+            ]
         },
         {
             "label": "CSharpier Format",

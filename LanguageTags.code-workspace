@@ -63,7 +63,7 @@
             "xtinct",
             "xunit"
         ],
-		"dotnet.defaultSolution": "LanguageTags.sln",
+		"dotnet.defaultSolution": "LanguageTags.slnx",
         "files.trimTrailingWhitespace": true,
         "files.trimTrailingWhitespaceInRegexAndStrings": false,
         "diffEditor.ignoreTrimWhitespace": false,

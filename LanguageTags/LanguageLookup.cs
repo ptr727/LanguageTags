@@ -3,13 +3,15 @@ namespace ptr727.LanguageTags;
 /// <summary>
 /// Provides language code lookup and conversion functionality between IETF and ISO standards.
 /// </summary>
-public sealed class LanguageLookup
+/// <param name="options">The options used to configure logging.</param>
+public sealed class LanguageLookup(Options? options = null)
 {
     /// <summary>
     /// The language code for undetermined languages ("und").
     /// </summary>
     public const string Undetermined = "und";
 
+    private readonly ILogger _logger = LogOptions.CreateLogger<LanguageLookup>(options);
     private readonly Iso6392Data _iso6392 = Iso6392Data.Create();
     private readonly Iso6393Data _iso6393 = Iso6393Data.Create();
     private readonly Rfc5646Data _rfc5646 = Rfc5646Data.Create();
@@ -105,7 +107,13 @@ public sealed class LanguageLookup
 
         // Try CultureInfo
         CultureInfo? cultureInfo = CreateCultureInfo(languageTag);
-        return cultureInfo != null ? cultureInfo.IetfLanguageTag : Undetermined;
+        if (cultureInfo != null)
+        {
+            return cultureInfo.IetfLanguageTag;
+        }
+
+        _logger.LogUndeterminedFallback(languageTag, nameof(GetIetfFromIso));
+        return Undetermined;
     }
 
     /// <summary>
@@ -169,6 +177,7 @@ public sealed class LanguageLookup
         CultureInfo? cultureInfo = CreateCultureInfo(languageTag);
         if (cultureInfo == null)
         {
+            _logger.LogUndeterminedFallback(languageTag, nameof(GetIsoFromIetf));
             return Undetermined;
         }
 
@@ -179,6 +188,7 @@ public sealed class LanguageLookup
             // Return the Part 2B code
             return iso6393.Part2B!;
         }
+        _logger.LogUndeterminedFallback(languageTag, nameof(GetIsoFromIetf));
         return Undetermined;
     }
 
@@ -193,6 +203,9 @@ public sealed class LanguageLookup
     {
         ArgumentNullException.ThrowIfNull(prefix);
         ArgumentNullException.ThrowIfNull(languageTag);
+
+        string originalPrefix = prefix;
+        string originalTag = languageTag;
 
         // TODO: Conditional parse and normalize before processing
 
@@ -239,6 +252,7 @@ public sealed class LanguageLookup
             }
 
             // No match
+            _logger.LogPrefixMatchFailed(originalPrefix, originalTag);
             return false;
         }
     }

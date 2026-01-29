@@ -10,12 +10,25 @@ public sealed partial class Iso6393Data
     internal const string DataFileName = "iso6393";
 
     /// <summary>
-    /// Loads ISO 639-3 data from a file.
+    /// Loads ISO 639-3 data from a file asynchronously.
     /// </summary>
     /// <param name="fileName">The path to the data file.</param>
     /// <returns>The loaded <see cref="Iso6393Data"/>.</returns>
     /// <exception cref="InvalidDataException">Thrown when the file contains invalid data.</exception>
-    public static Iso6393Data LoadData(string fileName)
+    public static Task<Iso6393Data> LoadDataAsync(string fileName) =>
+        LoadDataAsync(fileName, LogOptions.CreateLogger<Iso6393Data>());
+
+    /// <summary>
+    /// Loads ISO 639-3 data from a file asynchronously using the specified options.
+    /// </summary>
+    /// <param name="fileName">The path to the data file.</param>
+    /// <param name="options">The options used to configure logging.</param>
+    /// <returns>The loaded <see cref="Iso6393Data"/>.</returns>
+    /// <exception cref="InvalidDataException">Thrown when the file contains invalid data.</exception>
+    public static Task<Iso6393Data> LoadDataAsync(string fileName, Options? options) =>
+        LoadDataAsync(fileName, LogOptions.CreateLogger<Iso6393Data>(options));
+
+    private static async Task<Iso6393Data> LoadDataAsync(string fileName, ILogger logger)
     {
         // https://iso639-3.sil.org/code_tables/download_tables
         // Id char(3) NOT NULL, The three-letter 639-3 identifier
@@ -27,134 +40,230 @@ public sealed partial class Iso6393Data
         // Ref_Name varchar(150) NOT NULL, Reference language name
         // Comment varchar(150) NULL) Comment relating to one or more of the columns
 
-        // Read header
-        // Id	Part2b	Part2t	Part1	Scope	Language_Type	Ref_Name	Comment
-        List<Iso6393Record> recordList = [];
-        using StreamReader lineReader = new(File.OpenRead(fileName));
-        string? line = lineReader.ReadLine();
-        if (string.IsNullOrEmpty(line))
+        try
         {
-            throw new InvalidDataException($"Missing header line in ISO 639-3 file: {fileName}");
-        }
-        List<string> records = [.. line.Split('\t').Select(item => item.Trim())];
-        if (records.Count != 8)
-        {
-            throw new InvalidDataException($"Invalid data found in ISO 639-3 record: {line}");
-        }
-
-        // Read line by line
-        while ((line = lineReader.ReadLine()) is not null)
-        {
-            // Parse using tab character
-            records = [.. line.Split('\t').Select(item => item.Trim())];
-            if (records.Count != 8)
+            // Read header
+            // Id	Part2b	Part2t	Part1	Scope	Language_Type	Ref_Name	Comment
+            List<Iso6393Record> recordList = [];
+            FileStream fileStream = new(
+                fileName,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                4096,
+                FileOptions.Asynchronous | FileOptions.SequentialScan
+            );
+            await using (fileStream.ConfigureAwait(false))
             {
-                throw new InvalidDataException($"Invalid data found in ISO 639-3 record: {line}");
+                using StreamReader lineReader = new(fileStream);
+                string? line = await lineReader.ReadLineAsync().ConfigureAwait(false);
+                if (string.IsNullOrEmpty(line))
+                {
+                    throw new InvalidDataException(
+                        $"Missing header line in ISO 639-3 file: {fileName}"
+                    );
+                }
+                List<string> records = [.. line.Split('\t').Select(item => item.Trim())];
+                if (records.Count != 8)
+                {
+                    throw new InvalidDataException(
+                        $"Invalid data found in ISO 639-3 record: {line}"
+                    );
+                }
+
+                // Read line by line
+                while ((line = await lineReader.ReadLineAsync().ConfigureAwait(false)) is not null)
+                {
+                    // Parse using tab character
+                    records = [.. line.Split('\t').Select(item => item.Trim())];
+                    if (records.Count != 8)
+                    {
+                        throw new InvalidDataException(
+                            $"Invalid data found in ISO 639-3 record: {line}"
+                        );
+                    }
+
+                    // Populate record
+                    Iso6393Record record = new()
+                    {
+                        Id = string.IsNullOrEmpty(records[0]) ? null : records[0],
+                        Part2B = string.IsNullOrEmpty(records[1]) ? null : records[1],
+                        Part2T = string.IsNullOrEmpty(records[2]) ? null : records[2],
+                        Part1 = string.IsNullOrEmpty(records[3]) ? null : records[3],
+                        Scope = string.IsNullOrEmpty(records[4]) ? null : records[4],
+                        LanguageType = string.IsNullOrEmpty(records[5]) ? null : records[5],
+                        RefName = string.IsNullOrEmpty(records[6]) ? null : records[6],
+                        Comment = string.IsNullOrEmpty(records[7]) ? null : records[7],
+                    };
+                    if (
+                        string.IsNullOrEmpty(record.Id)
+                        || string.IsNullOrEmpty(record.Scope)
+                        || string.IsNullOrEmpty(record.LanguageType)
+                        || string.IsNullOrEmpty(record.RefName)
+                    )
+                    {
+                        throw new InvalidDataException(
+                            $"Invalid data found in ISO 639-3 record: {line}"
+                        );
+                    }
+                    recordList.Add(record);
+                }
             }
 
-            // Populate record
-            Iso6393Record record = new()
+            if (recordList.Count == 0)
             {
-                Id = string.IsNullOrEmpty(records[0]) ? null : records[0],
-                Part2B = string.IsNullOrEmpty(records[1]) ? null : records[1],
-                Part2T = string.IsNullOrEmpty(records[2]) ? null : records[2],
-                Part1 = string.IsNullOrEmpty(records[3]) ? null : records[3],
-                Scope = string.IsNullOrEmpty(records[4]) ? null : records[4],
-                LanguageType = string.IsNullOrEmpty(records[5]) ? null : records[5],
-                RefName = string.IsNullOrEmpty(records[6]) ? null : records[6],
-                Comment = string.IsNullOrEmpty(records[7]) ? null : records[7],
-            };
-            if (
-                string.IsNullOrEmpty(record.Id)
-                || string.IsNullOrEmpty(record.Scope)
-                || string.IsNullOrEmpty(record.LanguageType)
-                || string.IsNullOrEmpty(record.RefName)
-            )
-            {
-                throw new InvalidDataException($"Invalid data found in ISO 639-3 record: {line}");
+                logger.LogDataLoadEmpty(nameof(Iso6393Data), fileName);
+                throw new InvalidDataException($"No data found in ISO 639-3 file: {fileName}");
             }
-            recordList.Add(record);
+
+            Iso6393Data data = new() { RecordList = [.. recordList] };
+            logger.LogDataLoaded(nameof(Iso6393Data), fileName, data.RecordList.Length);
+            return data;
         }
-        return recordList.Count == 0
-            ? throw new InvalidDataException($"No data found in ISO 639-3 file: {fileName}")
-            : new Iso6393Data { RecordList = [.. recordList] };
+        catch (Exception exception)
+        {
+            logger.LogDataLoadFailed(nameof(Iso6393Data), fileName, exception);
+            throw;
+        }
     }
 
     /// <summary>
-    /// Loads ISO 639-3 data from a JSON file.
+    /// Loads ISO 639-3 data from a JSON file asynchronously.
     /// </summary>
     /// <param name="fileName">The path to the JSON file.</param>
     /// <returns>The loaded <see cref="Iso6393Data"/> or null if deserialization fails.</returns>
-    public static Iso6393Data? LoadJson(string fileName) =>
-        JsonSerializer.Deserialize(
-            File.ReadAllText(fileName),
-            LanguageJsonContext.Default.Iso6393Data
-        );
+    public static Task<Iso6393Data?> LoadJsonAsync(string fileName) =>
+        LoadJsonAsync(fileName, LogOptions.CreateLogger<Iso6393Data>());
 
-    internal static void SaveJson(string fileName, Iso6393Data iso6393) =>
-        File.WriteAllText(
+    /// <summary>
+    /// Loads ISO 639-3 data from a JSON file asynchronously using the specified options.
+    /// </summary>
+    /// <param name="fileName">The path to the JSON file.</param>
+    /// <param name="options">The options used to configure logging.</param>
+    /// <returns>The loaded <see cref="Iso6393Data"/> or null if deserialization fails.</returns>
+    public static Task<Iso6393Data?> LoadJsonAsync(string fileName, Options? options) =>
+        LoadJsonAsync(fileName, LogOptions.CreateLogger<Iso6393Data>(options));
+
+    private static async Task<Iso6393Data?> LoadJsonAsync(string fileName, ILogger logger)
+    {
+        try
+        {
+            FileStream fileStream = new(
+                fileName,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                4096,
+                FileOptions.Asynchronous | FileOptions.SequentialScan
+            );
+            await using (fileStream.ConfigureAwait(false))
+            {
+                Iso6393Data? data = await JsonSerializer
+                    .DeserializeAsync(fileStream, LanguageJsonContext.Default.Iso6393Data)
+                    .ConfigureAwait(false);
+                if (data == null)
+                {
+                    logger.LogDataLoadEmpty(nameof(Iso6393Data), fileName);
+                }
+                else
+                {
+                    logger.LogDataLoaded(nameof(Iso6393Data), fileName, data.RecordList.Length);
+                }
+
+                return data;
+            }
+        }
+        catch (Exception exception)
+        {
+            logger.LogDataLoadFailed(nameof(Iso6393Data), fileName, exception);
+            throw;
+        }
+    }
+
+    internal static async Task SaveJsonAsync(string fileName, Iso6393Data iso6393)
+    {
+        FileStream fileStream = new(
             fileName,
-            JsonSerializer.Serialize(iso6393, LanguageJsonContext.Default.Iso6393Data)
+            FileMode.Create,
+            FileAccess.Write,
+            FileShare.None,
+            4096,
+            FileOptions.Asynchronous | FileOptions.SequentialScan
         );
+        await using (fileStream.ConfigureAwait(false))
+        {
+            await JsonSerializer
+                .SerializeAsync(fileStream, iso6393, LanguageJsonContext.Default.Iso6393Data)
+                .ConfigureAwait(false);
+        }
+    }
 
-    internal static void GenCode(string fileName, Iso6393Data iso6393)
+    internal static async Task GenCodeAsync(string fileName, Iso6393Data iso6393)
     {
         ArgumentNullException.ThrowIfNull(iso6393);
-        StringBuilder stringBuilder = new();
-        _ = stringBuilder
-            .Append(
-                """
-                namespace ptr727.LanguageTags;
-
-                /// <summary>
-                /// Provides access to ISO 639-3 language code data.
-                /// </summary>
-                public sealed partial class Iso6393Data
-                {
-                    public static Iso6393Data Create() =>
-                        new()
-                        {
-                            RecordList =
-                            [
-                """
-            )
-            .Append("\r\n");
-
-        foreach (Iso6393Record record in iso6393.RecordList)
+        FileStream fileStream = new(
+            fileName,
+            FileMode.Create,
+            FileAccess.Write,
+            FileShare.None,
+            4096,
+            FileOptions.Asynchronous | FileOptions.SequentialScan
+        );
+        await using (fileStream.ConfigureAwait(false))
         {
-            _ = stringBuilder
-                .Append(
-                    CultureInfo.InvariantCulture,
-                    $$"""
-                                    new()
-                                    {
-                                        Id = {{LanguageSchema.GetCodeGenString(record.Id)}},
-                                        Part2B = {{LanguageSchema.GetCodeGenString(record.Part2B)}},
-                                        Part2T = {{LanguageSchema.GetCodeGenString(record.Part2T)}},
-                                        Part1 = {{LanguageSchema.GetCodeGenString(record.Part1)}},
-                                        Scope = {{LanguageSchema.GetCodeGenString(record.Scope)}},
-                                        LanguageType = {{LanguageSchema.GetCodeGenString(
-                        record.LanguageType
-                    )}},
-                                        RefName = {{LanguageSchema.GetCodeGenString(
-                        record.RefName
-                    )}},
-                                    },
-                    """
-                )
-                .Append("\r\n");
-        }
-        _ = stringBuilder
-            .Append(
-                """
-                            ],
-                        };
-                }
-                """
-            )
-            .Append("\r\n");
+            StreamWriter writer = new(fileStream, new UTF8Encoding(false)) { NewLine = "\r\n" };
+            await using (writer.ConfigureAwait(false))
+            {
+                System.Runtime.CompilerServices.ConfiguredTaskAwaitable WriteLineAsync(
+                    string value
+                ) => writer.WriteLineAsync(value).ConfigureAwait(false);
 
-        LanguageSchema.WriteFile(fileName, stringBuilder.ToString());
+                await WriteLineAsync("namespace ptr727.LanguageTags;");
+                await WriteLineAsync(string.Empty);
+                await WriteLineAsync("/// <summary>");
+                await WriteLineAsync("/// Provides access to ISO 639-3 language code data.");
+                await WriteLineAsync("/// </summary>");
+                await WriteLineAsync("public sealed partial class Iso6393Data");
+                await WriteLineAsync("{");
+                await WriteLineAsync("    public static Iso6393Data Create() =>");
+                await WriteLineAsync("        new()");
+                await WriteLineAsync("        {");
+                await WriteLineAsync("            RecordList =");
+                await WriteLineAsync("            [");
+
+                foreach (Iso6393Record record in iso6393.RecordList)
+                {
+                    await WriteLineAsync("                new()");
+                    await WriteLineAsync("                {");
+                    await WriteLineAsync(
+                        $"                    Id = {LanguageSchema.GetCodeGenString(record.Id)},"
+                    );
+                    await WriteLineAsync(
+                        $"                    Part2B = {LanguageSchema.GetCodeGenString(record.Part2B)},"
+                    );
+                    await WriteLineAsync(
+                        $"                    Part2T = {LanguageSchema.GetCodeGenString(record.Part2T)},"
+                    );
+                    await WriteLineAsync(
+                        $"                    Part1 = {LanguageSchema.GetCodeGenString(record.Part1)},"
+                    );
+                    await WriteLineAsync(
+                        $"                    Scope = {LanguageSchema.GetCodeGenString(record.Scope)},"
+                    );
+                    await WriteLineAsync(
+                        $"                    LanguageType = {LanguageSchema.GetCodeGenString(record.LanguageType)},"
+                    );
+                    await WriteLineAsync(
+                        $"                    RefName = {LanguageSchema.GetCodeGenString(record.RefName)},"
+                    );
+                    await WriteLineAsync("                },");
+                }
+
+                await WriteLineAsync("            ],");
+                await WriteLineAsync("        };");
+                await WriteLineAsync("}");
+            }
+        }
     }
 
     /// <summary>
@@ -168,10 +277,24 @@ public sealed partial class Iso6393Data
     /// <param name="languageTag">The language code or description to search for.</param>
     /// <param name="includeDescription">If true, searches in the reference name field; otherwise, only searches language codes.</param>
     /// <returns>The matching <see cref="Iso6393Record"/> or null if not found.</returns>
-    public Iso6393Record? Find(string? languageTag, bool includeDescription)
+    public Iso6393Record? Find(string? languageTag, bool includeDescription) =>
+        Find(languageTag, includeDescription, LogOptions.CreateLogger<Iso6393Data>());
+
+    /// <summary>
+    /// Finds an ISO 639-3 language record by language code or description using the specified options.
+    /// </summary>
+    /// <param name="languageTag">The language code or description to search for.</param>
+    /// <param name="includeDescription">If true, searches in the reference name field; otherwise, only searches language codes.</param>
+    /// <param name="options">The options used to configure logging.</param>
+    /// <returns>The matching <see cref="Iso6393Record"/> or null if not found.</returns>
+    public Iso6393Record? Find(string? languageTag, bool includeDescription, Options? options) =>
+        Find(languageTag, includeDescription, LogOptions.CreateLogger<Iso6393Data>(options));
+
+    private Iso6393Record? Find(string? languageTag, bool includeDescription, ILogger logger)
     {
         if (string.IsNullOrEmpty(languageTag))
         {
+            logger.LogFindRecordNotFound(nameof(Iso6393Data), languageTag, includeDescription);
             return null;
         }
 
@@ -188,6 +311,7 @@ public sealed partial class Iso6393Data
             );
             if (record != null)
             {
+                logger.LogFindRecordFound(nameof(Iso6393Data), languageTag, includeDescription);
                 return record;
             }
 
@@ -198,6 +322,7 @@ public sealed partial class Iso6393Data
             );
             if (record != null)
             {
+                logger.LogFindRecordFound(nameof(Iso6393Data), languageTag, includeDescription);
                 return record;
             }
 
@@ -208,6 +333,7 @@ public sealed partial class Iso6393Data
             );
             if (record != null)
             {
+                logger.LogFindRecordFound(nameof(Iso6393Data), languageTag, includeDescription);
                 return record;
             }
         }
@@ -222,6 +348,7 @@ public sealed partial class Iso6393Data
             );
             if (record != null)
             {
+                logger.LogFindRecordFound(nameof(Iso6393Data), languageTag, includeDescription);
                 return record;
             }
         }
@@ -236,6 +363,7 @@ public sealed partial class Iso6393Data
             );
             if (record != null)
             {
+                logger.LogFindRecordFound(nameof(Iso6393Data), languageTag, includeDescription);
                 return record;
             }
 
@@ -246,11 +374,13 @@ public sealed partial class Iso6393Data
             );
             if (record != null)
             {
+                logger.LogFindRecordFound(nameof(Iso6393Data), languageTag, includeDescription);
                 return record;
             }
         }
 
         // Not found
+        logger.LogFindRecordNotFound(nameof(Iso6393Data), languageTag, includeDescription);
         return null;
     }
 }

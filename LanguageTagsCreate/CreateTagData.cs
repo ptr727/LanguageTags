@@ -42,47 +42,41 @@ internal sealed class CreateTagData(
         Log.Information("Language tag data files downloaded successfully.");
     }
 
-    internal Task CreateJsonDataAsync()
+    internal async Task CreateJsonDataAsync()
     {
         ArgumentNullException.ThrowIfNull(_iso6392DataFile, nameof(_iso6392DataFile));
         ArgumentNullException.ThrowIfNull(_iso6393DataFile, nameof(_iso6393DataFile));
         ArgumentNullException.ThrowIfNull(_rfc5646DataFile, nameof(_rfc5646DataFile));
 
-        // TODO: Convert load and save to async
-
         // Convert data files to JSON
         Log.Information("Converting data files to JSON ...");
 
         Log.Information("Converting ISO 639-2 data to JSON ...");
-        _iso6392 = Iso6392Data.LoadData(_iso6392DataFile);
+        _iso6392 = await Iso6392Data.LoadDataAsync(_iso6392DataFile).ConfigureAwait(false);
         _iso6392JsonFile = Path.Combine(dataDirectory, Iso6392Data.DataFileName + ".json");
         Log.Information("Writing ISO 639-2 data to {JsonPath}", _iso6392JsonFile);
-        Iso6392Data.SaveJson(_iso6392JsonFile, _iso6392);
+        await Iso6392Data.SaveJsonAsync(_iso6392JsonFile, _iso6392).ConfigureAwait(false);
 
         Log.Information("Converting ISO 639-3 data to JSON ...");
-        _iso6393 = Iso6393Data.LoadData(_iso6393DataFile);
+        _iso6393 = await Iso6393Data.LoadDataAsync(_iso6393DataFile).ConfigureAwait(false);
         _iso6393JsonFile = Path.Combine(dataDirectory, Iso6393Data.DataFileName + ".json");
         Log.Information("Writing ISO 639-3 data to {JsonPath}", _iso6393JsonFile);
-        Iso6393Data.SaveJson(_iso6393JsonFile, _iso6393);
+        await Iso6393Data.SaveJsonAsync(_iso6393JsonFile, _iso6393).ConfigureAwait(false);
 
         Log.Information("Converting RFC 5646 data to JSON ...");
-        _rfc5646 = Rfc5646Data.LoadData(_rfc5646DataFile);
+        _rfc5646 = await Rfc5646Data.LoadDataAsync(_rfc5646DataFile).ConfigureAwait(false);
         _rfc5646JsonFile = Path.Combine(dataDirectory, Rfc5646Data.DataFileName + ".json");
         Log.Information("Writing RFC 5646 data to {JsonPath}", _rfc5646JsonFile);
-        Rfc5646Data.SaveJson(_rfc5646JsonFile, _rfc5646);
+        await Rfc5646Data.SaveJsonAsync(_rfc5646JsonFile, _rfc5646).ConfigureAwait(false);
 
         Log.Information("Data files converted to JSON successfully.");
-
-        return Task.CompletedTask;
     }
 
-    internal Task GenerateCodeAsync()
+    internal async Task GenerateCodeAsync()
     {
         ArgumentNullException.ThrowIfNull(_iso6392, nameof(_iso6392));
         ArgumentNullException.ThrowIfNull(_iso6393, nameof(_iso6393));
         ArgumentNullException.ThrowIfNull(_rfc5646, nameof(_rfc5646));
-
-        // TODO: Convert to async
 
         // Generate code files
         Log.Information("Generating code files ...");
@@ -90,20 +84,19 @@ internal sealed class CreateTagData(
         Log.Information("Generating ISO 639-2 code ...");
         _iso6392CodeFile = Path.Combine(codeDirectory, nameof(Iso6392Data) + "Gen.cs");
         Log.Information("Writing ISO 639-2 code to {CodePath}", _iso6392CodeFile);
-        Iso6392Data.GenCode(_iso6392CodeFile, _iso6392);
+        await Iso6392Data.GenCodeAsync(_iso6392CodeFile, _iso6392).ConfigureAwait(false);
 
         Log.Information("Generating ISO 639-3 code ...");
         _iso6393CodeFile = Path.Combine(codeDirectory, nameof(Iso6393Data) + "Gen.cs");
         Log.Information("Writing ISO 639-3 code to {CodePath}", _iso6393CodeFile);
-        Iso6393Data.GenCode(_iso6393CodeFile, _iso6393);
+        await Iso6393Data.GenCodeAsync(_iso6393CodeFile, _iso6393).ConfigureAwait(false);
 
         Log.Information("Generating RFC 5646 code ...");
         _rfc5646CodeFile = Path.Combine(codeDirectory, nameof(Rfc5646Data) + "Gen.cs");
         Log.Information("Writing RFC 5646 code to {CodePath}", _rfc5646CodeFile);
-        Rfc5646Data.GenCode(_rfc5646CodeFile, _rfc5646);
+        await Rfc5646Data.GenCodeAsync(_rfc5646CodeFile, _rfc5646).ConfigureAwait(false);
 
         Log.Information("Code files generated successfully.");
-        return Task.CompletedTask;
     }
 
     private async Task DownloadFileAsync(Uri uri, string fileName)
@@ -118,7 +111,14 @@ internal sealed class CreateTagData(
             .ConfigureAwait(false);
         await using (httpStream.ConfigureAwait(false))
         {
-            FileStream fileStream = File.Create(fileName);
+            FileStream fileStream = new(
+                fileName,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.None,
+                8192,
+                true
+            );
             await using (fileStream.ConfigureAwait(false))
             {
                 await httpStream.CopyToAsync(fileStream, cancellationToken).ConfigureAwait(false);

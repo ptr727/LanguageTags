@@ -27,10 +27,8 @@ internal sealed class Program(
         _ = LoggerFactory.Create(commandLine.CreateOptions(commandLine.Result).LogOptions);
         Log.Logger.LogOverrideContext().Information("Starting: {Args}", args);
 
-        // Initialize library with logger
-        //TemplateLibrary templateLibrary = new(
-        //    new Options() { Logger = LoggerFactory.CreateLogger(typeof(TemplateLibrary).FullName!) }
-        //);
+        // Initialize library with static logger
+        LogOptions.SetFactory(LoggerFactory.CreateLoggerFactory());
 
         // Invoke command
         return await commandLine.Result.InvokeAsync().ConfigureAwait(false);

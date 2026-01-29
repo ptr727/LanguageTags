@@ -9,12 +9,25 @@ public sealed partial class Iso6392Data
     internal const string DataFileName = "iso6392";
 
     /// <summary>
-    /// Loads ISO 639-2 data from a file.
+    /// Loads ISO 639-2 data from a file asynchronously.
     /// </summary>
     /// <param name="fileName">The path to the data file.</param>
     /// <returns>The loaded <see cref="Iso6392Data"/>.</returns>
     /// <exception cref="InvalidDataException">Thrown when the file contains invalid data.</exception>
-    public static Iso6392Data LoadData(string fileName)
+    public static Task<Iso6392Data> LoadDataAsync(string fileName) =>
+        LoadDataAsync(fileName, LogOptions.CreateLogger<Iso6392Data>());
+
+    /// <summary>
+    /// Loads ISO 639-2 data from a file asynchronously using the specified options.
+    /// </summary>
+    /// <param name="fileName">The path to the data file.</param>
+    /// <param name="options">The options used to configure logging.</param>
+    /// <returns>The loaded <see cref="Iso6392Data"/>.</returns>
+    /// <exception cref="InvalidDataException">Thrown when the file contains invalid data.</exception>
+    public static Task<Iso6392Data> LoadDataAsync(string fileName, Options? options) =>
+        LoadDataAsync(fileName, LogOptions.CreateLogger<Iso6392Data>(options));
+
+    private static async Task<Iso6392Data> LoadDataAsync(string fileName, ILogger logger)
     {
         // https://www.loc.gov/standards/iso639-2/ascii_8bits.html
         // Alpha-3 (bibliographic) code
@@ -25,107 +38,195 @@ public sealed partial class Iso6392Data
         // | deliminator
         // LF line terminator
 
-        // Read line by line
-        List<Iso6392Record> recordList = [];
-        using StreamReader lineReader = new(File.OpenRead(fileName));
-        while (lineReader.ReadLine() is { } line)
+        try
         {
-            // Parse using pipe character
-            List<string> records = [.. line.Split('|').Select(item => item.Trim())];
-            if (records.Count != 5)
+            // Read line by line
+            List<Iso6392Record> recordList = [];
+            FileStream fileStream = new(
+                fileName,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                4096,
+                FileOptions.Asynchronous | FileOptions.SequentialScan
+            );
+            await using (fileStream.ConfigureAwait(false))
             {
-                throw new InvalidDataException($"Invalid data found in ISO 639-2 record: {line}");
+                using StreamReader lineReader = new(fileStream);
+                while (await lineReader.ReadLineAsync().ConfigureAwait(false) is { } line)
+                {
+                    // Parse using pipe character
+                    List<string> records = [.. line.Split('|').Select(item => item.Trim())];
+                    if (records.Count != 5)
+                    {
+                        throw new InvalidDataException(
+                            $"Invalid data found in ISO 639-2 record: {line}"
+                        );
+                    }
+
+                    // Populate record
+                    Iso6392Record record = new()
+                    {
+                        Part2B = string.IsNullOrEmpty(records[0]) ? null : records[0],
+                        Part2T = string.IsNullOrEmpty(records[1]) ? null : records[1],
+                        Part1 = string.IsNullOrEmpty(records[2]) ? null : records[2],
+                        RefName = string.IsNullOrEmpty(records[3]) ? null : records[3],
+                    };
+                    if (string.IsNullOrEmpty(record.Part2B) || string.IsNullOrEmpty(record.RefName))
+                    {
+                        throw new InvalidDataException(
+                            $"Invalid data found in ISO 639-2 record: {line}"
+                        );
+                    }
+                    recordList.Add(record);
+                }
             }
 
-            // Populate record
-            Iso6392Record record = new()
+            if (recordList.Count == 0)
             {
-                Part2B = string.IsNullOrEmpty(records[0]) ? null : records[0],
-                Part2T = string.IsNullOrEmpty(records[1]) ? null : records[1],
-                Part1 = string.IsNullOrEmpty(records[2]) ? null : records[2],
-                RefName = string.IsNullOrEmpty(records[3]) ? null : records[3],
-            };
-            if (string.IsNullOrEmpty(record.Part2B) || string.IsNullOrEmpty(record.RefName))
-            {
-                throw new InvalidDataException($"Invalid data found in ISO 639-2 record: {line}");
+                logger.LogDataLoadEmpty(nameof(Iso6392Data), fileName);
+                throw new InvalidDataException($"No data found in ISO 639-2 file: {fileName}");
             }
-            recordList.Add(record);
+
+            Iso6392Data data = new() { RecordList = [.. recordList] };
+            logger.LogDataLoaded(nameof(Iso6392Data), fileName, data.RecordList.Length);
+            return data;
         }
-        return recordList.Count == 0
-            ? throw new InvalidDataException($"No data found in ISO 639-2 file: {fileName}")
-            : new Iso6392Data { RecordList = [.. recordList] };
+        catch (Exception exception)
+        {
+            logger.LogDataLoadFailed(nameof(Iso6392Data), fileName, exception);
+            throw;
+        }
     }
 
     /// <summary>
-    /// Loads ISO 639-2 data from a JSON file.
+    /// Loads ISO 639-2 data from a JSON file asynchronously.
     /// </summary>
     /// <param name="fileName">The path to the JSON file.</param>
     /// <returns>The loaded <see cref="Iso6392Data"/> or null if deserialization fails.</returns>
-    public static Iso6392Data? LoadJson(string fileName) =>
-        JsonSerializer.Deserialize(
-            File.ReadAllText(fileName),
-            LanguageJsonContext.Default.Iso6392Data
-        );
+    public static Task<Iso6392Data?> LoadJsonAsync(string fileName) =>
+        LoadJsonAsync(fileName, LogOptions.CreateLogger<Iso6392Data>());
 
-    internal static void SaveJson(string fileName, Iso6392Data iso6392) =>
-        File.WriteAllText(
+    /// <summary>
+    /// Loads ISO 639-2 data from a JSON file asynchronously using the specified options.
+    /// </summary>
+    /// <param name="fileName">The path to the JSON file.</param>
+    /// <param name="options">The options used to configure logging.</param>
+    /// <returns>The loaded <see cref="Iso6392Data"/> or null if deserialization fails.</returns>
+    public static Task<Iso6392Data?> LoadJsonAsync(string fileName, Options? options) =>
+        LoadJsonAsync(fileName, LogOptions.CreateLogger<Iso6392Data>(options));
+
+    private static async Task<Iso6392Data?> LoadJsonAsync(string fileName, ILogger logger)
+    {
+        try
+        {
+            FileStream fileStream = new(
+                fileName,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                4096,
+                FileOptions.Asynchronous | FileOptions.SequentialScan
+            );
+            await using (fileStream.ConfigureAwait(false))
+            {
+                Iso6392Data? data = await JsonSerializer
+                    .DeserializeAsync(fileStream, LanguageJsonContext.Default.Iso6392Data)
+                    .ConfigureAwait(false);
+                if (data == null)
+                {
+                    logger.LogDataLoadEmpty(nameof(Iso6392Data), fileName);
+                }
+                else
+                {
+                    logger.LogDataLoaded(nameof(Iso6392Data), fileName, data.RecordList.Length);
+                }
+
+                return data;
+            }
+        }
+        catch (Exception exception)
+        {
+            logger.LogDataLoadFailed(nameof(Iso6392Data), fileName, exception);
+            throw;
+        }
+    }
+
+    internal static async Task SaveJsonAsync(string fileName, Iso6392Data iso6392)
+    {
+        FileStream fileStream = new(
             fileName,
-            JsonSerializer.Serialize(iso6392, LanguageJsonContext.Default.Iso6392Data)
+            FileMode.Create,
+            FileAccess.Write,
+            FileShare.None,
+            4096,
+            FileOptions.Asynchronous | FileOptions.SequentialScan
         );
+        await using (fileStream.ConfigureAwait(false))
+        {
+            await JsonSerializer
+                .SerializeAsync(fileStream, iso6392, LanguageJsonContext.Default.Iso6392Data)
+                .ConfigureAwait(false);
+        }
+    }
 
-    internal static void GenCode(string fileName, Iso6392Data iso6392)
+    internal static async Task GenCodeAsync(string fileName, Iso6392Data iso6392)
     {
         ArgumentNullException.ThrowIfNull(iso6392);
-        StringBuilder stringBuilder = new();
-        _ = stringBuilder
-            .Append(
-                """
-                namespace ptr727.LanguageTags;
-
-                /// <summary>
-                /// Provides access to ISO 639-2 language code data.
-                /// </summary>
-                public sealed partial class Iso6392Data
-                {
-                    public static Iso6392Data Create() =>
-                        new()
-                        {
-                            RecordList =
-                            [
-                """
-            )
-            .Append("\r\n");
-
-        foreach (Iso6392Record record in iso6392.RecordList)
+        FileStream fileStream = new(
+            fileName,
+            FileMode.Create,
+            FileAccess.Write,
+            FileShare.None,
+            4096,
+            FileOptions.Asynchronous | FileOptions.SequentialScan
+        );
+        await using (fileStream.ConfigureAwait(false))
         {
-            _ = stringBuilder
-                .Append(
-                    CultureInfo.InvariantCulture,
-                    $$"""
-                                    new()
-                                    {
-                                        Part2B = {{LanguageSchema.GetCodeGenString(record.Part2B)}},
-                                        Part2T = {{LanguageSchema.GetCodeGenString(record.Part2T)}},
-                                        Part1 = {{LanguageSchema.GetCodeGenString(record.Part1)}},
-                                        RefName = {{LanguageSchema.GetCodeGenString(
-                        record.RefName
-                    )}},
-                                    },
-                    """
-                )
-                .Append("\r\n");
-        }
-        _ = stringBuilder
-            .Append(
-                """
-                            ],
-                        };
-                }
-                """
-            )
-            .Append("\r\n");
+            StreamWriter writer = new(fileStream, new UTF8Encoding(false)) { NewLine = "\r\n" };
+            await using (writer.ConfigureAwait(false))
+            {
+                System.Runtime.CompilerServices.ConfiguredTaskAwaitable WriteLineAsync(
+                    string value
+                ) => writer.WriteLineAsync(value).ConfigureAwait(false);
 
-        LanguageSchema.WriteFile(fileName, stringBuilder.ToString());
+                await WriteLineAsync("namespace ptr727.LanguageTags;");
+                await WriteLineAsync(string.Empty);
+                await WriteLineAsync("/// <summary>");
+                await WriteLineAsync("/// Provides access to ISO 639-2 language code data.");
+                await WriteLineAsync("/// </summary>");
+                await WriteLineAsync("public sealed partial class Iso6392Data");
+                await WriteLineAsync("{");
+                await WriteLineAsync("    public static Iso6392Data Create() =>");
+                await WriteLineAsync("        new()");
+                await WriteLineAsync("        {");
+                await WriteLineAsync("            RecordList =");
+                await WriteLineAsync("            [");
+
+                foreach (Iso6392Record record in iso6392.RecordList)
+                {
+                    await WriteLineAsync("                new()");
+                    await WriteLineAsync("                {");
+                    await WriteLineAsync(
+                        $"                    Part2B = {LanguageSchema.GetCodeGenString(record.Part2B)},"
+                    );
+                    await WriteLineAsync(
+                        $"                    Part2T = {LanguageSchema.GetCodeGenString(record.Part2T)},"
+                    );
+                    await WriteLineAsync(
+                        $"                    Part1 = {LanguageSchema.GetCodeGenString(record.Part1)},"
+                    );
+                    await WriteLineAsync(
+                        $"                    RefName = {LanguageSchema.GetCodeGenString(record.RefName)},"
+                    );
+                    await WriteLineAsync("                },");
+                }
+
+                await WriteLineAsync("            ],");
+                await WriteLineAsync("        };");
+                await WriteLineAsync("}");
+            }
+        }
     }
 
     /// <summary>
@@ -139,10 +240,24 @@ public sealed partial class Iso6392Data
     /// <param name="languageTag">The language code or description to search for.</param>
     /// <param name="includeDescription">If true, searches in the reference name field; otherwise, only searches language codes.</param>
     /// <returns>The matching <see cref="Iso6392Record"/> or null if not found.</returns>
-    public Iso6392Record? Find(string? languageTag, bool includeDescription)
+    public Iso6392Record? Find(string? languageTag, bool includeDescription) =>
+        Find(languageTag, includeDescription, LogOptions.CreateLogger<Iso6392Data>());
+
+    /// <summary>
+    /// Finds an ISO 639-2 language record by language code or description using the specified options.
+    /// </summary>
+    /// <param name="languageTag">The language code or description to search for.</param>
+    /// <param name="includeDescription">If true, searches in the reference name field; otherwise, only searches language codes.</param>
+    /// <param name="options">The options used to configure logging.</param>
+    /// <returns>The matching <see cref="Iso6392Record"/> or null if not found.</returns>
+    public Iso6392Record? Find(string? languageTag, bool includeDescription, Options? options) =>
+        Find(languageTag, includeDescription, LogOptions.CreateLogger<Iso6392Data>(options));
+
+    private Iso6392Record? Find(string? languageTag, bool includeDescription, ILogger logger)
     {
         if (string.IsNullOrEmpty(languageTag))
         {
+            logger.LogFindRecordNotFound(nameof(Iso6392Data), languageTag, includeDescription);
             return null;
         }
 
@@ -159,6 +274,7 @@ public sealed partial class Iso6392Data
             );
             if (record != null)
             {
+                logger.LogFindRecordFound(nameof(Iso6392Data), languageTag, includeDescription);
                 return record;
             }
 
@@ -169,6 +285,7 @@ public sealed partial class Iso6392Data
             );
             if (record != null)
             {
+                logger.LogFindRecordFound(nameof(Iso6392Data), languageTag, includeDescription);
                 return record;
             }
         }
@@ -183,6 +300,7 @@ public sealed partial class Iso6392Data
             );
             if (record != null)
             {
+                logger.LogFindRecordFound(nameof(Iso6392Data), languageTag, includeDescription);
                 return record;
             }
         }
@@ -197,6 +315,7 @@ public sealed partial class Iso6392Data
             );
             if (record != null)
             {
+                logger.LogFindRecordFound(nameof(Iso6392Data), languageTag, includeDescription);
                 return record;
             }
 
@@ -207,11 +326,13 @@ public sealed partial class Iso6392Data
             );
             if (record != null)
             {
+                logger.LogFindRecordFound(nameof(Iso6392Data), languageTag, includeDescription);
                 return record;
             }
         }
 
         // Not found
+        logger.LogFindRecordNotFound(nameof(Iso6392Data), languageTag, includeDescription);
         return null;
     }
 }

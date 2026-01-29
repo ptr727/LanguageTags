@@ -126,4 +126,12 @@ public sealed class LanguageTagBuilder
     /// </summary>
     /// <returns>A normalized <see cref="LanguageTag"/> or null if normalization fails.</returns>
     public LanguageTag? Normalize() => new LanguageTagParser().Normalize(_languageTag);
+
+    /// <summary>
+    /// Builds and normalizes the constructed language tag according to RFC 5646 rules using the specified options.
+    /// </summary>
+    /// <param name="options">The options used to configure logging.</param>
+    /// <returns>A normalized <see cref="LanguageTag"/> or null if normalization fails.</returns>
+    public LanguageTag? Normalize(Options? options) =>
+        new LanguageTagParser(options).Normalize(_languageTag);
 }

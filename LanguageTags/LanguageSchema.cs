@@ -4,7 +4,7 @@ namespace ptr727.LanguageTags;
 
 internal static class LanguageSchema
 {
-    internal static void WriteFile(string fileName, string value)
+    internal static async Task WriteFileAsync(string fileName, string value)
     {
         // Always write as CRLF with newline at the end
         if (
@@ -15,7 +15,7 @@ internal static class LanguageSchema
             value = value.Replace("\n", "\r\n", StringComparison.Ordinal);
         }
         value = value.TrimEnd() + "\r\n";
-        File.WriteAllText(fileName, value);
+        await File.WriteAllTextAsync(fileName, value).ConfigureAwait(false);
     }
 
     internal static string GetCodeGenString(string? text) =>

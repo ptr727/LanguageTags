@@ -113,7 +113,7 @@ See [Usage](#usage) for detailed usage instructions.
 
 ### Tag Lookup
 
-Tag records can be constructed by calling `Create()`, or loaded from data `LoadData()`, or loaded from JSON `LoadJson()`.\
+Tag records can be constructed by calling `Create()`, or loaded from data `LoadDataAsync()`, or loaded from JSON `LoadJsonAsync()`.\
 The records and record collections are immutable and can safely be reused and shared across threads.
 
 Each class implements a `Find(string languageTag, bool includeDescription)` method that will search all tags in all records for a matching tag.\
@@ -130,7 +130,7 @@ record = iso6392.Find("zulu", true);
 ```
 
 ```csharp
-Iso6393Data iso6393 = Iso6393Data.LoadData("iso6393");
+Iso6393Data iso6393 = await Iso6393Data.LoadDataAsync("iso6393");
 Iso6393Record? record = iso6393.Find("zh", false);
 // record.Id = "zho"
 // record.Part1 = "zh"
@@ -141,7 +141,7 @@ record = iso6393.Find("yue chinese", true);
 ```
 
 ```csharp
-Rfc5646Data rfc5646 = Rfc5646Data.LoadJson("rfc5646.json");
+Rfc5646Data rfc5646 = await Rfc5646Data.LoadJsonAsync("rfc5646.json");
 Rfc5646Record? record = rfc5646.Find("de", false);
 // record.SubTag = "de"
 // record.Description[0] = "German"
@@ -349,6 +349,8 @@ isValid = languageTag.IsValid; // true
 
 ## Installation
 
+**Project integration**:
+
 ```shell
 # Add the package to your project
 dotnet add package ptr727.LanguageTags
@@ -357,6 +359,43 @@ dotnet add package ptr727.LanguageTags
 ```csharp
 // Include the namespace
 using ptr727.LanguageTags;
+```
+
+**Debug log configuration**:
+
+```csharp
+// Configure global logging (static fallback)
+using Microsoft.Extensions.Logging;
+using ptr727.LanguageTags;
+using Serilog;
+using Serilog.Extensions.Logging;
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .WriteTo.Debug()
+    .CreateLogger();
+
+ILoggerFactory loggerFactory = new SerilogLoggerFactory(Log.Logger, dispose: true);
+LogOptions.SetFactory(loggerFactory);
+```
+
+```csharp
+// Configure per-call logging (instance logger or factory)
+using Microsoft.Extensions.Logging;
+using ptr727.LanguageTags;
+using Serilog;
+using Serilog.Extensions.Logging;
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .WriteTo.Debug()
+    .CreateLogger();
+
+ILoggerFactory loggerFactory = new SerilogLoggerFactory(Log.Logger, dispose: true);
+Options options = new() { LoggerFactory = loggerFactory };
+
+LanguageTag? tag = LanguageTag.Parse("en-US", options);
+LanguageLookup lookup = new(options);
 ```
 
 ## Questions or Issues

@@ -1,0 +1,7 @@
+root = false
+
+# C# files
+[*.cs]
+
+# Ignore types can be made internal
+dotnet_diagnostic.CA1515.severity = none

@@ -7,7 +7,7 @@ The project serves two primary purposes:
 1. **Data Publishing**: Provides ISO 639-2, ISO 639-3, and RFC 5646 language tag records in JSON and C# formats
 2. **Tag Processing**: Implements IETF BCP 47 language tag construction and parsing per RFC 5646 semantic rules
 
-For comprehensive coding standards and detailed conventions, refer to [`.github/copilot-instructions.md`](./.github/copilot-instructions.md).
+For comprehensive coding standards and detailed conventions, refer to [`.github/copilot-instructions.md`](./.github/copilot-instructions.md) and [`CODESTYLE.md`](./CODESTYLE.md).
 
 ## Solution Structure
 
@@ -45,50 +45,11 @@ For comprehensive coding standards and detailed conventions, refer to [`.github/
 
 - `LanguageTagParser`: Internal parser (use `LanguageTag.Parse()` instead)
 
-## Key Requirements
-
-### Build & Quality Standards
-
-- **Zero Warnings Policy**: All builds must complete without errors or warnings
-  - Run `.Net Format` task: `dotnet format style --verify-no-changes --severity=info --verbosity=detailed`
-  - Run `CSharpier Format` task: `dotnet csharpier format --log-level=debug .`
-  - Husky.Net pre-commit hooks must pass before committing
-
-- **Code Analysis**: Enable all .NET analyzers
-  - `<EnableNETAnalyzers>true</EnableNETAnalyzers>`
-  - `<AnalysisLevel>latest-all</AnalysisLevel>`
-
-### Development Environment
-
-- Target latest .NET SDK (currently .NET 10 with C# 14)
-- Support Visual Studio Code (`.code-workspace`) and Visual Studio Community (`.slnx`)
-- Support Linux, Windows, and macOS with correct line endings and permissions
-- Use `.editorconfig` for style enforcement
-
-### Code Standards (Summary)
-
-- **No `var`**: Always use explicit types
-- **File-scoped namespaces**: `namespace ptr727.ProjectTemplate.Library;`
-- **Allman braces**: Opening brace on new line
-- **Expression bodies**: Use for single-statement members
-- **Modern C# features**: Primary constructors, pattern matching, collection expressions
-- **Naming conventions**: `_privateField`, `s_staticField`, `PascalCaseConstants`
-- **Structured logging**: Use `ILogger` with Serilog
-- **XML documentation**: All public APIs with single line `<summary>` tags
-- **Nullable support**: `<Nullable>enable</Nullable>`
-- **AOT compatible code**: `<IsAotCompatible>true</IsAotCompatible>`
-
-### Testing
-
-- Use xUnit v3 and FluentAssertions
-- Organize tests logically in separate files
-- Follow Arrange-Act-Assert pattern
-- Test naming: `MethodName_Scenario_ExpectedBehavior()`
-
 ## Authoritative References
 
 For detailed specifications, see:
 
 - [`.github/copilot-instructions.md`](./.github/copilot-instructions.md) - Complete coding conventions and style guide
+- [`CODESTYLE.md`](./CODESTYLE.md) - Code style and formatting rules
 - [`.editorconfig`](./.editorconfig) - Automated style enforcement
 - Project task definitions - `CSharpier Format`, `.Net Build`, `.Net Format`, `Husky.Net Run`

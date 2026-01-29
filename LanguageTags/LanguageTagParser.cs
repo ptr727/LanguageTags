@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 
 namespace ptr727.LanguageTags;
 
@@ -69,10 +66,9 @@ internal sealed class LanguageTagParser
         // Script title case
         if (!string.IsNullOrEmpty(languageTag.Script))
         {
-            languageTag.Script =
-                System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(
-                    languageTag.Script.ToLowerInvariant()
-                );
+            languageTag.Script = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(
+                languageTag.Script.ToLowerInvariant()
+            );
         }
 
         // Region uppercase

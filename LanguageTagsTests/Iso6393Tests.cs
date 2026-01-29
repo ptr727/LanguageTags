@@ -1,6 +1,3 @@
-using AwesomeAssertions;
-using Xunit;
-
 namespace ptr727.LanguageTags.Tests;
 
 public sealed class Iso6393Tests

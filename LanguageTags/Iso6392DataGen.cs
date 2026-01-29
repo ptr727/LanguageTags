@@ -3,7 +3,7 @@ namespace ptr727.LanguageTags;
 /// <summary>
 /// Provides access to ISO 639-2 language code data.
 /// </summary>
-public partial class Iso6392Data
+public sealed partial class Iso6392Data
 {
     public static Iso6392Data Create() =>
         new()

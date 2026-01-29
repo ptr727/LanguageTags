@@ -1,11 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace ptr727.LanguageTags;
@@ -13,7 +5,7 @@ namespace ptr727.LanguageTags;
 /// <summary>
 /// Provides access to RFC 5646 / BCP 47 language subtag registry data.
 /// </summary>
-public partial class Rfc5646Data
+public sealed partial class Rfc5646Data
 {
     internal const string DataUri =
         "https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry";
@@ -77,14 +69,12 @@ public partial class Rfc5646Data
             .Append(
                 CultureInfo.InvariantCulture,
                 $$"""
-                using System;
-
                 namespace ptr727.LanguageTags;
 
                 /// <summary>
                 /// Provides access to RFC 5646 / BCP 47 language subtag registry data.
                 /// </summary>
-                public partial class Rfc5646Data
+                public sealed partial class Rfc5646Data
                 {
                     public static Rfc5646Data Create() =>
                         new()

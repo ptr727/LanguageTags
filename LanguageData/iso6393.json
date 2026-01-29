@@ -5216,7 +5216,7 @@
       "Id": "boe",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Mundabli"
+      "RefName": "Mundabli-Mufu"
     },
     {
       "Id": "bof",
@@ -10725,6 +10725,12 @@
       "Scope": "I",
       "LanguageType": "L",
       "RefName": "Djimini Senoufo"
+    },
+    {
+      "Id": "dyl",
+      "Scope": "I",
+      "LanguageType": "L",
+      "RefName": "Bhutanese Sign Language"
     },
     {
       "Id": "dym",
@@ -21966,6 +21972,12 @@
       "RefName": "Lefa"
     },
     {
+      "Id": "lfb",
+      "Scope": "I",
+      "LanguageType": "L",
+      "RefName": "Buu (Cameroon)"
+    },
+    {
       "Id": "lfn",
       "Scope": "I",
       "LanguageType": "C",
@@ -23261,7 +23273,7 @@
       "Part2T": "lui",
       "Scope": "I",
       "LanguageType": "E",
-      "RefName": "Luiseno"
+      "RefName": "Luise\u00F1o"
     },
     {
       "Id": "luj",

@@ -1,18 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-
 namespace ptr727.LanguageTags;
 
 /// <summary>
 /// Provides access to ISO 639-3 language code data.
 /// </summary>
-public partial class Iso6393Data
+public sealed partial class Iso6393Data
 {
     internal const string DataUri =
         "https://iso639-3.sil.org/sites/iso639-3/files/downloads/iso-639-3.tab";
@@ -118,7 +109,7 @@ public partial class Iso6393Data
                 /// <summary>
                 /// Provides access to ISO 639-3 language code data.
                 /// </summary>
-                public partial class Iso6393Data
+                public sealed partial class Iso6393Data
                 {
                     public static Iso6393Data Create() =>
                         new()

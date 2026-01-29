@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace ptr727.LanguageTags;
 
 /// <summary>

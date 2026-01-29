@@ -1,18 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-
 namespace ptr727.LanguageTags;
 
 /// <summary>
 /// Provides access to ISO 639-2 language code data.
 /// </summary>
-public partial class Iso6392Data
+public sealed partial class Iso6392Data
 {
     internal const string DataUri = "https://www.loc.gov/standards/iso639-2/ISO-639-2_utf-8.txt";
     internal const string DataFileName = "iso6392";
@@ -94,7 +85,7 @@ public partial class Iso6392Data
                 /// <summary>
                 /// Provides access to ISO 639-2 language code data.
                 /// </summary>
-                public partial class Iso6392Data
+                public sealed partial class Iso6392Data
                 {
                     public static Iso6392Data Create() =>
                         new()

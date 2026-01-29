@@ -3,5 +3,5 @@ root = false
 # C# files
 [*.cs]
 
-# Normalize strings to uppercase
+# Ignore normalize strings to uppercase
 dotnet_diagnostic.CA1308.severity = none

@@ -11,7 +11,7 @@ namespace ptr727.LanguageTags;
 /// <summary>
 /// Represents a language tag conforming to RFC 5646 / BCP 47.
 /// </summary>
-public class LanguageTag : IEquatable<LanguageTag>
+public sealed class LanguageTag : IEquatable<LanguageTag>
 {
     internal LanguageTag()
     {
@@ -33,7 +33,7 @@ public class LanguageTag : IEquatable<LanguageTag>
         Region = languageTag.Region;
         _variants = [.. languageTag._variants];
         _extensions = [.. languageTag._extensions];
-        PrivateUse = new PrivateUseTag(languageTag.PrivateUse);
+        PrivateUse = languageTag.PrivateUse;
     }
 
     /// <summary>
@@ -71,7 +71,7 @@ public class LanguageTag : IEquatable<LanguageTag>
     /// <summary>
     /// Gets the private use subtag.
     /// </summary>
-    public PrivateUseTag PrivateUse { get; init; }
+    public PrivateUseTag PrivateUse { get; internal set; }
 
     /// <summary>
     /// Parses a language tag string into a LanguageTag object.
@@ -171,7 +171,7 @@ public class LanguageTag : IEquatable<LanguageTag>
                 $"-{string.Join('-', _extensions.Select(item => item.ToString()))}"
             );
         }
-        if (PrivateUse._tags.Count > 0)
+        if (!PrivateUse.Tags.IsEmpty)
         {
             if (stringBuilder.Length > 0)
             {
@@ -258,66 +258,80 @@ public class LanguageTag : IEquatable<LanguageTag>
 /// <summary>
 /// Represents an extension subtag in a language tag.
 /// </summary>
-public class ExtensionTag
+/// <param name="Prefix">The single-character prefix for the extension (e.g., 'u' for Unicode extensions).</param>
+/// <param name="Tags">The list of extension subtag values.</param>
+public sealed record ExtensionTag(char Prefix, ImmutableArray<string> Tags)
 {
-    internal ExtensionTag()
-    {
-        Prefix = '\0';
-        _tags = [];
-    }
-
-    internal ExtensionTag(ExtensionTag extensionTag)
-    {
-        ArgumentNullException.ThrowIfNull(extensionTag);
-        Prefix = extensionTag.Prefix;
-        _tags = [.. extensionTag._tags];
-    }
+    /// <summary>
+    /// Creates an extension tag with a prefix and tags from an enumerable collection.
+    /// </summary>
+    /// <param name="prefix">The single-character prefix.</param>
+    /// <param name="tags">The extension subtag values.</param>
+    public ExtensionTag(char prefix, IEnumerable<string> tags)
+        : this(prefix, [.. tags]) { }
 
     /// <summary>
-    /// Gets or sets the single-character prefix for the extension (e.g., 'u' for Unicode extensions).
+    /// Creates an empty extension tag.
     /// </summary>
-    public char Prefix { get; internal set; }
-
-    /// <summary>
-    /// Gets the list of extension subtag values.
-    /// </summary>
-    public ImmutableArray<string> Tags => [.. _tags];
-    internal List<string> _tags { get; init; }
+    public ExtensionTag()
+        : this('\0', []) { }
 
     /// <summary>
     /// Converts this extension tag to its string representation.
     /// </summary>
     /// <returns>A string representation of the extension tag (e.g., "u-ca-buddhist").</returns>
-    public override string ToString() => $"{Prefix}-{string.Join('-', _tags)}";
+    public override string ToString() => $"{Prefix}-{string.Join('-', Tags)}";
+
+    /// <summary>
+    /// Creates a new extension tag with sorted and lowercased tags.
+    /// </summary>
+    /// <returns>A normalized copy of this extension tag.</returns>
+    internal ExtensionTag Normalize() =>
+        this with
+        {
+            Prefix = char.ToLowerInvariant(Prefix),
+            Tags = [.. Tags.Select(t => t.ToLowerInvariant()).OrderBy(t => t)],
+        };
 }
 
 /// <summary>
 /// Represents a private use subtag in a language tag.
 /// </summary>
-public class PrivateUseTag
+/// <param name="Tags">The list of private use subtag values.</param>
+public sealed record PrivateUseTag(ImmutableArray<string> Tags)
 {
-    internal PrivateUseTag() => _tags = [];
-
-    internal PrivateUseTag(PrivateUseTag privateUseTag)
-    {
-        ArgumentNullException.ThrowIfNull(privateUseTag);
-        _tags = [.. privateUseTag._tags];
-    }
-
     /// <summary>
     /// The prefix character for private use subtags ('x').
     /// </summary>
     public const char Prefix = 'x';
 
     /// <summary>
-    /// Gets the list of private use subtag values.
+    /// Creates a private use tag from an enumerable collection.
     /// </summary>
-    public ImmutableArray<string> Tags => [.. _tags];
-    internal List<string> _tags { get; init; }
+    /// <param name="tags">The private use subtag values.</param>
+    public PrivateUseTag(IEnumerable<string> tags)
+        : this([.. tags]) { }
+
+    /// <summary>
+    /// Creates an empty private use tag.
+    /// </summary>
+    public PrivateUseTag()
+        : this([]) { }
 
     /// <summary>
     /// Converts this private use tag to its string representation.
     /// </summary>
     /// <returns>A string representation of the private use tag (e.g., "x-private").</returns>
-    public override string ToString() => $"{Prefix}-{string.Join('-', _tags)}";
+    public override string ToString() =>
+        Tags.IsEmpty ? string.Empty : $"{Prefix}-{string.Join('-', Tags)}";
+
+    /// <summary>
+    /// Creates a new private use tag with sorted and lowercased tags.
+    /// </summary>
+    /// <returns>A normalized copy of this private use tag.</returns>
+    internal PrivateUseTag Normalize() =>
+        this with
+        {
+            Tags = [.. Tags.Select(t => t.ToLowerInvariant()).OrderBy(t => t)],
+        };
 }

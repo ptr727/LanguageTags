@@ -228,7 +228,7 @@ public partial class Iso6392Data
 /// <summary>
 /// Represents an ISO 639-2 language code record.
 /// </summary>
-public record Iso6392Record
+public sealed record Iso6392Record
 {
     /// <summary>
     /// Gets the ISO 639-2/B bibliographic code (3 letters).

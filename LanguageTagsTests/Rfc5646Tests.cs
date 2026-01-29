@@ -80,4 +80,22 @@ public class Rfc5646Tests
         Rfc5646Record? record = rfc5646.Find(input, false);
         _ = record.Should().BeNull();
     }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public void Find_NullOrEmpty_ReturnsNull(string? input)
+    {
+        Rfc5646Data rfc5646 = Rfc5646Data.Create();
+        Rfc5646Record? record = rfc5646.Find(input, false);
+        _ = record.Should().BeNull();
+    }
+
+    [Fact]
+    public void FileDate_IsSet()
+    {
+        Rfc5646Data rfc5646 = Rfc5646Data.Create();
+        _ = rfc5646.FileDate.Should().NotBeNull();
+        _ = rfc5646.FileDate.Should().HaveValue();
+    }
 }

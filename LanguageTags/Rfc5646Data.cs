@@ -449,7 +449,7 @@ public partial class Rfc5646Data
 /// <summary>
 /// Represents a record from the RFC 5646 / BCP 47 language subtag registry.
 /// </summary>
-public record Rfc5646Record
+public sealed record Rfc5646Record
 {
     /// <summary>
     /// Defines the type of language subtag record.

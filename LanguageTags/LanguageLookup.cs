@@ -8,7 +8,7 @@ namespace ptr727.LanguageTags;
 /// <summary>
 /// Provides language code lookup and conversion functionality between IETF and ISO standards.
 /// </summary>
-public class LanguageLookup
+public sealed class LanguageLookup
 {
     /// <summary>
     /// The language code for undetermined languages ("und").

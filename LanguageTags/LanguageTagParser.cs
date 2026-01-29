@@ -20,7 +20,7 @@ namespace ptr727.LanguageTags;
 
 // TODO: Implement subtag content validation by comparing values with the registry data
 
-internal class LanguageTagParser
+internal sealed class LanguageTagParser
 {
     private readonly Rfc5646Data _rfc5646 = Rfc5646Data.Create();
     private readonly List<string> _tagList = [];
@@ -52,7 +52,6 @@ internal class LanguageTagParser
         return languageTag;
     }
 
-#pragma warning disable CA1308
     private static void SetCase(LanguageTag languageTag)
     {
         // Language lowercase
@@ -88,23 +87,15 @@ internal class LanguageTagParser
             languageTag._variants[i] = languageTag._variants[i].ToLowerInvariant();
         }
 
-        // Extensions lowercase
-        foreach (ExtensionTag extension in languageTag._extensions)
+        // Extensions lowercase and normalize
+        for (int i = 0; i < languageTag._extensions.Count; i++)
         {
-            extension.Prefix = char.ToLowerInvariant(extension.Prefix);
-            for (int i = 0; i < extension._tags.Count; i++)
-            {
-                extension._tags[i] = extension._tags[i].ToLowerInvariant();
-            }
+            languageTag._extensions[i] = languageTag._extensions[i].Normalize();
         }
 
-        // Private use lowercase
-        for (int i = 0; i < languageTag.PrivateUse._tags.Count; i++)
-        {
-            languageTag.PrivateUse._tags[i] = languageTag.PrivateUse._tags[i].ToLowerInvariant();
-        }
+        // Private use lowercase and normalize
+        languageTag.PrivateUse = languageTag.PrivateUse.Normalize();
     }
-#pragma warning restore CA1308
 
     private static void Sort(LanguageTag languageTag)
     {
@@ -114,9 +105,7 @@ internal class LanguageTagParser
         // Sort extensions by prefix
         languageTag._extensions.Sort((x, y) => x.Prefix.CompareTo(y.Prefix));
 
-        // Sort extensions and private use tags
-        languageTag._extensions.ForEach(extension => extension._tags.Sort());
-        languageTag.PrivateUse._tags.Sort();
+        // Note: Extension tags and private use tags are already sorted by Normalize()
     }
 
     private static bool ValidateLanguage(string tag) =>
@@ -331,7 +320,7 @@ internal class LanguageTagParser
                 return false;
             }
 
-            ExtensionTag extensionTag = new() { Prefix = _tagList[0][0] };
+            char prefix = _tagList[0][0];
             _tagList.RemoveAt(0);
 
             // 1 or more tags remaining
@@ -340,29 +329,32 @@ internal class LanguageTagParser
                 return false;
             }
 
+            // Collect tags for this extension
+            List<string> extensionTags = [];
+
             // 2 to 8 chars
             // Stop when no more tags match
             while (_tagList.Count > 0 && ValidateExtension(_tagList[0]))
             {
                 // Tag may not repeat
-                if (extensionTag._tags.Contains(_tagList[0], StringComparer.OrdinalIgnoreCase))
+                if (extensionTags.Contains(_tagList[0], StringComparer.OrdinalIgnoreCase))
                 {
                     return false;
                 }
 
                 // Add extension tag
-                extensionTag._tags.Add(_tagList[0]);
+                extensionTags.Add(_tagList[0]);
                 _tagList.RemoveAt(0);
             }
 
             // Must have some matches
-            if (extensionTag._tags.Count == 0)
+            if (extensionTags.Count == 0)
             {
                 return false;
             }
 
             // Add extension tag
-            _languageTag._extensions.Add(extensionTag);
+            _languageTag._extensions.Add(new ExtensionTag(prefix, extensionTags));
         }
 
         // Done
@@ -394,7 +386,7 @@ internal class LanguageTagParser
         }
 
         // Prefix may not repeat
-        if (_languageTag.PrivateUse._tags.Count > 0)
+        if (!_languageTag.PrivateUse.Tags.IsEmpty)
         {
             return false;
         }
@@ -408,6 +400,9 @@ internal class LanguageTagParser
             return false;
         }
 
+        // Collect all private use tags
+        List<string> privateTags = [];
+
         // Read all tags
         while (_tagList.Count > 0)
         {
@@ -419,26 +414,24 @@ internal class LanguageTagParser
             }
 
             // Tag may not repeat
-            if (
-                _languageTag.PrivateUse._tags.Contains(
-                    _tagList[0],
-                    StringComparer.OrdinalIgnoreCase
-                )
-            )
+            if (privateTags.Contains(_tagList[0], StringComparer.OrdinalIgnoreCase))
             {
                 return false;
             }
 
             // Add private use tag
-            _languageTag.PrivateUse._tags.Add(_tagList[0]);
+            privateTags.Add(_tagList[0]);
             _tagList.RemoveAt(0);
         }
 
         // Must have some matches
-        if (_languageTag.PrivateUse._tags.Count == 0)
+        if (privateTags.Count == 0)
         {
             return false;
         }
+
+        // Create private use tag
+        _languageTag.PrivateUse = new PrivateUseTag(privateTags);
 
         // Done
         return true;
@@ -774,13 +767,13 @@ internal class LanguageTagParser
         if (
             languageTag._extensions.Any(extension =>
                 !ValidateExtensionPrefix(extension.Prefix.ToString())
-                || extension._tags.Any(tag => !ValidateExtension(tag))
+                || extension.Tags.Any(tag => !ValidateExtension(tag))
             )
         )
         {
             return false;
         }
-        if (languageTag.PrivateUse._tags.Any(tag => !ValidatePrivateUse(tag)))
+        if (languageTag.PrivateUse.Tags.Any(tag => !ValidatePrivateUse(tag)))
         {
             return false;
         }
@@ -804,7 +797,7 @@ internal class LanguageTagParser
         // No duplicate extensions per prefix
         if (
             languageTag._extensions.Any(extension =>
-                extension._tags.GroupBy(tag => tag).Any(group => group.Count() > 1)
+                extension.Tags.GroupBy(tag => tag).Any(group => group.Count() > 1)
             )
         )
         {
@@ -812,7 +805,7 @@ internal class LanguageTagParser
         }
 
         // No duplicate private use tags
-        if (languageTag.PrivateUse._tags.GroupBy(tag => tag).Any(group => group.Count() > 1))
+        if (languageTag.PrivateUse.Tags.GroupBy(tag => tag).Any(group => group.Count() > 1))
         {
             return false;
         }

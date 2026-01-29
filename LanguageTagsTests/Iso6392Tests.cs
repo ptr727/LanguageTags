@@ -70,4 +70,14 @@ public sealed class Iso6392Tests
         Iso6392Record? record = iso6392.Find(input, false);
         _ = record.Should().BeNull();
     }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public void Find_NullOrEmpty_ReturnsNull(string? input)
+    {
+        Iso6392Data iso6392 = Iso6392Data.Create();
+        Iso6392Record? record = iso6392.Find(input, false);
+        _ = record.Should().BeNull();
+    }
 }

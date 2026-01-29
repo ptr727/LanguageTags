@@ -1,3 +1,4 @@
+using System;
 using AwesomeAssertions;
 using Xunit;
 
@@ -128,5 +129,49 @@ public sealed class LanguageTagBuilderTests
         // Extension prefix 1 char, not x
         languageTag = new LanguageTagBuilder().Language("en").ExtensionAdd('x', ["abcd"]).Build();
         _ = languageTag.Validate().Should().BeFalse();
+    }
+
+    [Fact]
+    public void VariantAddRange_AddsMultipleVariants()
+    {
+        LanguageTag languageTag = new LanguageTagBuilder()
+            .Language("en")
+            .VariantAddRange(["variant1", "variant2", "variant3"])
+            .Build();
+
+        _ = languageTag.Variants.Length.Should().Be(3);
+        _ = languageTag.Variants[0].Should().Be("variant1");
+        _ = languageTag.Variants[1].Should().Be("variant2");
+        _ = languageTag.Variants[2].Should().Be("variant3");
+    }
+
+    [Fact]
+    public void VariantAddRange_ThrowsOnNull()
+    {
+        LanguageTagBuilder builder = new();
+        _ = Assert
+            .Throws<ArgumentNullException>(() => builder.VariantAddRange(null!))
+            .Should()
+            .NotBeNull();
+    }
+
+    [Fact]
+    public void ExtensionAdd_ThrowsOnNull()
+    {
+        LanguageTagBuilder builder = new();
+        _ = Assert
+            .Throws<ArgumentNullException>(() => builder.ExtensionAdd('u', null!))
+            .Should()
+            .NotBeNull();
+    }
+
+    [Fact]
+    public void PrivateUseAddRange_ThrowsOnNull()
+    {
+        LanguageTagBuilder builder = new();
+        _ = Assert
+            .Throws<ArgumentNullException>(() => builder.PrivateUseAddRange(null!))
+            .Should()
+            .NotBeNull();
     }
 }

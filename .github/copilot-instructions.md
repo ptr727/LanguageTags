@@ -7,6 +7,10 @@
 1. **Data Publishing**: Provides ISO 639-2, ISO 639-3, and RFC 5646 language tag records in JSON and C# formats
 2. **Tag Processing**: Implements IETF BCP 47 language tag construction and parsing per RFC 5646 semantic rules
 
+**Current Version**: 1.2 (supports .NET 10.0, AOT compatible)
+
+**Important Note**: The implemented language tag parsing and normalization logic may be incomplete or inaccuriate per RFC 5646. Always verify results for your specific use case
+
 ## Solution Structure
 
 ### Projects
@@ -38,9 +42,11 @@
   - Updated weekly via GitHub Actions
 
 - **.github/workflows/**
-  - `update-languagedata.yml`: Weekly scheduled job to update language data
+  - `run-periodic-codegen-pull-request.yml`: Weekly scheduled job to update language data
   - `publish-release.yml`: Release and NuGet publishing workflow
-  - `merge-bot-pr.yml`: Automated PR merge workflow
+  - `merge-bot-pull-request.yml`: Automated PR merge workflow
+  - `build-release-task.yml`, `build-library-task.yml`, `build-executable-task.yml`: Build tasks
+  - `get-version-task.yml`, `build-datebadge-task.yml`: Version and badge generation
 
 ## Core Components
 
@@ -207,7 +213,7 @@ All public classes, methods, properties, enums, and operators **must** have XML 
 
 ```csharp
 /// <summary>
-/// Brief description of the member.
+/// Single line brief description of the member.
 /// </summary>
 /// <param name="paramName">Description of parameter.</param>
 /// <returns>Description of return value.</returns>

@@ -1,0 +1,73 @@
+name: Build library task
+
+env:
+  IS_MAIN_BRANCH: ${{ endsWith(github.ref, 'refs/heads/main') }}
+  PROJECT_FILE: ./LanguageTags/LanguageTags.csproj
+  PROJECT_ARTIFACT: LanguageTags.7z
+
+on:
+  workflow_call:
+    inputs:
+      # Input to control whether to push the library to NuGet.org
+      push:
+        required: false
+        type: boolean
+        default: false
+    outputs:
+      # Output of the uploaded artifact id
+      artifact-id:
+        value: ${{ jobs.build-library.outputs.artifact-id }}
+
+jobs:
+
+  get-version:
+    name: Get version information job
+    uses: ./.github/workflows/get-version-task.yml
+    secrets: inherit
+
+  build-library:
+    name: Build library project job
+    runs-on: ubuntu-latest
+    outputs:
+      artifact-id: ${{ steps.artifact-upload-step.outputs.artifact-id }}
+    needs: [get-version]
+
+    steps:
+
+      - name: Setup .NET SDK step
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.x
+
+      - name: Checkout code step
+        uses: actions/checkout@v6
+
+      - name: Build library project step
+        run: >-
+          dotnet build ${{ env.PROJECT_FILE }}
+          --output ${{ runner.temp }}/publish
+          --configuration ${{ env.IS_MAIN_BRANCH == 'true' && 'Release' || 'Debug' }}
+          -property:Version=${{ needs.get-version.outputs.AssemblyVersion }}
+          -property:FileVersion=${{ needs.get-version.outputs.AssemblyFileVersion }}
+          -property:AssemblyVersion=${{ needs.get-version.outputs.AssemblyVersion }}
+          -property:InformationalVersion=${{ needs.get-version.outputs.AssemblyInformationalVersion }}
+          -property:PackageVersion=${{ needs.get-version.outputs.SemVer2 }}
+
+      - name: Publish to NuGet.org step
+        if: ${{ inputs.push }}
+        run: >-
+            dotnet nuget push ${{ runner.temp }}/publish/*.nupkg
+            --source https://api.nuget.org/v3/index.json
+            --api-key ${{ secrets.NUGET_API_KEY }}
+            --skip-duplicate
+
+      - name: Zip output step
+        run: |
+          7z a -t7z ${{ runner.temp }}/${{ env.PROJECT_ARTIFACT }} ${{ runner.temp }}/publish/*
+
+      - name: Upload build artifacts step
+        id: artifact-upload-step
+        uses: actions/upload-artifact@v6
+        with:
+          name: library-build
+          path: ${{ runner.temp }}/${{ env.PROJECT_ARTIFACT }}

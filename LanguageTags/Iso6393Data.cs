@@ -267,7 +267,7 @@ public partial class Iso6393Data
 /// <summary>
 /// Represents an ISO 639-3 language code record.
 /// </summary>
-public record Iso6393Record
+public sealed record Iso6393Record
 {
     /// <summary>
     /// Gets the ISO 639-3 identifier (3 letters).

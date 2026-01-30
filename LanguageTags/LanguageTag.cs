@@ -317,7 +317,8 @@ public sealed record ExtensionTag(char Prefix, ImmutableArray<string> Tags)
     /// Converts this extension tag to its string representation.
     /// </summary>
     /// <returns>A string representation of the extension tag (e.g., "u-ca-buddhist").</returns>
-    public override string ToString() => $"{Prefix}-{string.Join('-', Tags)}";
+    public override string ToString() =>
+        Tags.IsEmpty ? string.Empty : $"{Prefix}-{string.Join('-', Tags)}";
 
     /// <summary>
     /// Creates a new extension tag with sorted and lowercased tags.

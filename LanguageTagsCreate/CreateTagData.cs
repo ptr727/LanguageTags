@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace ptr727.LanguageTags.Create;
 
 internal sealed class CreateTagData(
@@ -105,24 +107,23 @@ internal sealed class CreateTagData(
         ArgumentException.ThrowIfNullOrWhiteSpace(fileName, nameof(fileName));
 
         Log.Information("Downloading \"{Uri}\" to \"{FileName}\" ...", uri.ToString(), fileName);
+
         Stream httpStream = await HttpClientFactory
             .GetHttpClient()
             .GetStreamAsync(uri, cancellationToken)
             .ConfigureAwait(false);
-        await using (httpStream.ConfigureAwait(false))
-        {
-            FileStream fileStream = new(
-                fileName,
-                FileMode.Create,
-                FileAccess.Write,
-                FileShare.None,
-                8192,
-                true
-            );
-            await using (fileStream.ConfigureAwait(false))
-            {
-                await httpStream.CopyToAsync(fileStream, cancellationToken).ConfigureAwait(false);
-            }
-        }
+        await using ConfiguredAsyncDisposable httpStreamScope = httpStream.ConfigureAwait(false);
+
+        FileStream fileStream = new(
+            fileName,
+            FileMode.Create,
+            FileAccess.Write,
+            FileShare.None,
+            8192,
+            FileOptions.Asynchronous | FileOptions.SequentialScan
+        );
+        await using ConfiguredAsyncDisposable fileStreamScope = fileStream.ConfigureAwait(false);
+
+        await httpStream.CopyToAsync(fileStream, cancellationToken).ConfigureAwait(false);
     }
 }

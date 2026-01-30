@@ -8,7 +8,7 @@
             "preLaunchTask": ".Net Build",
             "program": "${workspaceFolder}/LanguageTagsCreate/bin/Debug/net10.0/LanguageTagsCreate.dll",
             "args": [
-                "--codepath"
+                "--codepath",
                 "${workspaceFolder}",
             ],
             "cwd": "${workspaceFolder}/LanguageTagsCreate/bin/Debug/net10.0",

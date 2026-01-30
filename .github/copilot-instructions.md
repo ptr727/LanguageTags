@@ -9,7 +9,7 @@
 
 **Current Version**: 1.2 (supports .NET 10.0, AOT compatible)
 
-**Important Note**: The implemented language tag parsing and normalization logic may be incomplete or inaccuriate per RFC 5646. Always verify results for your specific use case
+**Important Note**: The implemented language tag parsing and normalization logic may be incomplete or inaccurate per RFC 5646. Always verify results for your specific use case
 
 ## Solution Structure
 

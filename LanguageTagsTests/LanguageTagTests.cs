@@ -541,6 +541,13 @@ public class LanguageTagTests
     }
 
     [Fact]
+    public void ExtensionTag_EmptyTags_ToStringReturnsEmpty()
+    {
+        ExtensionTag extension = new('u', []);
+        _ = extension.ToString().Should().Be(string.Empty);
+    }
+
+    [Fact]
     public void ExtensionTag_EnumerableConstructor_CreatesTag()
     {
         List<string> tags = ["tag1", "tag2", "tag3"];

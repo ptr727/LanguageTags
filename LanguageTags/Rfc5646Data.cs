@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 
 namespace ptr727.LanguageTags;
@@ -30,6 +31,11 @@ public sealed partial class Rfc5646Data
     public static Task<Rfc5646Data> LoadDataAsync(string fileName, Options? options) =>
         LoadDataAsync(fileName, LogOptions.CreateLogger<Rfc5646Data>(options));
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Reliability",
+        "CA2007:Consider calling ConfigureAwait on the awaited task",
+        Justification = "https://github.com/dotnet/roslyn-analyzers/issues/7185"
+    )]
     private static async Task<Rfc5646Data> LoadDataAsync(string fileName, ILogger logger)
     {
         // File Format
@@ -42,7 +48,7 @@ public sealed partial class Rfc5646Data
         {
             List<Rfc5646Record> recordList = [];
             Parser parser = new();
-            FileStream fileStream = new(
+            await using FileStream fileStream = new(
                 fileName,
                 FileMode.Open,
                 FileAccess.Read,
@@ -50,30 +56,27 @@ public sealed partial class Rfc5646Data
                 4096,
                 FileOptions.Asynchronous | FileOptions.SequentialScan
             );
-            await using (fileStream.ConfigureAwait(false))
+            using StreamReader lineReader = new(fileStream);
+
+            // First record is file date
+            _ = await parser.ReadAttributesAsync(lineReader).ConfigureAwait(false);
+            DateOnly fileDate = parser.GetFileDate();
+
+            // Read all record attributes separated by %% until EOF
+            while (await parser.ReadAttributesAsync(lineReader).ConfigureAwait(false))
             {
-                using StreamReader lineReader = new(fileStream);
-
-                // First record is file date
-                _ = await parser.ReadAttributesAsync(lineReader).ConfigureAwait(false);
-                DateOnly fileDate = parser.GetFileDate();
-
-                // Read all record attributes separated by %% until EOF
-                while (await parser.ReadAttributesAsync(lineReader).ConfigureAwait(false))
-                {
-                    recordList.Add(parser.GetRecord());
-                }
                 recordList.Add(parser.GetRecord());
-
-                if (recordList.Count == 0)
-                {
-                    logger.LogDataLoadEmpty(nameof(Rfc5646Data), fileName);
-                }
-
-                Rfc5646Data data = new() { FileDate = fileDate, RecordList = [.. recordList] };
-                logger.LogDataLoaded(nameof(Rfc5646Data), fileName, data.RecordList.Length);
-                return data;
             }
+            recordList.Add(parser.GetRecord());
+
+            if (recordList.Count == 0)
+            {
+                logger.LogDataLoadEmpty(nameof(Rfc5646Data), fileName);
+            }
+
+            Rfc5646Data data = new() { FileDate = fileDate, RecordList = [.. recordList] };
+            logger.LogDataLoaded(nameof(Rfc5646Data), fileName, data.RecordList.Length);
+            return data;
         }
         catch (Exception exception)
         {
@@ -99,11 +102,16 @@ public sealed partial class Rfc5646Data
     public static Task<Rfc5646Data?> LoadJsonAsync(string fileName, Options? options) =>
         LoadJsonAsync(fileName, LogOptions.CreateLogger<Rfc5646Data>(options));
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Reliability",
+        "CA2007:Consider calling ConfigureAwait on the awaited task",
+        Justification = "https://github.com/dotnet/roslyn-analyzers/issues/7185"
+    )]
     private static async Task<Rfc5646Data?> LoadJsonAsync(string fileName, ILogger logger)
     {
         try
         {
-            FileStream fileStream = new(
+            await using FileStream fileStream = new(
                 fileName,
                 FileMode.Open,
                 FileAccess.Read,
@@ -111,22 +119,19 @@ public sealed partial class Rfc5646Data
                 4096,
                 FileOptions.Asynchronous | FileOptions.SequentialScan
             );
-            await using (fileStream.ConfigureAwait(false))
+            Rfc5646Data? data = await JsonSerializer
+                .DeserializeAsync(fileStream, LanguageJsonContext.Default.Rfc5646Data)
+                .ConfigureAwait(false);
+            if (data == null)
             {
-                Rfc5646Data? data = await JsonSerializer
-                    .DeserializeAsync(fileStream, LanguageJsonContext.Default.Rfc5646Data)
-                    .ConfigureAwait(false);
-                if (data == null)
-                {
-                    logger.LogDataLoadEmpty(nameof(Rfc5646Data), fileName);
-                }
-                else
-                {
-                    logger.LogDataLoaded(nameof(Rfc5646Data), fileName, data.RecordList.Length);
-                }
-
-                return data;
+                logger.LogDataLoadEmpty(nameof(Rfc5646Data), fileName);
             }
+            else
+            {
+                logger.LogDataLoaded(nameof(Rfc5646Data), fileName, data.RecordList.Length);
+            }
+
+            return data;
         }
         catch (Exception exception)
         {
@@ -135,9 +140,14 @@ public sealed partial class Rfc5646Data
         }
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Reliability",
+        "CA2007:Consider calling ConfigureAwait on the awaited task",
+        Justification = "https://github.com/dotnet/roslyn-analyzers/issues/7185"
+    )]
     internal static async Task SaveJsonAsync(string fileName, Rfc5646Data rfc5646)
     {
-        FileStream fileStream = new(
+        await using FileStream fileStream = new(
             fileName,
             FileMode.Create,
             FileAccess.Write,
@@ -145,100 +155,103 @@ public sealed partial class Rfc5646Data
             4096,
             FileOptions.Asynchronous | FileOptions.SequentialScan
         );
-        await using (fileStream.ConfigureAwait(false))
-        {
-            await JsonSerializer
-                .SerializeAsync(fileStream, rfc5646, LanguageJsonContext.Default.Rfc5646Data)
-                .ConfigureAwait(false);
-        }
+        await JsonSerializer
+            .SerializeAsync(fileStream, rfc5646, LanguageJsonContext.Default.Rfc5646Data)
+            .ConfigureAwait(false);
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Reliability",
+        "CA2007:Consider calling ConfigureAwait on the awaited task",
+        Justification = "https://github.com/dotnet/roslyn-analyzers/issues/7185"
+    )]
     internal static async Task GenCodeAsync(string fileName, Rfc5646Data rfc5646)
     {
         ArgumentNullException.ThrowIfNull(rfc5646);
-        FileStream fileStream = new(
-            fileName,
-            FileMode.Create,
-            FileAccess.Write,
-            FileShare.None,
-            4096,
-            FileOptions.Asynchronous | FileOptions.SequentialScan
-        );
-        await using (fileStream.ConfigureAwait(false))
+
+        StreamWriter writer = new(
+            new FileStream(
+                fileName,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.None,
+                4096,
+                FileOptions.Asynchronous | FileOptions.SequentialScan
+            ),
+            new UTF8Encoding(false)
+        )
         {
-            StreamWriter writer = new(fileStream, new UTF8Encoding(false)) { NewLine = "\r\n" };
-            await using (writer.ConfigureAwait(false))
-            {
-                System.Runtime.CompilerServices.ConfiguredTaskAwaitable WriteLineAsync(
-                    string value
-                ) => writer.WriteLineAsync(value).ConfigureAwait(false);
+            NewLine = "\r\n",
+        };
+        await using ConfiguredAsyncDisposable writerScope = writer.ConfigureAwait(false);
 
-                await WriteLineAsync("namespace ptr727.LanguageTags;");
-                await WriteLineAsync(string.Empty);
-                await WriteLineAsync("/// <summary>");
-                await WriteLineAsync(
-                    "/// Provides access to RFC 5646 / BCP 47 language subtag registry data."
-                );
-                await WriteLineAsync("/// </summary>");
-                await WriteLineAsync("public sealed partial class Rfc5646Data");
-                await WriteLineAsync("{");
-                await WriteLineAsync("    public static Rfc5646Data Create() =>");
-                await WriteLineAsync("        new()");
-                await WriteLineAsync("        {");
-                await WriteLineAsync(
-                    $"            FileDate = {LanguageSchema.GetCodeGenString(rfc5646.FileDate)},"
-                );
-                await WriteLineAsync("            RecordList =");
-                await WriteLineAsync("            [");
+        ConfiguredTaskAwaitable WriteLineAsync(string value) =>
+            writer.WriteLineAsync(value).ConfigureAwait(false);
 
-                foreach (Rfc5646Record record in rfc5646.RecordList)
-                {
-                    await WriteLineAsync("                new()");
-                    await WriteLineAsync("                {");
-                    await WriteLineAsync(
-                        $"                    Type = {LanguageSchema.GetCodeGenString(record.Type)},"
-                    );
-                    await WriteLineAsync(
-                        $"                    SubTag = {LanguageSchema.GetCodeGenString(record.SubTag)},"
-                    );
-                    await WriteLineAsync(
-                        $"                    Added = {LanguageSchema.GetCodeGenString(record.Added)},"
-                    );
-                    await WriteLineAsync(
-                        $"                    SuppressScript = {LanguageSchema.GetCodeGenString(record.SuppressScript)},"
-                    );
-                    await WriteLineAsync(
-                        $"                    Scope = {LanguageSchema.GetCodeGenString(record.Scope)},"
-                    );
-                    await WriteLineAsync(
-                        $"                    MacroLanguage = {LanguageSchema.GetCodeGenString(record.MacroLanguage)},"
-                    );
-                    await WriteLineAsync(
-                        $"                    Deprecated = {LanguageSchema.GetCodeGenString(record.Deprecated)},"
-                    );
-                    await WriteLineAsync(
-                        $"                    PreferredValue = {LanguageSchema.GetCodeGenString(record.PreferredValue)},"
-                    );
-                    await WriteLineAsync(
-                        $"                    Tag = {LanguageSchema.GetCodeGenString(record.Tag)},"
-                    );
-                    await WriteLineAsync(
-                        $"                    Description = {LanguageSchema.GetCodeGenString(record.Description)},"
-                    );
-                    await WriteLineAsync(
-                        $"                    Comments = {LanguageSchema.GetCodeGenString(record.Comments)},"
-                    );
-                    await WriteLineAsync(
-                        $"                    Prefix = {LanguageSchema.GetCodeGenString(record.Prefix)},"
-                    );
-                    await WriteLineAsync("                },");
-                }
+        await WriteLineAsync("namespace ptr727.LanguageTags;");
+        await WriteLineAsync(string.Empty);
+        await WriteLineAsync("/// <summary>");
+        await WriteLineAsync(
+            "/// Provides access to RFC 5646 / BCP 47 language subtag registry data."
+        );
+        await WriteLineAsync("/// </summary>");
+        await WriteLineAsync("public sealed partial class Rfc5646Data");
+        await WriteLineAsync("{");
+        await WriteLineAsync("    public static Rfc5646Data Create() =>");
+        await WriteLineAsync("        new()");
+        await WriteLineAsync("        {");
+        await WriteLineAsync(
+            $"            FileDate = {LanguageSchema.GetCodeGenString(rfc5646.FileDate)},"
+        );
+        await WriteLineAsync("            RecordList =");
+        await WriteLineAsync("            [");
 
-                await WriteLineAsync("            ],");
-                await WriteLineAsync("        };");
-                await WriteLineAsync("}");
-            }
+        foreach (Rfc5646Record record in rfc5646.RecordList)
+        {
+            await WriteLineAsync("                new()");
+            await WriteLineAsync("                {");
+            await WriteLineAsync(
+                $"                    Type = {LanguageSchema.GetCodeGenString(record.Type)},"
+            );
+            await WriteLineAsync(
+                $"                    SubTag = {LanguageSchema.GetCodeGenString(record.SubTag)},"
+            );
+            await WriteLineAsync(
+                $"                    Added = {LanguageSchema.GetCodeGenString(record.Added)},"
+            );
+            await WriteLineAsync(
+                $"                    SuppressScript = {LanguageSchema.GetCodeGenString(record.SuppressScript)},"
+            );
+            await WriteLineAsync(
+                $"                    Scope = {LanguageSchema.GetCodeGenString(record.Scope)},"
+            );
+            await WriteLineAsync(
+                $"                    MacroLanguage = {LanguageSchema.GetCodeGenString(record.MacroLanguage)},"
+            );
+            await WriteLineAsync(
+                $"                    Deprecated = {LanguageSchema.GetCodeGenString(record.Deprecated)},"
+            );
+            await WriteLineAsync(
+                $"                    PreferredValue = {LanguageSchema.GetCodeGenString(record.PreferredValue)},"
+            );
+            await WriteLineAsync(
+                $"                    Tag = {LanguageSchema.GetCodeGenString(record.Tag)},"
+            );
+            await WriteLineAsync(
+                $"                    Description = {LanguageSchema.GetCodeGenString(record.Description)},"
+            );
+            await WriteLineAsync(
+                $"                    Comments = {LanguageSchema.GetCodeGenString(record.Comments)},"
+            );
+            await WriteLineAsync(
+                $"                    Prefix = {LanguageSchema.GetCodeGenString(record.Prefix)},"
+            );
+            await WriteLineAsync("                },");
         }
+
+        await WriteLineAsync("            ],");
+        await WriteLineAsync("        };");
+        await WriteLineAsync("}");
     }
 
     internal sealed class Parser

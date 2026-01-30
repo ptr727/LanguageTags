@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace ptr727.LanguageTags;
 
 /// <summary>
@@ -27,6 +29,11 @@ public sealed partial class Iso6392Data
     public static Task<Iso6392Data> LoadDataAsync(string fileName, Options? options) =>
         LoadDataAsync(fileName, LogOptions.CreateLogger<Iso6392Data>(options));
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Reliability",
+        "CA2007:Consider calling ConfigureAwait on the awaited task",
+        Justification = "https://github.com/dotnet/roslyn-analyzers/issues/7185"
+    )]
     private static async Task<Iso6392Data> LoadDataAsync(string fileName, ILogger logger)
     {
         // https://www.loc.gov/standards/iso639-2/ascii_8bits.html
@@ -42,7 +49,7 @@ public sealed partial class Iso6392Data
         {
             // Read line by line
             List<Iso6392Record> recordList = [];
-            FileStream fileStream = new(
+            await using FileStream fileStream = new(
                 fileName,
                 FileMode.Open,
                 FileAccess.Read,
@@ -50,36 +57,33 @@ public sealed partial class Iso6392Data
                 4096,
                 FileOptions.Asynchronous | FileOptions.SequentialScan
             );
-            await using (fileStream.ConfigureAwait(false))
+            using StreamReader lineReader = new(fileStream);
+            while (await lineReader.ReadLineAsync().ConfigureAwait(false) is { } line)
             {
-                using StreamReader lineReader = new(fileStream);
-                while (await lineReader.ReadLineAsync().ConfigureAwait(false) is { } line)
+                // Parse using pipe character
+                List<string> records = [.. line.Split('|').Select(item => item.Trim())];
+                if (records.Count != 5)
                 {
-                    // Parse using pipe character
-                    List<string> records = [.. line.Split('|').Select(item => item.Trim())];
-                    if (records.Count != 5)
-                    {
-                        throw new InvalidDataException(
-                            $"Invalid data found in ISO 639-2 record: {line}"
-                        );
-                    }
-
-                    // Populate record
-                    Iso6392Record record = new()
-                    {
-                        Part2B = string.IsNullOrEmpty(records[0]) ? null : records[0],
-                        Part2T = string.IsNullOrEmpty(records[1]) ? null : records[1],
-                        Part1 = string.IsNullOrEmpty(records[2]) ? null : records[2],
-                        RefName = string.IsNullOrEmpty(records[3]) ? null : records[3],
-                    };
-                    if (string.IsNullOrEmpty(record.Part2B) || string.IsNullOrEmpty(record.RefName))
-                    {
-                        throw new InvalidDataException(
-                            $"Invalid data found in ISO 639-2 record: {line}"
-                        );
-                    }
-                    recordList.Add(record);
+                    throw new InvalidDataException(
+                        $"Invalid data found in ISO 639-2 record: {line}"
+                    );
                 }
+
+                // Populate record
+                Iso6392Record record = new()
+                {
+                    Part2B = string.IsNullOrEmpty(records[0]) ? null : records[0],
+                    Part2T = string.IsNullOrEmpty(records[1]) ? null : records[1],
+                    Part1 = string.IsNullOrEmpty(records[2]) ? null : records[2],
+                    RefName = string.IsNullOrEmpty(records[3]) ? null : records[3],
+                };
+                if (string.IsNullOrEmpty(record.Part2B) || string.IsNullOrEmpty(record.RefName))
+                {
+                    throw new InvalidDataException(
+                        $"Invalid data found in ISO 639-2 record: {line}"
+                    );
+                }
+                recordList.Add(record);
             }
 
             if (recordList.Count == 0)
@@ -116,11 +120,16 @@ public sealed partial class Iso6392Data
     public static Task<Iso6392Data?> LoadJsonAsync(string fileName, Options? options) =>
         LoadJsonAsync(fileName, LogOptions.CreateLogger<Iso6392Data>(options));
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Reliability",
+        "CA2007:Consider calling ConfigureAwait on the awaited task",
+        Justification = "https://github.com/dotnet/roslyn-analyzers/issues/7185"
+    )]
     private static async Task<Iso6392Data?> LoadJsonAsync(string fileName, ILogger logger)
     {
         try
         {
-            FileStream fileStream = new(
+            await using FileStream fileStream = new(
                 fileName,
                 FileMode.Open,
                 FileAccess.Read,
@@ -128,22 +137,19 @@ public sealed partial class Iso6392Data
                 4096,
                 FileOptions.Asynchronous | FileOptions.SequentialScan
             );
-            await using (fileStream.ConfigureAwait(false))
+            Iso6392Data? data = await JsonSerializer
+                .DeserializeAsync(fileStream, LanguageJsonContext.Default.Iso6392Data)
+                .ConfigureAwait(false);
+            if (data == null)
             {
-                Iso6392Data? data = await JsonSerializer
-                    .DeserializeAsync(fileStream, LanguageJsonContext.Default.Iso6392Data)
-                    .ConfigureAwait(false);
-                if (data == null)
-                {
-                    logger.LogDataLoadEmpty(nameof(Iso6392Data), fileName);
-                }
-                else
-                {
-                    logger.LogDataLoaded(nameof(Iso6392Data), fileName, data.RecordList.Length);
-                }
-
-                return data;
+                logger.LogDataLoadEmpty(nameof(Iso6392Data), fileName);
             }
+            else
+            {
+                logger.LogDataLoaded(nameof(Iso6392Data), fileName, data.RecordList.Length);
+            }
+
+            return data;
         }
         catch (Exception exception)
         {
@@ -152,9 +158,14 @@ public sealed partial class Iso6392Data
         }
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Reliability",
+        "CA2007:Consider calling ConfigureAwait on the awaited task",
+        Justification = "https://github.com/dotnet/roslyn-analyzers/issues/7185"
+    )]
     internal static async Task SaveJsonAsync(string fileName, Iso6392Data iso6392)
     {
-        FileStream fileStream = new(
+        await using FileStream fileStream = new(
             fileName,
             FileMode.Create,
             FileAccess.Write,
@@ -162,71 +173,73 @@ public sealed partial class Iso6392Data
             4096,
             FileOptions.Asynchronous | FileOptions.SequentialScan
         );
-        await using (fileStream.ConfigureAwait(false))
-        {
-            await JsonSerializer
-                .SerializeAsync(fileStream, iso6392, LanguageJsonContext.Default.Iso6392Data)
-                .ConfigureAwait(false);
-        }
+        await JsonSerializer
+            .SerializeAsync(fileStream, iso6392, LanguageJsonContext.Default.Iso6392Data)
+            .ConfigureAwait(false);
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Reliability",
+        "CA2007:Consider calling ConfigureAwait on the awaited task",
+        Justification = "https://github.com/dotnet/roslyn-analyzers/issues/7185"
+    )]
     internal static async Task GenCodeAsync(string fileName, Iso6392Data iso6392)
     {
         ArgumentNullException.ThrowIfNull(iso6392);
-        FileStream fileStream = new(
-            fileName,
-            FileMode.Create,
-            FileAccess.Write,
-            FileShare.None,
-            4096,
-            FileOptions.Asynchronous | FileOptions.SequentialScan
-        );
-        await using (fileStream.ConfigureAwait(false))
+        StreamWriter writer = new(
+            new FileStream(
+                fileName,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.None,
+                4096,
+                FileOptions.Asynchronous | FileOptions.SequentialScan
+            ),
+            new UTF8Encoding(false)
+        )
         {
-            StreamWriter writer = new(fileStream, new UTF8Encoding(false)) { NewLine = "\r\n" };
-            await using (writer.ConfigureAwait(false))
-            {
-                System.Runtime.CompilerServices.ConfiguredTaskAwaitable WriteLineAsync(
-                    string value
-                ) => writer.WriteLineAsync(value).ConfigureAwait(false);
+            NewLine = "\r\n",
+        };
+        await using ConfiguredAsyncDisposable writerScope = writer.ConfigureAwait(false);
 
-                await WriteLineAsync("namespace ptr727.LanguageTags;");
-                await WriteLineAsync(string.Empty);
-                await WriteLineAsync("/// <summary>");
-                await WriteLineAsync("/// Provides access to ISO 639-2 language code data.");
-                await WriteLineAsync("/// </summary>");
-                await WriteLineAsync("public sealed partial class Iso6392Data");
-                await WriteLineAsync("{");
-                await WriteLineAsync("    public static Iso6392Data Create() =>");
-                await WriteLineAsync("        new()");
-                await WriteLineAsync("        {");
-                await WriteLineAsync("            RecordList =");
-                await WriteLineAsync("            [");
+        ConfiguredTaskAwaitable WriteLineAsync(string value) =>
+            writer.WriteLineAsync(value).ConfigureAwait(false);
 
-                foreach (Iso6392Record record in iso6392.RecordList)
-                {
-                    await WriteLineAsync("                new()");
-                    await WriteLineAsync("                {");
-                    await WriteLineAsync(
-                        $"                    Part2B = {LanguageSchema.GetCodeGenString(record.Part2B)},"
-                    );
-                    await WriteLineAsync(
-                        $"                    Part2T = {LanguageSchema.GetCodeGenString(record.Part2T)},"
-                    );
-                    await WriteLineAsync(
-                        $"                    Part1 = {LanguageSchema.GetCodeGenString(record.Part1)},"
-                    );
-                    await WriteLineAsync(
-                        $"                    RefName = {LanguageSchema.GetCodeGenString(record.RefName)},"
-                    );
-                    await WriteLineAsync("                },");
-                }
+        await WriteLineAsync("namespace ptr727.LanguageTags;");
+        await WriteLineAsync(string.Empty);
+        await WriteLineAsync("/// <summary>");
+        await WriteLineAsync("/// Provides access to ISO 639-2 language code data.");
+        await WriteLineAsync("/// </summary>");
+        await WriteLineAsync("public sealed partial class Iso6392Data");
+        await WriteLineAsync("{");
+        await WriteLineAsync("    public static Iso6392Data Create() =>");
+        await WriteLineAsync("        new()");
+        await WriteLineAsync("        {");
+        await WriteLineAsync("            RecordList =");
+        await WriteLineAsync("            [");
 
-                await WriteLineAsync("            ],");
-                await WriteLineAsync("        };");
-                await WriteLineAsync("}");
-            }
+        foreach (Iso6392Record record in iso6392.RecordList)
+        {
+            await WriteLineAsync("                new()");
+            await WriteLineAsync("                {");
+            await WriteLineAsync(
+                $"                    Part2B = {LanguageSchema.GetCodeGenString(record.Part2B)},"
+            );
+            await WriteLineAsync(
+                $"                    Part2T = {LanguageSchema.GetCodeGenString(record.Part2T)},"
+            );
+            await WriteLineAsync(
+                $"                    Part1 = {LanguageSchema.GetCodeGenString(record.Part1)},"
+            );
+            await WriteLineAsync(
+                $"                    RefName = {LanguageSchema.GetCodeGenString(record.RefName)},"
+            );
+            await WriteLineAsync("                },");
         }
+
+        await WriteLineAsync("            ],");
+        await WriteLineAsync("        };");
+        await WriteLineAsync("}");
     }
 
     /// <summary>

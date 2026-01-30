@@ -8,10 +8,6 @@ internal sealed class Program(
     private const string DataDirectory = "LanguageData";
     private const string CodeDirectory = "LanguageTags";
 
-    internal CommandLine.Options GetCommandLineOptions() => commandLineOptions;
-
-    internal CancellationToken GetCancellationToken() => cancellationToken;
-
     internal static async Task<int> Main(string[] args)
     {
         // Parse commandline

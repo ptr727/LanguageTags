@@ -56,9 +56,12 @@ The main public API for working with language tags:
 
 **Static Factory Methods:**
 - `Parse(string tag)`: Parse a language tag string, returns null on failure
+- `Parse(string tag, Options? options)`: Parse with per-call logging options
 - `TryParse(string tag, out LanguageTag? result)`: Safe parsing with out parameter
+- `TryParse(string tag, out LanguageTag? result, Options? options)`: Safe parsing with per-call logging options
 - `ParseOrDefault(string tag, LanguageTag? defaultTag = null)`: Parse with fallback to "und"
 - `ParseAndNormalize(string tag)`: Parse and normalize in one step
+- `ParseAndNormalize(string tag, Options? options)`: Parse and normalize with per-call logging options
 - `CreateBuilder()`: Create a fluent builder instance
 - `FromLanguage(string language)`: Factory for simple language tags
 - `FromLanguageRegion(string language, string region)`: Factory for language+region tags
@@ -77,6 +80,7 @@ The main public API for working with language tags:
 **Instance Methods:**
 - `Validate()`: Verify tag correctness
 - `Normalize()`: Return normalized copy of tag
+- `Normalize(Options? options)`: Return normalized copy with per-call logging options
 - `ToString()`: String representation
 - `Equals()`: Equality comparison (case-insensitive)
 - `GetHashCode()`: Hash code for collections
@@ -104,6 +108,7 @@ Fluent builder for constructing language tags:
 - `PrivateUseAddRange(IEnumerable<string> values)`: Add multiple private use tags
 - `Build()`: Return constructed tag (no validation)
 - `Normalize()`: Return normalized tag (with validation)
+- `Normalize(Options? options)`: Return normalized tag with per-call logging options
 
 ### LanguageTagParser Class (LanguageTagParser.cs)
 
@@ -133,33 +138,39 @@ Provides language code conversion and matching:
 - `GetIsoFromIetf(string languageTag)`: Convert IETF to ISO format
 - `IsMatch(string prefix, string languageTag)`: Prefix matching for content selection
 
+**Construction:**
+- `new LanguageLookup(Options? options = null)`: Optional per-instance logging
+
 ### Data Models
 
 #### Iso6392Data.cs
 - ISO 639-2 language codes (3-letter bibliographic/terminologic codes)
 - **Public Methods:**
   - `Create()`: Load embedded data
-  - `LoadData(string fileName)`: Load from file
-  - `LoadJson(string fileName)`: Load from JSON
+  - `LoadDataAsync(string fileName)`: Load from file
+  - `LoadJsonAsync(string fileName)`: Load from JSON
   - `Find(string? languageTag, bool includeDescription)`: Find record by tag
+  - `Find(string? languageTag, bool includeDescription, Options? options)`: Find record by tag with logging options
 - **Record Properties:** `Part2B`, `Part2T`, `Part1`, `RefName`
 
 #### Iso6393Data.cs
 - ISO 639-3 language codes (comprehensive language codes)
 - **Public Methods:**
   - `Create()`: Load embedded data
-  - `LoadData(string fileName)`: Load from file
-  - `LoadJson(string fileName)`: Load from JSON
+  - `LoadDataAsync(string fileName)`: Load from file
+  - `LoadJsonAsync(string fileName)`: Load from JSON
   - `Find(string? languageTag, bool includeDescription)`: Find record by tag
+  - `Find(string? languageTag, bool includeDescription, Options? options)`: Find record by tag with logging options
 - **Record Properties:** `Id`, `Part2B`, `Part2T`, `Part1`, `Scope`, `LanguageType`, `RefName`, `Comment`
 
 #### Rfc5646Data.cs
 - RFC 5646 / BCP 47 language subtag registry
 - **Public Methods:**
   - `Create()`: Load embedded data
-  - `LoadData(string fileName)`: Load from file
-  - `LoadJson(string fileName)`: Load from JSON
+  - `LoadDataAsync(string fileName)`: Load from file
+  - `LoadJsonAsync(string fileName)`: Load from JSON
   - `Find(string? languageTag, bool includeDescription)`: Find record by tag
+  - `Find(string? languageTag, bool includeDescription, Options? options)`: Find record by tag with logging options
 - **Properties:** `FileDate`, `RecordList`
 - **Record Properties:** `Type`, `Tag`, `SubTag`, `Description` (ImmutableArray), `Added`, `SuppressScript`, `Scope`, `MacroLanguage`, `Deprecated`, `Comments` (ImmutableArray), `Prefix` (ImmutableArray), `PreferredValue`, `TagAny`
 - **Enums:**
@@ -268,15 +279,18 @@ LanguageTag tag = LanguageTag.ParseOrDefault(input); // Falls back to "und"
   - `VariantList` → `Variants`
   - `ExtensionList` → `Extensions`
   - `TagList` → `Tags`
-- `LoadData()` and `LoadJson()` changed from internal to public in data classes
+- Data file APIs are async-only: `LoadDataAsync()`/`LoadJsonAsync()`; sync versions removed
 - Tag construction requires use of factory methods or builder (constructors are internal)
 
 ### Added (Non-Breaking)
 - `LanguageTag.ParseOrDefault()`: Safe parsing with fallback
 - `LanguageTag.ParseAndNormalize()`: Combined parse and normalize
+- `LanguageTag.ParseAndNormalize(string, Options?)`: Combined parse and normalize with logging options
 - `LanguageTag.IsValid`: Property for validation
 - `LanguageTag.FromLanguage()`, `FromLanguageRegion()`, `FromLanguageScriptRegion()`: Factory methods
 - `IEquatable<LanguageTag>` implementation with operators
+- Options-aware logging for parsing/normalization and lookup (`Options` + `LogOptions`)
+- `LanguageLookup` supports optional logging via primary constructor
 - Comprehensive XML documentation for all public APIs
 
 ## Future Improvements

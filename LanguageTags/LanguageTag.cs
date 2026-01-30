@@ -320,16 +320,41 @@ public sealed record ExtensionTag(char Prefix, ImmutableArray<string> Tags)
     public override string ToString() =>
         Tags.IsEmpty ? string.Empty : $"{Prefix}-{string.Join('-', Tags)}";
 
-    /// <summary>
-    /// Creates a new extension tag with sorted and lowercased tags.
-    /// </summary>
-    /// <returns>A normalized copy of this extension tag.</returns>
     internal ExtensionTag Normalize() =>
         this with
         {
             Prefix = char.ToLowerInvariant(Prefix),
             Tags = [.. Tags.Select(t => t.ToLowerInvariant()).OrderBy(t => t)],
         };
+
+    /// <summary>
+    /// Determines whether this instance is equal to another <see cref="ExtensionTag"/>.
+    /// </summary>
+    /// <param name="other">The <see cref="ExtensionTag"/> to compare with.</param>
+    /// <returns>true if the extension tags are equal; otherwise, false.</returns>
+    public bool Equals(ExtensionTag? other) =>
+        ReferenceEquals(this, other)
+        || (
+            other is not null
+            && char.ToLowerInvariant(Prefix) == char.ToLowerInvariant(other.Prefix)
+            && Tags.SequenceEqual(other.Tags, StringComparer.OrdinalIgnoreCase)
+        );
+
+    /// <summary>
+    /// Returns the hash code for this extension tag.
+    /// </summary>
+    /// <returns>A hash code for the current extension tag.</returns>
+    public override int GetHashCode()
+    {
+        HashCode hashCode = new();
+        hashCode.Add(char.ToLowerInvariant(Prefix));
+        foreach (string tag in Tags)
+        {
+            hashCode.Add(tag, StringComparer.OrdinalIgnoreCase);
+        }
+
+        return hashCode.ToHashCode();
+    }
 }
 
 /// <summary>
@@ -363,13 +388,33 @@ public sealed record PrivateUseTag(ImmutableArray<string> Tags)
     public override string ToString() =>
         Tags.IsEmpty ? string.Empty : $"{Prefix}-{string.Join('-', Tags)}";
 
-    /// <summary>
-    /// Creates a new private use tag with sorted and lowercased tags.
-    /// </summary>
-    /// <returns>A normalized copy of this private use tag.</returns>
     internal PrivateUseTag Normalize() =>
         this with
         {
             Tags = [.. Tags.Select(t => t.ToLowerInvariant()).OrderBy(t => t)],
         };
+
+    /// <summary>
+    /// Determines whether this instance is equal to another <see cref="PrivateUseTag"/>.
+    /// </summary>
+    /// <param name="other">The <see cref="PrivateUseTag"/> to compare with.</param>
+    /// <returns>true if the private use tags are equal; otherwise, false.</returns>
+    public bool Equals(PrivateUseTag? other) =>
+        ReferenceEquals(this, other)
+        || (other is not null && Tags.SequenceEqual(other.Tags, StringComparer.OrdinalIgnoreCase));
+
+    /// <summary>
+    /// Returns the hash code for this private use tag.
+    /// </summary>
+    /// <returns>A hash code for the current private use tag.</returns>
+    public override int GetHashCode()
+    {
+        HashCode hashCode = new();
+        foreach (string tag in Tags)
+        {
+            hashCode.Add(tag, StringComparer.OrdinalIgnoreCase);
+        }
+
+        return hashCode.ToHashCode();
+    }
 }

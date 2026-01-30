@@ -290,7 +290,9 @@ internal sealed class LanguageTagParser
 
     private static bool ValidateExtension(string tag) =>
         // 2 - 8 chars
-        !string.IsNullOrEmpty(tag) && tag.Length is >= 2 and <= 8;
+        !string.IsNullOrWhiteSpace(tag)
+        && tag.Length is >= 2 and <= 8
+        && !tag.Any(char.IsWhiteSpace);
 
     private bool ParseExtension()
     {
@@ -788,7 +790,8 @@ internal sealed class LanguageTagParser
         }
         if (
             languageTag._extensions.Any(extension =>
-                !ValidateExtensionPrefix(extension.Prefix.ToString())
+                extension.Tags.IsEmpty
+                || !ValidateExtensionPrefix(extension.Prefix.ToString())
                 || extension.Tags.Any(tag => !ValidateExtension(tag))
             )
         )

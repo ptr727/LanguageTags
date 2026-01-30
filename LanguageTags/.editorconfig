@@ -5,3 +5,6 @@ root = false
 
 # Ignore normalize strings to uppercase
 dotnet_diagnostic.CA1308.severity = none
+
+# Ignore missing XML comments
+dotnet_diagnostic.CS1591.severity = none

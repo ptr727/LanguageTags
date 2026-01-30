@@ -7,6 +7,10 @@
 1. **Data Publishing**: Provides ISO 639-2, ISO 639-3, and RFC 5646 language tag records in JSON and C# formats
 2. **Tag Processing**: Implements IETF BCP 47 language tag construction and parsing per RFC 5646 semantic rules
 
+**Current Version**: 1.2 (supports .NET 10.0, AOT compatible)
+
+**Important Note**: The implemented language tag parsing and normalization logic may be incomplete or inaccurate per RFC 5646. Always verify results for your specific use case
+
 ## Solution Structure
 
 ### Projects
@@ -38,9 +42,11 @@
   - Updated weekly via GitHub Actions
 
 - **.github/workflows/**
-  - `update-languagedata.yml`: Weekly scheduled job to update language data
+  - `run-periodic-codegen-pull-request.yml`: Weekly scheduled job to update language data
   - `publish-release.yml`: Release and NuGet publishing workflow
-  - `merge-bot-pr.yml`: Automated PR merge workflow
+  - `merge-bot-pull-request.yml`: Automated PR merge workflow
+  - `build-release-task.yml`, `build-library-task.yml`: Build tasks
+  - `get-version-task.yml`, `build-datebadge-task.yml`: Version and badge generation
 
 ## Core Components
 
@@ -50,9 +56,12 @@ The main public API for working with language tags:
 
 **Static Factory Methods:**
 - `Parse(string tag)`: Parse a language tag string, returns null on failure
+- `Parse(string tag, Options? options)`: Parse with per-call logging options
 - `TryParse(string tag, out LanguageTag? result)`: Safe parsing with out parameter
+- `TryParse(string tag, out LanguageTag? result, Options? options)`: Safe parsing with per-call logging options
 - `ParseOrDefault(string tag, LanguageTag? defaultTag = null)`: Parse with fallback to "und"
 - `ParseAndNormalize(string tag)`: Parse and normalize in one step
+- `ParseAndNormalize(string tag, Options? options)`: Parse and normalize with per-call logging options
 - `CreateBuilder()`: Create a fluent builder instance
 - `FromLanguage(string language)`: Factory for simple language tags
 - `FromLanguageRegion(string language, string region)`: Factory for language+region tags
@@ -71,6 +80,7 @@ The main public API for working with language tags:
 **Instance Methods:**
 - `Validate()`: Verify tag correctness
 - `Normalize()`: Return normalized copy of tag
+- `Normalize(Options? options)`: Return normalized copy with per-call logging options
 - `ToString()`: String representation
 - `Equals()`: Equality comparison (case-insensitive)
 - `GetHashCode()`: Hash code for collections
@@ -98,6 +108,7 @@ Fluent builder for constructing language tags:
 - `PrivateUseAddRange(IEnumerable<string> values)`: Add multiple private use tags
 - `Build()`: Return constructed tag (no validation)
 - `Normalize()`: Return normalized tag (with validation)
+- `Normalize(Options? options)`: Return normalized tag with per-call logging options
 
 ### LanguageTagParser Class (LanguageTagParser.cs)
 
@@ -127,33 +138,39 @@ Provides language code conversion and matching:
 - `GetIsoFromIetf(string languageTag)`: Convert IETF to ISO format
 - `IsMatch(string prefix, string languageTag)`: Prefix matching for content selection
 
+**Construction:**
+- `new LanguageLookup(Options? options = null)`: Optional per-instance logging
+
 ### Data Models
 
 #### Iso6392Data.cs
 - ISO 639-2 language codes (3-letter bibliographic/terminologic codes)
 - **Public Methods:**
   - `Create()`: Load embedded data
-  - `LoadData(string fileName)`: Load from file
-  - `LoadJson(string fileName)`: Load from JSON
+  - `LoadDataAsync(string fileName)`: Load from file
+  - `LoadJsonAsync(string fileName)`: Load from JSON
   - `Find(string? languageTag, bool includeDescription)`: Find record by tag
+  - `Find(string? languageTag, bool includeDescription, Options? options)`: Find record by tag with logging options
 - **Record Properties:** `Part2B`, `Part2T`, `Part1`, `RefName`
 
 #### Iso6393Data.cs
 - ISO 639-3 language codes (comprehensive language codes)
 - **Public Methods:**
   - `Create()`: Load embedded data
-  - `LoadData(string fileName)`: Load from file
-  - `LoadJson(string fileName)`: Load from JSON
+  - `LoadDataAsync(string fileName)`: Load from file
+  - `LoadJsonAsync(string fileName)`: Load from JSON
   - `Find(string? languageTag, bool includeDescription)`: Find record by tag
+  - `Find(string? languageTag, bool includeDescription, Options? options)`: Find record by tag with logging options
 - **Record Properties:** `Id`, `Part2B`, `Part2T`, `Part1`, `Scope`, `LanguageType`, `RefName`, `Comment`
 
 #### Rfc5646Data.cs
 - RFC 5646 / BCP 47 language subtag registry
 - **Public Methods:**
   - `Create()`: Load embedded data
-  - `LoadData(string fileName)`: Load from file
-  - `LoadJson(string fileName)`: Load from JSON
+  - `LoadDataAsync(string fileName)`: Load from file
+  - `LoadJsonAsync(string fileName)`: Load from JSON
   - `Find(string? languageTag, bool includeDescription)`: Find record by tag
+  - `Find(string? languageTag, bool includeDescription, Options? options)`: Find record by tag with logging options
 - **Properties:** `FileDate`, `RecordList`
 - **Record Properties:** `Type`, `Tag`, `SubTag`, `Description` (ImmutableArray), `Added`, `SuppressScript`, `Scope`, `MacroLanguage`, `Deprecated`, `Comments` (ImmutableArray), `Prefix` (ImmutableArray), `PreferredValue`, `TagAny`
 - **Enums:**
@@ -183,83 +200,6 @@ Examples:
 - `zh`: Simple language tag
 - `zh-yue-hk`: Language with extended language and region
 - `en-latn-gb-boont-r-extended-sequence-x-private`: Full tag with all components
-
-## Development Guidelines
-
-### Code Style
-
-- **C# Version**: 14.0 (latest features)
-- **Target Framework**: .NET 10.0
-- Use modern C# features and syntax
-- Follow .NET naming conventions
-- Use collection expressions: `[]` instead of `new List<>()`
-- Use `ImmutableArray` for public collections
-- Use file-scoped namespaces
-- **Required**: Include XML documentation (`///`) for ALL public APIs
-- Use `init` accessors for immutable properties where appropriate
-- Use `internal set` for properties that need internal mutability
-- Use readonly fields where appropriate
-- Prefer primary constructors where applicable
-
-### XML Documentation Requirements
-
-All public classes, methods, properties, enums, and operators **must** have XML documentation:
-
-```csharp
-/// <summary>
-/// Brief description of the member.
-/// </summary>
-/// <param name="paramName">Description of parameter.</param>
-/// <returns>Description of return value.</returns>
-/// <exception cref="ExceptionType">When this exception is thrown.</exception>
-public ReturnType MethodName(ParamType paramName)
-```
-
-### Immutability and Thread Safety
-
-- All data classes (`Iso6392Data`, `Iso6393Data`, `Rfc5646Data`) are immutable
-- Records can be safely shared across threads
-- Use `ImmutableArray<T>` for collections in public APIs
-- Properties expose immutable collections; internal backing stores can be mutable
-
-### Testing Requirements
-
-- **100% coverage** of all public APIs required
-- Write unit tests for:
-  - All public methods
-  - All static factory methods
-  - Property accessors
-  - Equality members
-  - Edge cases (null, empty, invalid inputs)
-  - Case-insensitive behavior
-  - Roundtrip scenarios (parse → normalize → toString)
-- Tests are organized by component:
-  - `LanguageTagTests.cs`: 77+ tests for LanguageTag class
-  - `LanguageTagBuilderTests.cs`: Builder functionality
-  - `LanguageTagParserTests.cs`: Parser and normalization
-  - `LanguageLookupTests.cs`: Conversion and matching
-  - `Iso6392Tests.cs`, `Iso6393Tests.cs`, `Rfc5646Tests.cs`: Data access
-- Use descriptive test method names that explain the scenario
-- Leverage AwesomeAssertions for fluent assertions
-- Use `[Theory]` with `[InlineData]` for parameterized tests
-
-### Tools and Formatting
-
-Available VS Code tasks:
-- `.Net Build`: Build the solution
-- `.Net Format`: Format code using dotnet format
-- `CSharpier Format`: Format code using CSharpier
-- `.Net Tool Update`: Update all .NET tools
-- `Husky.Net Run`: Run Husky pre-commit hooks
-
-### Package Management
-
-- Uses Microsoft.SourceLink.GitHub for source linking
-- Generates symbols package (.snupkg) for debugging
-- Embeds untracked sources for complete debugging experience
-- Package ID: `ptr727.LanguageTags`
-- License: MIT
-- Current version: 1.0.0-pre
 
 ### Data Updates
 
@@ -339,15 +279,18 @@ LanguageTag tag = LanguageTag.ParseOrDefault(input); // Falls back to "und"
   - `VariantList` → `Variants`
   - `ExtensionList` → `Extensions`
   - `TagList` → `Tags`
-- `LoadData()` and `LoadJson()` changed from internal to public in data classes
+- Data file APIs are async-only: `LoadDataAsync()`/`LoadJsonAsync()`; sync versions removed
 - Tag construction requires use of factory methods or builder (constructors are internal)
 
 ### Added (Non-Breaking)
 - `LanguageTag.ParseOrDefault()`: Safe parsing with fallback
 - `LanguageTag.ParseAndNormalize()`: Combined parse and normalize
+- `LanguageTag.ParseAndNormalize(string, Options?)`: Combined parse and normalize with logging options
 - `LanguageTag.IsValid`: Property for validation
 - `LanguageTag.FromLanguage()`, `FromLanguageRegion()`, `FromLanguageScriptRegion()`: Factory methods
 - `IEquatable<LanguageTag>` implementation with operators
+- Options-aware logging for parsing/normalization and lookup (`Options` + `LogOptions`)
+- `LanguageLookup` supports optional logging via primary constructor
 - Comprehensive XML documentation for all public APIs
 
 ## Future Improvements
@@ -361,17 +304,9 @@ Consider these areas for enhancement:
 
 ## Contributing
 
-When contributing to this project:
-1. Follow the existing code style and patterns
-2. Add unit tests for ALL new public functionality (100% coverage required)
-3. Add XML documentation for ALL public APIs
-4. Run formatting tools before committing
-5. Ensure all tests pass (211+ tests should pass)
-6. Update the README if adding significant features
-7. Do not expose constructors publicly - use factory methods or builder pattern
-8. Prefer immutability - use `ImmutableArray` for collections
-9. Follow the safe parsing patterns (TryParse, ParseOrDefault)
-10. Maintain thread safety for all data structures
+- Follow the authoritative coding standards and tooling in `CODESTYLE.md` and `.editorconfig`
+- Add tests for new public behavior and keep API documentation complete
+- Use factory methods or builders for tag creation; avoid public constructors
 
 ## Common Patterns
 

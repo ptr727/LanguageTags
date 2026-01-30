@@ -1,6 +1,3 @@
-using AwesomeAssertions;
-using Xunit;
-
 namespace ptr727.LanguageTags.Tests;
 
 public sealed class LanguageLookupTests
@@ -63,5 +60,63 @@ public sealed class LanguageLookupTests
     {
         LanguageLookup languageLookup = new();
         _ = languageLookup.IsMatch(prefix, tag).Should().Be(match);
+    }
+
+    [Theory]
+    [InlineData("en-US", "en-us", true)]
+    [InlineData("en-US", "EN-US", true)]
+    [InlineData("zh-Hans", "zh-hans", true)]
+    [InlineData("en-US", "en-GB", false)]
+    [InlineData("en", "fr", false)]
+    public void AreEquivalent_ComparesTagsCaseInsensitive(
+        string tag1,
+        string tag2,
+        bool expected
+    ) => _ = LanguageLookup.AreEquivalent(tag1, tag2).Should().Be(expected);
+
+    [Theory]
+    [InlineData("en-latn-us", "en-US", true)] // Normalized tags match
+    [InlineData("zh-cmn-Hans-CN", "cmn-Hans-CN", true)] // Normalized tags match
+    [InlineData("en-US", "en-GB", false)] // Different regions
+    [InlineData("en", "fr", false)] // Different languages
+    public void AreEquivalentNormalized_NormalizesAndCompares(
+        string tag1,
+        string tag2,
+        bool expected
+    ) => _ = LanguageLookup.AreEquivalentNormalized(tag1, tag2).Should().Be(expected);
+
+    [Fact]
+    public void Overrides_CanBeModified()
+    {
+        LanguageLookup languageLookup = new();
+        _ = languageLookup.Overrides.Should().NotBeNull();
+        _ = languageLookup.Overrides.Count.Should().Be(0);
+
+        languageLookup.Overrides.Add(("custom_ietf", "custom_iso"));
+        _ = languageLookup.Overrides.Count.Should().Be(1);
+    }
+
+    [Fact]
+    public void Undetermined_ConstantIsCorrect() =>
+        _ = LanguageLookup.Undetermined.Should().Be("und");
+
+    [Fact]
+    public void IsMatch_ThrowsOnNullPrefix()
+    {
+        LanguageLookup languageLookup = new();
+        _ = Assert
+            .Throws<ArgumentNullException>(() => languageLookup.IsMatch(null!, "en-US"))
+            .Should()
+            .NotBeNull();
+    }
+
+    [Fact]
+    public void IsMatch_ThrowsOnNullTag()
+    {
+        LanguageLookup languageLookup = new();
+        _ = Assert
+            .Throws<ArgumentNullException>(() => languageLookup.IsMatch("en", null!))
+            .Should()
+            .NotBeNull();
     }
 }

@@ -1,11 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 
 namespace ptr727.LanguageTags;
@@ -13,19 +6,37 @@ namespace ptr727.LanguageTags;
 /// <summary>
 /// Provides access to RFC 5646 / BCP 47 language subtag registry data.
 /// </summary>
-public partial class Rfc5646Data
+public sealed partial class Rfc5646Data
 {
     internal const string DataUri =
         "https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry";
     internal const string DataFileName = "rfc5646";
 
     /// <summary>
-    /// Loads RFC 5646 data from a file.
+    /// Loads RFC 5646 data from a file asynchronously.
     /// </summary>
     /// <param name="fileName">The path to the data file.</param>
     /// <returns>The loaded <see cref="Rfc5646Data"/>.</returns>
     /// <exception cref="InvalidDataException">Thrown when the file contains invalid data.</exception>
-    public static Rfc5646Data LoadData(string fileName)
+    public static Task<Rfc5646Data> LoadDataAsync(string fileName) =>
+        LoadDataAsync(fileName, LogOptions.CreateLogger<Rfc5646Data>());
+
+    /// <summary>
+    /// Loads RFC 5646 data from a file asynchronously using the specified options.
+    /// </summary>
+    /// <param name="fileName">The path to the data file.</param>
+    /// <param name="options">The options used to configure logging.</param>
+    /// <returns>The loaded <see cref="Rfc5646Data"/>.</returns>
+    /// <exception cref="InvalidDataException">Thrown when the file contains invalid data.</exception>
+    public static Task<Rfc5646Data> LoadDataAsync(string fileName, Options? options) =>
+        LoadDataAsync(fileName, LogOptions.CreateLogger<Rfc5646Data>(options));
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Reliability",
+        "CA2007:Consider calling ConfigureAwait on the awaited task",
+        Justification = "https://github.com/dotnet/roslyn-analyzers/issues/7185"
+    )]
+    private static async Task<Rfc5646Data> LoadDataAsync(string fileName, ILogger logger)
     {
         // File Format
         // https://www.rfc-editor.org/rfc/rfc5646#section-3.1
@@ -33,124 +44,230 @@ public partial class Rfc5646Data
         // https://www.w3.org/International/articles/language-tags
         // https://datatracker.ietf.org/doc/html/draft-phillips-record-jar-02
 
-        List<Rfc5646Record> recordList = [];
-        Parser parser = new();
-        using StreamReader lineReader = new(File.OpenRead(fileName));
-
-        // First record is file date
-        _ = parser.ReadAttributes(lineReader);
-        DateOnly fileDate = parser.GetFileDate();
-
-        // Read all record attributes separated by %% until EOF
-        while (parser.ReadAttributes(lineReader))
+        try
         {
-            recordList.Add(parser.GetRecord());
-        }
-        recordList.Add(parser.GetRecord());
+            List<Rfc5646Record> recordList = [];
+            Parser parser = new();
+            await using FileStream fileStream = new(
+                fileName,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                4096,
+                FileOptions.Asynchronous | FileOptions.SequentialScan
+            );
+            using StreamReader lineReader = new(fileStream);
 
-        return new Rfc5646Data { FileDate = fileDate, RecordList = [.. recordList] };
+            // First record is file date
+            _ = await parser.ReadAttributesAsync(lineReader).ConfigureAwait(false);
+            DateOnly fileDate = parser.GetFileDate();
+
+            // Read all record attributes separated by %% until EOF
+            while (await parser.ReadAttributesAsync(lineReader).ConfigureAwait(false))
+            {
+                recordList.Add(parser.GetRecord());
+            }
+            recordList.Add(parser.GetRecord());
+
+            if (recordList.Count == 0)
+            {
+                logger.LogDataLoadEmpty(nameof(Rfc5646Data), fileName);
+            }
+
+            Rfc5646Data data = new() { FileDate = fileDate, RecordList = [.. recordList] };
+            logger.LogDataLoaded(nameof(Rfc5646Data), fileName, data.RecordList.Length);
+            return data;
+        }
+        catch (Exception exception)
+        {
+            logger.LogDataLoadFailed(nameof(Rfc5646Data), fileName, exception);
+            throw;
+        }
     }
 
     /// <summary>
-    /// Loads RFC 5646 data from a JSON file.
+    /// Loads RFC 5646 data from a JSON file asynchronously.
     /// </summary>
     /// <param name="fileName">The path to the JSON file.</param>
-    /// <returns>The loaded <see cref="Rfc5646Data"/> or null if deserialization fails.</returns>
-    public static Rfc5646Data? LoadJson(string fileName) =>
-        JsonSerializer.Deserialize(
-            File.ReadAllText(fileName),
-            LanguageJsonContext.Default.Rfc5646Data
-        );
+    /// <returns>
+    /// The loaded <see cref="Rfc5646Data"/>, or null when deserialization yields no data.
+    /// </returns>
+    /// <exception cref="IOException">Thrown when the file cannot be read.</exception>
+    /// <exception cref="JsonException">Thrown when the JSON is invalid.</exception>
+    public static Task<Rfc5646Data?> LoadJsonAsync(string fileName) =>
+        LoadJsonAsync(fileName, LogOptions.CreateLogger<Rfc5646Data>());
 
-    internal static void SaveJson(string fileName, Rfc5646Data rfc5646) =>
-        File.WriteAllText(
+    /// <summary>
+    /// Loads RFC 5646 data from a JSON file asynchronously using the specified options.
+    /// </summary>
+    /// <param name="fileName">The path to the JSON file.</param>
+    /// <param name="options">The options used to configure logging.</param>
+    /// <returns>
+    /// The loaded <see cref="Rfc5646Data"/>, or null when deserialization yields no data.
+    /// </returns>
+    /// <exception cref="IOException">Thrown when the file cannot be read.</exception>
+    /// <exception cref="JsonException">Thrown when the JSON is invalid.</exception>
+    public static Task<Rfc5646Data?> LoadJsonAsync(string fileName, Options? options) =>
+        LoadJsonAsync(fileName, LogOptions.CreateLogger<Rfc5646Data>(options));
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Reliability",
+        "CA2007:Consider calling ConfigureAwait on the awaited task",
+        Justification = "https://github.com/dotnet/roslyn-analyzers/issues/7185"
+    )]
+    private static async Task<Rfc5646Data?> LoadJsonAsync(string fileName, ILogger logger)
+    {
+        try
+        {
+            await using FileStream fileStream = new(
+                fileName,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                4096,
+                FileOptions.Asynchronous | FileOptions.SequentialScan
+            );
+            Rfc5646Data? data = await JsonSerializer
+                .DeserializeAsync(fileStream, LanguageJsonContext.Default.Rfc5646Data)
+                .ConfigureAwait(false);
+            if (data == null)
+            {
+                logger.LogDataLoadEmpty(nameof(Rfc5646Data), fileName);
+            }
+            else
+            {
+                logger.LogDataLoaded(nameof(Rfc5646Data), fileName, data.RecordList.Length);
+            }
+
+            return data;
+        }
+        catch (Exception exception)
+        {
+            logger.LogDataLoadFailed(nameof(Rfc5646Data), fileName, exception);
+            throw;
+        }
+    }
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Reliability",
+        "CA2007:Consider calling ConfigureAwait on the awaited task",
+        Justification = "https://github.com/dotnet/roslyn-analyzers/issues/7185"
+    )]
+    internal static async Task SaveJsonAsync(string fileName, Rfc5646Data rfc5646)
+    {
+        await using FileStream fileStream = new(
             fileName,
-            JsonSerializer.Serialize(rfc5646, LanguageJsonContext.Default.Rfc5646Data)
+            FileMode.Create,
+            FileAccess.Write,
+            FileShare.None,
+            4096,
+            FileOptions.Asynchronous | FileOptions.SequentialScan
         );
+        await JsonSerializer
+            .SerializeAsync(fileStream, rfc5646, LanguageJsonContext.Default.Rfc5646Data)
+            .ConfigureAwait(false);
+    }
 
-    internal static void GenCode(string fileName, Rfc5646Data rfc5646)
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Reliability",
+        "CA2007:Consider calling ConfigureAwait on the awaited task",
+        Justification = "https://github.com/dotnet/roslyn-analyzers/issues/7185"
+    )]
+    internal static async Task GenCodeAsync(string fileName, Rfc5646Data rfc5646)
     {
         ArgumentNullException.ThrowIfNull(rfc5646);
 
-        StringBuilder stringBuilder = new();
-        _ = stringBuilder
-            .Append(
-                CultureInfo.InvariantCulture,
-                $$"""
-                using System;
+        StreamWriter writer = new(
+            new FileStream(
+                fileName,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.None,
+                4096,
+                FileOptions.Asynchronous | FileOptions.SequentialScan
+            ),
+            new UTF8Encoding(false)
+        )
+        {
+            NewLine = "\r\n",
+        };
+        await using ConfiguredAsyncDisposable writerScope = writer.ConfigureAwait(false);
 
-                namespace ptr727.LanguageTags;
+        ConfiguredTaskAwaitable WriteLineAsync(string value) =>
+            writer.WriteLineAsync(value).ConfigureAwait(false);
 
-                /// <summary>
-                /// Provides access to RFC 5646 / BCP 47 language subtag registry data.
-                /// </summary>
-                public partial class Rfc5646Data
-                {
-                    public static Rfc5646Data Create() =>
-                        new()
-                        {
-                            FileDate = {{LanguageSchema.GetCodeGenString(rfc5646.FileDate)}},
-                            RecordList =
-                            [
-                """
-            )
-            .Append("\r\n");
+        await WriteLineAsync("namespace ptr727.LanguageTags;");
+        await WriteLineAsync(string.Empty);
+        await WriteLineAsync("/// <summary>");
+        await WriteLineAsync(
+            "/// Provides access to RFC 5646 / BCP 47 language subtag registry data."
+        );
+        await WriteLineAsync("/// </summary>");
+        await WriteLineAsync("public sealed partial class Rfc5646Data");
+        await WriteLineAsync("{");
+        await WriteLineAsync("    public static Rfc5646Data Create() =>");
+        await WriteLineAsync("        new()");
+        await WriteLineAsync("        {");
+        await WriteLineAsync(
+            $"            FileDate = {LanguageSchema.GetCodeGenString(rfc5646.FileDate)},"
+        );
+        await WriteLineAsync("            RecordList =");
+        await WriteLineAsync("            [");
 
         foreach (Rfc5646Record record in rfc5646.RecordList)
         {
-            _ = stringBuilder
-                .Append(
-                    CultureInfo.InvariantCulture,
-                    $$"""
-                                   new()
-                                   {
-                                       Type = {{LanguageSchema.GetCodeGenString(record.Type)}},
-                                       SubTag = {{LanguageSchema.GetCodeGenString(record.SubTag)}},
-                                       Added = {{LanguageSchema.GetCodeGenString(record.Added)}},
-                                       SuppressScript = {{LanguageSchema.GetCodeGenString(
-                        record.SuppressScript
-                    )}},
-                                       Scope = {{LanguageSchema.GetCodeGenString(record.Scope)}},
-                                       MacroLanguage = {{LanguageSchema.GetCodeGenString(
-                        record.MacroLanguage
-                    )}},
-                                       Deprecated = {{LanguageSchema.GetCodeGenString(
-                        record.Deprecated
-                    )}},
-                                       PreferredValue = {{LanguageSchema.GetCodeGenString(
-                        record.PreferredValue
-                    )}},
-                                       Tag = {{LanguageSchema.GetCodeGenString(record.Tag)}},
-                                       Description = {{LanguageSchema.GetCodeGenString(
-                        record.Description
-                    )}},
-                                       Comments = {{LanguageSchema.GetCodeGenString(
-                        record.Comments
-                    )}},
-                                       Prefix = {{LanguageSchema.GetCodeGenString(record.Prefix)}},
-                                   },
-                    """
-                )
-                .Append("\r\n");
+            await WriteLineAsync("                new()");
+            await WriteLineAsync("                {");
+            await WriteLineAsync(
+                $"                    Type = {LanguageSchema.GetCodeGenString(record.Type)},"
+            );
+            await WriteLineAsync(
+                $"                    SubTag = {LanguageSchema.GetCodeGenString(record.SubTag)},"
+            );
+            await WriteLineAsync(
+                $"                    Added = {LanguageSchema.GetCodeGenString(record.Added)},"
+            );
+            await WriteLineAsync(
+                $"                    SuppressScript = {LanguageSchema.GetCodeGenString(record.SuppressScript)},"
+            );
+            await WriteLineAsync(
+                $"                    Scope = {LanguageSchema.GetCodeGenString(record.Scope)},"
+            );
+            await WriteLineAsync(
+                $"                    MacroLanguage = {LanguageSchema.GetCodeGenString(record.MacroLanguage)},"
+            );
+            await WriteLineAsync(
+                $"                    Deprecated = {LanguageSchema.GetCodeGenString(record.Deprecated)},"
+            );
+            await WriteLineAsync(
+                $"                    PreferredValue = {LanguageSchema.GetCodeGenString(record.PreferredValue)},"
+            );
+            await WriteLineAsync(
+                $"                    Tag = {LanguageSchema.GetCodeGenString(record.Tag)},"
+            );
+            await WriteLineAsync(
+                $"                    Description = {LanguageSchema.GetCodeGenString(record.Description)},"
+            );
+            await WriteLineAsync(
+                $"                    Comments = {LanguageSchema.GetCodeGenString(record.Comments)},"
+            );
+            await WriteLineAsync(
+                $"                    Prefix = {LanguageSchema.GetCodeGenString(record.Prefix)},"
+            );
+            await WriteLineAsync("                },");
         }
-        _ = stringBuilder
-            .Append(
-                """
-                            ],
-                        };
-                }
-                """
-            )
-            .Append("\r\n");
 
-        LanguageSchema.WriteFile(fileName, stringBuilder.ToString());
+        await WriteLineAsync("            ],");
+        await WriteLineAsync("        };");
+        await WriteLineAsync("}");
     }
 
     internal sealed class Parser
     {
         private readonly List<KeyValuePair<string, string>> _attributeList = [];
+        private string? _pendingLine;
 
-        public bool ReadAttributes(StreamReader lineReader)
+        public async Task<bool> ReadAttributesAsync(StreamReader lineReader)
         {
             // Read until %% or EOF
             _attributeList.Clear();
@@ -158,7 +275,7 @@ public partial class Rfc5646Data
             while (true)
             {
                 // Read next line
-                string? line = lineReader.ReadLine();
+                string? line = await ReadLineAsync(lineReader).ConfigureAwait(false);
                 if (string.IsNullOrEmpty(line))
                 {
                     // End of file
@@ -183,26 +300,20 @@ public partial class Rfc5646Data
                 // Peek at the next line an look for a space
                 while (true)
                 {
-                    // There is no PeekLine(), so we only get 1 char look ahead
-                    // -1 is EOF or error, else cast to Char
-                    int peek = lineReader.Peek();
-                    if (peek == -1 || (char)peek != ' ')
+                    // Read next line to check for multiline continuation
+                    string? multiLine = await ReadLineAsync(lineReader).ConfigureAwait(false);
+                    if (string.IsNullOrEmpty(multiLine))
                     {
-                        // Done
+                        _pendingLine = multiLine;
                         break;
                     }
 
-                    // Append the next line to the current line
-                    string? multiLine = lineReader.ReadLine();
-                    if (
-                        string.IsNullOrEmpty(multiLine)
-                        || !multiLine.StartsWith("  ", StringComparison.Ordinal)
-                    )
+                    if (!multiLine.StartsWith("  ", StringComparison.Ordinal))
                     {
-                        throw new InvalidDataException(
-                            $"Invalid data found in RFC 5646 record: {line}"
-                        );
+                        _pendingLine = multiLine;
+                        break;
                     }
+
                     line = $"{line.Trim()} {multiLine.Trim()}";
                 }
 
@@ -216,6 +327,18 @@ public partial class Rfc5646Data
             }
 
             return !eof;
+        }
+
+        private async Task<string?> ReadLineAsync(StreamReader lineReader)
+        {
+            if (_pendingLine is not null)
+            {
+                string? line = _pendingLine;
+                _pendingLine = null;
+                return line;
+            }
+
+            return await lineReader.ReadLineAsync().ConfigureAwait(false);
         }
 
         public Rfc5646Record GetRecord()
@@ -375,10 +498,24 @@ public partial class Rfc5646Data
     /// <param name="languageTag">The language tag, subtag, or description to search for.</param>
     /// <param name="includeDescription">If true, searches in the description field; otherwise, only searches tags and subtags.</param>
     /// <returns>The matching <see cref="Rfc5646Record"/> or null if not found.</returns>
-    public Rfc5646Record? Find(string? languageTag, bool includeDescription)
+    public Rfc5646Record? Find(string? languageTag, bool includeDescription) =>
+        Find(languageTag, includeDescription, LogOptions.CreateLogger<Rfc5646Data>());
+
+    /// <summary>
+    /// Finds a language subtag record by tag, subtag, preferred value, or description using the specified options.
+    /// </summary>
+    /// <param name="languageTag">The language tag, subtag, or description to search for.</param>
+    /// <param name="includeDescription">If true, searches in the description field; otherwise, only searches tags and subtags.</param>
+    /// <param name="options">The options used to configure logging.</param>
+    /// <returns>The matching <see cref="Rfc5646Record"/> or null if not found.</returns>
+    public Rfc5646Record? Find(string? languageTag, bool includeDescription, Options? options) =>
+        Find(languageTag, includeDescription, LogOptions.CreateLogger<Rfc5646Data>(options));
+
+    private Rfc5646Record? Find(string? languageTag, bool includeDescription, ILogger logger)
     {
         if (string.IsNullOrEmpty(languageTag))
         {
+            logger.LogFindRecordNotFound(nameof(Rfc5646Data), languageTag, includeDescription);
             return null;
         }
 
@@ -392,6 +529,7 @@ public partial class Rfc5646Data
         );
         if (record != null)
         {
+            logger.LogFindRecordFound(nameof(Rfc5646Data), languageTag, includeDescription);
             return record;
         }
 
@@ -402,6 +540,7 @@ public partial class Rfc5646Data
         );
         if (record != null)
         {
+            logger.LogFindRecordFound(nameof(Rfc5646Data), languageTag, includeDescription);
             return record;
         }
 
@@ -412,6 +551,7 @@ public partial class Rfc5646Data
         );
         if (record != null)
         {
+            logger.LogFindRecordFound(nameof(Rfc5646Data), languageTag, includeDescription);
             return record;
         }
 
@@ -426,6 +566,7 @@ public partial class Rfc5646Data
             );
             if (record != null)
             {
+                logger.LogFindRecordFound(nameof(Rfc5646Data), languageTag, includeDescription);
                 return record;
             }
 
@@ -437,11 +578,13 @@ public partial class Rfc5646Data
             );
             if (record != null)
             {
+                logger.LogFindRecordFound(nameof(Rfc5646Data), languageTag, includeDescription);
                 return record;
             }
         }
 
         // Not found
+        logger.LogFindRecordNotFound(nameof(Rfc5646Data), languageTag, includeDescription);
         return null;
     }
 }
@@ -449,7 +592,7 @@ public partial class Rfc5646Data
 /// <summary>
 /// Represents a record from the RFC 5646 / BCP 47 language subtag registry.
 /// </summary>
-public record Rfc5646Record
+public sealed record Rfc5646Record
 {
     /// <summary>
     /// Defines the type of language subtag record.

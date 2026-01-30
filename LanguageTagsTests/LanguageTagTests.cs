@@ -1,6 +1,4 @@
 using System.Collections.Immutable;
-using AwesomeAssertions;
-using Xunit;
 
 namespace ptr727.LanguageTags.Tests;
 
@@ -14,6 +12,20 @@ public class LanguageTagTests
     public void Parse_Static_Pass(string tag)
     {
         LanguageTag? languageTag = LanguageTag.Parse(tag);
+        _ = languageTag.Should().NotBeNull();
+        _ = languageTag!.Validate().Should().BeTrue();
+        _ = languageTag.ToString().Should().Be(tag);
+    }
+
+    [Theory]
+    [InlineData("en-US")]
+    [InlineData("zh-Hans-CN")]
+    [InlineData("en-latn-gb-boont-r-extended-sequence-x-private")]
+    [InlineData("x-all-private")]
+    public void Parse_WithOptions_Pass(string tag)
+    {
+        Options options = new();
+        LanguageTag? languageTag = LanguageTag.Parse(tag, options);
         _ = languageTag.Should().NotBeNull();
         _ = languageTag!.Validate().Should().BeTrue();
         _ = languageTag.ToString().Should().Be(tag);
@@ -34,12 +46,41 @@ public class LanguageTagTests
     }
 
     [Theory]
+    [InlineData("")] // Empty string
+    [InlineData("i")] // Too short
+    [InlineData("abcdefghi")] // Too long
+    [InlineData("en--gb")] // Empty tag
+    [InlineData("en-€-extension")] // Non-ASCII
+    [InlineData("a-extension")] // Only start with x or grandfathered
+    [InlineData("en-gb-x")] // Private must have parts
+    public void Parse_WithOptions_ReturnsNull(string tag)
+    {
+        Options options = new();
+        LanguageTag? languageTag = LanguageTag.Parse(tag, options);
+        _ = languageTag.Should().BeNull();
+    }
+
+    [Theory]
     [InlineData("en-US")]
     [InlineData("zh-Hans-CN")]
     [InlineData("en-latn-gb-boont-r-extended-sequence-x-private")]
     public void TryParse_Success(string tag)
     {
         bool result = LanguageTag.TryParse(tag, out LanguageTag? languageTag);
+        _ = result.Should().BeTrue();
+        _ = languageTag.Should().NotBeNull();
+        _ = languageTag!.Validate().Should().BeTrue();
+        _ = languageTag.ToString().Should().Be(tag);
+    }
+
+    [Theory]
+    [InlineData("en-US")]
+    [InlineData("zh-Hans-CN")]
+    [InlineData("en-latn-gb-boont-r-extended-sequence-x-private")]
+    public void TryParse_WithOptions_Success(string tag)
+    {
+        Options options = new();
+        bool result = LanguageTag.TryParse(tag, out LanguageTag? languageTag, options);
         _ = result.Should().BeTrue();
         _ = languageTag.Should().NotBeNull();
         _ = languageTag!.Validate().Should().BeTrue();
@@ -58,6 +99,23 @@ public class LanguageTagTests
     public void TryParse_Failure(string tag)
     {
         bool result = LanguageTag.TryParse(tag, out LanguageTag? languageTag);
+        _ = result.Should().BeFalse();
+        _ = languageTag.Should().BeNull();
+    }
+
+    [Theory]
+    [InlineData("")] // Empty string
+    [InlineData("i")] // Too short
+    [InlineData("abcdefghi")] // Too long
+    [InlineData("en--gb")] // Empty tag
+    [InlineData("en-€-extension")] // Non-ASCII
+    [InlineData("a-extension")] // Only start with x or grandfathered
+    [InlineData("en-gb-x")] // Private must have parts
+    [InlineData("x")] // Private missing
+    public void TryParse_WithOptions_Failure(string tag)
+    {
+        Options options = new();
+        bool result = LanguageTag.TryParse(tag, out LanguageTag? languageTag, options);
         _ = result.Should().BeFalse();
         _ = languageTag.Should().BeNull();
     }
@@ -161,6 +219,28 @@ public class LanguageTagTests
     public void ParseAndNormalize_InvalidTag_ReturnsNull()
     {
         LanguageTag? result = LanguageTag.ParseAndNormalize("invalid-tag");
+        _ = result.Should().BeNull();
+    }
+
+    [Theory]
+    [InlineData("en-latn-us", "en-US")]
+    [InlineData("zh-cmn-Hans-CN", "cmn-Hans-CN")]
+    public void ParseAndNormalize_WithOptions_ValidTag_ReturnsNormalized(
+        string tag,
+        string expected
+    )
+    {
+        Options options = new();
+        LanguageTag? result = LanguageTag.ParseAndNormalize(tag, options);
+        _ = result.Should().NotBeNull();
+        _ = result!.ToString().Should().Be(expected);
+    }
+
+    [Fact]
+    public void ParseAndNormalize_WithOptions_InvalidTag_ReturnsNull()
+    {
+        Options options = new();
+        LanguageTag? result = LanguageTag.ParseAndNormalize("invalid-tag", options);
         _ = result.Should().BeNull();
     }
 
@@ -531,5 +611,89 @@ public class LanguageTagTests
 
         _ = tag.IsValid.Should().BeTrue();
         _ = tag.Validate().Should().BeTrue();
+    }
+
+    [Fact]
+    public void ExtensionTag_DefaultConstructor_CreatesEmptyTag()
+    {
+        ExtensionTag extension = new();
+        _ = extension.Prefix.Should().Be('\0');
+        _ = extension.Tags.IsEmpty.Should().BeTrue();
+    }
+
+    [Fact]
+    public void ExtensionTag_EmptyTags_ToStringReturnsEmpty()
+    {
+        ExtensionTag extension = new('u', []);
+        _ = extension.ToString().Should().Be(string.Empty);
+    }
+
+    [Fact]
+    public void ExtensionTag_EnumerableConstructor_CreatesTag()
+    {
+        List<string> tags = ["tag1", "tag2", "tag3"];
+        ExtensionTag extension = new('u', tags);
+
+        _ = extension.Prefix.Should().Be('u');
+        _ = extension.Tags.Length.Should().Be(3);
+        _ = extension.Tags[0].Should().Be("tag1");
+        _ = extension.Tags[1].Should().Be("tag2");
+        _ = extension.Tags[2].Should().Be("tag3");
+    }
+
+    [Fact]
+    public void ExtensionTag_RecordEquality_WorksCorrectly()
+    {
+        ExtensionTag ext1 = new('u', ["ca", "buddhist"]);
+        ExtensionTag ext2 = new('U', ["CA", "BUDDHIST"]);
+        ExtensionTag ext3 = new('t', ["ca", "buddhist"]);
+
+        _ = ext1.Equals(ext2).Should().BeTrue();
+        _ = (ext1 == ext2).Should().BeTrue();
+        _ = ext1.GetHashCode().Should().Be(ext2.GetHashCode());
+
+        _ = ext1.Equals(ext3).Should().BeFalse();
+        _ = (ext1 != ext3).Should().BeTrue();
+    }
+
+    [Fact]
+    public void PrivateUseTag_DefaultConstructor_CreatesEmptyTag()
+    {
+        PrivateUseTag privateUse = new();
+        _ = privateUse.Tags.IsEmpty.Should().BeTrue();
+        _ = privateUse.ToString().Should().Be(string.Empty);
+    }
+
+    [Fact]
+    public void PrivateUseTag_EnumerableConstructor_CreatesTag()
+    {
+        List<string> tags = ["private1", "private2"];
+        PrivateUseTag privateUse = new(tags);
+
+        _ = privateUse.Tags.Length.Should().Be(2);
+        _ = privateUse.Tags[0].Should().Be("private1");
+        _ = privateUse.Tags[1].Should().Be("private2");
+    }
+
+    [Fact]
+    public void PrivateUseTag_RecordEquality_WorksCorrectly()
+    {
+        PrivateUseTag priv1 = new(["private1", "private2"]);
+        PrivateUseTag priv2 = new(["PRIVATE1", "PRIVATE2"]);
+        PrivateUseTag priv3 = new(["other"]);
+
+        _ = priv1.Equals(priv2).Should().BeTrue();
+        _ = (priv1 == priv2).Should().BeTrue();
+        _ = priv1.GetHashCode().Should().Be(priv2.GetHashCode());
+
+        _ = priv1.Equals(priv3).Should().BeFalse();
+        _ = (priv1 != priv3).Should().BeTrue();
+    }
+
+    [Fact]
+    public void PrivateUseTag_EmptyTag_ToStringReturnsEmpty()
+    {
+        PrivateUseTag privateUse = new();
+        _ = privateUse.ToString().Should().Be(string.Empty);
     }
 }

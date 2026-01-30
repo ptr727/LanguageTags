@@ -1,17 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Linq;
-using System.Text;
 
 namespace ptr727.LanguageTags;
 
 /// <summary>
 /// Represents a language tag conforming to RFC 5646 / BCP 47.
 /// </summary>
-public class LanguageTag : IEquatable<LanguageTag>
+public sealed class LanguageTag : IEquatable<LanguageTag>
 {
     internal LanguageTag()
     {
@@ -33,7 +27,7 @@ public class LanguageTag : IEquatable<LanguageTag>
         Region = languageTag.Region;
         _variants = [.. languageTag._variants];
         _extensions = [.. languageTag._extensions];
-        PrivateUse = new PrivateUseTag(languageTag.PrivateUse);
+        PrivateUse = languageTag.PrivateUse;
     }
 
     /// <summary>
@@ -71,7 +65,7 @@ public class LanguageTag : IEquatable<LanguageTag>
     /// <summary>
     /// Gets the private use subtag.
     /// </summary>
-    public PrivateUseTag PrivateUse { get; init; }
+    public PrivateUseTag PrivateUse { get; internal set; }
 
     /// <summary>
     /// Parses a language tag string into a LanguageTag object.
@@ -79,6 +73,15 @@ public class LanguageTag : IEquatable<LanguageTag>
     /// <param name="tag">The language tag string to parse (e.g., "en-US", "zh-Hans-CN").</param>
     /// <returns>A parsed and normalized LanguageTag object, or null if parsing fails.</returns>
     public static LanguageTag? Parse(string tag) => new LanguageTagParser().Parse(tag);
+
+    /// <summary>
+    /// Parses a language tag string into a LanguageTag object using the specified options.
+    /// </summary>
+    /// <param name="tag">The language tag string to parse (e.g., "en-US", "zh-Hans-CN").</param>
+    /// <param name="options">The options used to configure logging.</param>
+    /// <returns>A parsed and normalized LanguageTag object, or null if parsing fails.</returns>
+    public static LanguageTag? Parse(string tag, Options? options) =>
+        new LanguageTagParser(options).Parse(tag);
 
     /// <summary>
     /// Parses a language tag string, returning a default tag if parsing fails.
@@ -100,6 +103,15 @@ public class LanguageTag : IEquatable<LanguageTag>
     public static LanguageTag? ParseAndNormalize(string tag) => Parse(tag)?.Normalize();
 
     /// <summary>
+    /// Parses and normalizes a language tag string using the specified options.
+    /// </summary>
+    /// <param name="tag">The language tag string.</param>
+    /// <param name="options">The options used to configure logging.</param>
+    /// <returns>A normalized language tag or null if parsing/normalization fails.</returns>
+    public static LanguageTag? ParseAndNormalize(string tag, Options? options) =>
+        Parse(tag, options)?.Normalize(options);
+
+    /// <summary>
     /// Tries to parse a language tag string into a LanguageTag object.
     /// </summary>
     /// <param name="tag">The language tag string to parse (e.g., "en-US", "zh-Hans-CN").</param>
@@ -108,6 +120,23 @@ public class LanguageTag : IEquatable<LanguageTag>
     public static bool TryParse(string tag, [NotNullWhen(true)] out LanguageTag? result)
     {
         result = Parse(tag);
+        return result != null;
+    }
+
+    /// <summary>
+    /// Tries to parse a language tag string into a LanguageTag object using the specified options.
+    /// </summary>
+    /// <param name="tag">The language tag string to parse (e.g., "en-US", "zh-Hans-CN").</param>
+    /// <param name="result">When this method returns, contains the parsed LanguageTag if successful, or null if parsing fails.</param>
+    /// <param name="options">The options used to configure logging.</param>
+    /// <returns>true if the tag was successfully parsed; otherwise, false.</returns>
+    public static bool TryParse(
+        string tag,
+        [NotNullWhen(true)] out LanguageTag? result,
+        Options? options
+    )
+    {
+        result = Parse(tag, options);
         return result != null;
     }
 
@@ -133,6 +162,14 @@ public class LanguageTag : IEquatable<LanguageTag>
     /// </summary>
     /// <returns>A normalized copy of this language tag.</returns>
     public LanguageTag? Normalize() => new LanguageTagParser().Normalize(this);
+
+    /// <summary>
+    /// Normalizes this language tag according to RFC 5646 rules using the specified options.
+    /// </summary>
+    /// <param name="options">The options used to configure logging.</param>
+    /// <returns>A normalized copy of this language tag.</returns>
+    public LanguageTag? Normalize(Options? options) =>
+        new LanguageTagParser(options).Normalize(this);
 
     /// <summary>
     /// Converts this language tag to its string representation.
@@ -171,7 +208,7 @@ public class LanguageTag : IEquatable<LanguageTag>
                 $"-{string.Join('-', _extensions.Select(item => item.ToString()))}"
             );
         }
-        if (PrivateUse._tags.Count > 0)
+        if (!PrivateUse.Tags.IsEmpty)
         {
             if (stringBuilder.Length > 0)
             {
@@ -258,66 +295,132 @@ public class LanguageTag : IEquatable<LanguageTag>
 /// <summary>
 /// Represents an extension subtag in a language tag.
 /// </summary>
-public class ExtensionTag
+/// <param name="Prefix">The single-character prefix for the extension (e.g., 'u' for Unicode extensions).</param>
+/// <param name="Tags">The list of extension subtag values.</param>
+public sealed record ExtensionTag(char Prefix, ImmutableArray<string> Tags)
 {
-    internal ExtensionTag()
-    {
-        Prefix = '\0';
-        _tags = [];
-    }
-
-    internal ExtensionTag(ExtensionTag extensionTag)
-    {
-        ArgumentNullException.ThrowIfNull(extensionTag);
-        Prefix = extensionTag.Prefix;
-        _tags = [.. extensionTag._tags];
-    }
+    /// <summary>
+    /// Creates an extension tag with a prefix and tags from an enumerable collection.
+    /// </summary>
+    /// <param name="prefix">The single-character prefix.</param>
+    /// <param name="tags">The extension subtag values.</param>
+    public ExtensionTag(char prefix, IEnumerable<string> tags)
+        : this(prefix, [.. tags]) { }
 
     /// <summary>
-    /// Gets or sets the single-character prefix for the extension (e.g., 'u' for Unicode extensions).
+    /// Creates an empty extension tag.
     /// </summary>
-    public char Prefix { get; internal set; }
-
-    /// <summary>
-    /// Gets the list of extension subtag values.
-    /// </summary>
-    public ImmutableArray<string> Tags => [.. _tags];
-    internal List<string> _tags { get; init; }
+    public ExtensionTag()
+        : this('\0', []) { }
 
     /// <summary>
     /// Converts this extension tag to its string representation.
     /// </summary>
     /// <returns>A string representation of the extension tag (e.g., "u-ca-buddhist").</returns>
-    public override string ToString() => $"{Prefix}-{string.Join('-', _tags)}";
+    public override string ToString() =>
+        Tags.IsEmpty ? string.Empty : $"{Prefix}-{string.Join('-', Tags)}";
+
+    internal ExtensionTag Normalize() =>
+        this with
+        {
+            Prefix = char.ToLowerInvariant(Prefix),
+            Tags =
+            [
+                .. Tags.Select(t => t.ToLowerInvariant()).OrderBy(t => t, StringComparer.Ordinal),
+            ],
+        };
+
+    /// <summary>
+    /// Determines whether this instance is equal to another <see cref="ExtensionTag"/>.
+    /// </summary>
+    /// <param name="other">The <see cref="ExtensionTag"/> to compare with.</param>
+    /// <returns>true if the extension tags are equal; otherwise, false.</returns>
+    public bool Equals(ExtensionTag? other) =>
+        ReferenceEquals(this, other)
+        || (
+            other is not null
+            && char.ToLowerInvariant(Prefix) == char.ToLowerInvariant(other.Prefix)
+            && Tags.SequenceEqual(other.Tags, StringComparer.OrdinalIgnoreCase)
+        );
+
+    /// <summary>
+    /// Returns the hash code for this extension tag.
+    /// </summary>
+    /// <returns>A hash code for the current extension tag.</returns>
+    public override int GetHashCode()
+    {
+        HashCode hashCode = new();
+        hashCode.Add(char.ToLowerInvariant(Prefix));
+        foreach (string tag in Tags)
+        {
+            hashCode.Add(tag, StringComparer.OrdinalIgnoreCase);
+        }
+
+        return hashCode.ToHashCode();
+    }
 }
 
 /// <summary>
 /// Represents a private use subtag in a language tag.
 /// </summary>
-public class PrivateUseTag
+/// <param name="Tags">The list of private use subtag values.</param>
+public sealed record PrivateUseTag(ImmutableArray<string> Tags)
 {
-    internal PrivateUseTag() => _tags = [];
-
-    internal PrivateUseTag(PrivateUseTag privateUseTag)
-    {
-        ArgumentNullException.ThrowIfNull(privateUseTag);
-        _tags = [.. privateUseTag._tags];
-    }
-
     /// <summary>
     /// The prefix character for private use subtags ('x').
     /// </summary>
     public const char Prefix = 'x';
 
     /// <summary>
-    /// Gets the list of private use subtag values.
+    /// Creates a private use tag from an enumerable collection.
     /// </summary>
-    public ImmutableArray<string> Tags => [.. _tags];
-    internal List<string> _tags { get; init; }
+    /// <param name="tags">The private use subtag values.</param>
+    public PrivateUseTag(IEnumerable<string> tags)
+        : this([.. tags]) { }
+
+    /// <summary>
+    /// Creates an empty private use tag.
+    /// </summary>
+    public PrivateUseTag()
+        : this([]) { }
 
     /// <summary>
     /// Converts this private use tag to its string representation.
     /// </summary>
     /// <returns>A string representation of the private use tag (e.g., "x-private").</returns>
-    public override string ToString() => $"{Prefix}-{string.Join('-', _tags)}";
+    public override string ToString() =>
+        Tags.IsEmpty ? string.Empty : $"{Prefix}-{string.Join('-', Tags)}";
+
+    internal PrivateUseTag Normalize() =>
+        this with
+        {
+            Tags =
+            [
+                .. Tags.Select(t => t.ToLowerInvariant()).OrderBy(t => t, StringComparer.Ordinal),
+            ],
+        };
+
+    /// <summary>
+    /// Determines whether this instance is equal to another <see cref="PrivateUseTag"/>.
+    /// </summary>
+    /// <param name="other">The <see cref="PrivateUseTag"/> to compare with.</param>
+    /// <returns>true if the private use tags are equal; otherwise, false.</returns>
+    public bool Equals(PrivateUseTag? other) =>
+        ReferenceEquals(this, other)
+        || (other is not null && Tags.SequenceEqual(other.Tags, StringComparer.OrdinalIgnoreCase));
+
+    /// <summary>
+    /// Returns the hash code for this private use tag.
+    /// </summary>
+    /// <returns>A hash code for the current private use tag.</returns>
+    public override int GetHashCode()
+    {
+        HashCode hashCode = new();
+        foreach (string tag in Tags)
+        {
+            hashCode.Add(tag, StringComparer.OrdinalIgnoreCase);
+        }
+
+        return hashCode.ToHashCode();
+    }
 }

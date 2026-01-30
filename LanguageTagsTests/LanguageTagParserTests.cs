@@ -1,6 +1,3 @@
-using AwesomeAssertions;
-using Xunit;
-
 namespace ptr727.LanguageTags.Tests;
 
 public class LanguageTagParserTests
@@ -98,6 +95,7 @@ public class LanguageTagParserTests
     [InlineData("en-gb-abcde-abcde")] // Variant repeats
     [InlineData("en-gb-a-abcd-a-abcde")] // Extension prefix repeats
     [InlineData("en-gb-a-abcd-abcd")] // Extension tag repeats
+    [InlineData("en-a- ")] // Extension tag whitespace
     [InlineData("en-gb-x-abcd-x-abcd")] // Private prefix repeats
     [InlineData("en-gb-x-abcd-abcd")] // Private tag repeats
     public void Parse_Fail(string tag) => _ = new LanguageTagParser().Parse(tag).Should().BeNull();

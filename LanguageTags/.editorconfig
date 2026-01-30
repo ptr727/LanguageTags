@@ -1,0 +1,7 @@
+root = false
+
+# C# files
+[*.cs]
+
+# Ignore normalize strings to uppercase
+dotnet_diagnostic.CA1308.severity = none

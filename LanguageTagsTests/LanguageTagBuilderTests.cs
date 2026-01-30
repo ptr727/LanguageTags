@@ -1,6 +1,3 @@
-using AwesomeAssertions;
-using Xunit;
-
 namespace ptr727.LanguageTags.Tests;
 
 public sealed class LanguageTagBuilderTests
@@ -95,6 +92,25 @@ public sealed class LanguageTagBuilderTests
     }
 
     [Fact]
+    public void Normalize_WithOptions_Pass()
+    {
+        Options options = new();
+
+        // en-Latn-GB-boont-r-extended-sequence-x-private
+        LanguageTag? languageTag = new LanguageTagBuilder()
+            .Language("en")
+            .Script("latn")
+            .Region("gb")
+            .VariantAdd("boont")
+            .ExtensionAdd('r', ["extended", "sequence"])
+            .PrivateUseAdd("private")
+            .Normalize(options);
+        _ = languageTag.Should().NotBeNull();
+        _ = languageTag!.Validate().Should().BeTrue();
+        _ = languageTag.ToString().Should().Be("en-GB-boont-r-extended-sequence-x-private");
+    }
+
+    [Fact]
     public void Build_Fail()
     {
         // Must have something
@@ -128,5 +144,63 @@ public sealed class LanguageTagBuilderTests
         // Extension prefix 1 char, not x
         languageTag = new LanguageTagBuilder().Language("en").ExtensionAdd('x', ["abcd"]).Build();
         _ = languageTag.Validate().Should().BeFalse();
+
+        // Extension tags must not be whitespace
+        languageTag = new LanguageTagBuilder().Language("en").ExtensionAdd('a', [" "]).Build();
+        _ = languageTag.Validate().Should().BeFalse();
+    }
+
+    [Fact]
+    public void VariantAddRange_AddsMultipleVariants()
+    {
+        LanguageTag languageTag = new LanguageTagBuilder()
+            .Language("en")
+            .VariantAddRange(["variant1", "variant2", "variant3"])
+            .Build();
+
+        _ = languageTag.Variants.Length.Should().Be(3);
+        _ = languageTag.Variants[0].Should().Be("variant1");
+        _ = languageTag.Variants[1].Should().Be("variant2");
+        _ = languageTag.Variants[2].Should().Be("variant3");
+    }
+
+    [Fact]
+    public void VariantAddRange_ThrowsOnNull()
+    {
+        LanguageTagBuilder builder = new();
+        _ = Assert
+            .Throws<ArgumentNullException>(() => builder.VariantAddRange(null!))
+            .Should()
+            .NotBeNull();
+    }
+
+    [Fact]
+    public void ExtensionAdd_ThrowsOnNull()
+    {
+        LanguageTagBuilder builder = new();
+        _ = Assert
+            .Throws<ArgumentNullException>(() => builder.ExtensionAdd('u', null!))
+            .Should()
+            .NotBeNull();
+    }
+
+    [Fact]
+    public void ExtensionAdd_ThrowsOnEmpty()
+    {
+        LanguageTagBuilder builder = new();
+        _ = Assert
+            .Throws<ArgumentException>(() => builder.ExtensionAdd('u', []))
+            .Should()
+            .NotBeNull();
+    }
+
+    [Fact]
+    public void PrivateUseAddRange_ThrowsOnNull()
+    {
+        LanguageTagBuilder builder = new();
+        _ = Assert
+            .Throws<ArgumentNullException>(() => builder.PrivateUseAddRange(null!))
+            .Should()
+            .NotBeNull();
     }
 }

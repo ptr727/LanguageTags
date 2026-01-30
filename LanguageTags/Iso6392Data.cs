@@ -107,7 +107,11 @@ public sealed partial class Iso6392Data
     /// Loads ISO 639-2 data from a JSON file asynchronously.
     /// </summary>
     /// <param name="fileName">The path to the JSON file.</param>
-    /// <returns>The loaded <see cref="Iso6392Data"/> or null if deserialization fails.</returns>
+    /// <returns>
+    /// The loaded <see cref="Iso6392Data"/>, or null when deserialization yields no data.
+    /// </returns>
+    /// <exception cref="IOException">Thrown when the file cannot be read.</exception>
+    /// <exception cref="JsonException">Thrown when the JSON is invalid.</exception>
     public static Task<Iso6392Data?> LoadJsonAsync(string fileName) =>
         LoadJsonAsync(fileName, LogOptions.CreateLogger<Iso6392Data>());
 
@@ -116,7 +120,11 @@ public sealed partial class Iso6392Data
     /// </summary>
     /// <param name="fileName">The path to the JSON file.</param>
     /// <param name="options">The options used to configure logging.</param>
-    /// <returns>The loaded <see cref="Iso6392Data"/> or null if deserialization fails.</returns>
+    /// <returns>
+    /// The loaded <see cref="Iso6392Data"/>, or null when deserialization yields no data.
+    /// </returns>
+    /// <exception cref="IOException">Thrown when the file cannot be read.</exception>
+    /// <exception cref="JsonException">Thrown when the JSON is invalid.</exception>
     public static Task<Iso6392Data?> LoadJsonAsync(string fileName, Options? options) =>
         LoadJsonAsync(fileName, LogOptions.CreateLogger<Iso6392Data>(options));
 

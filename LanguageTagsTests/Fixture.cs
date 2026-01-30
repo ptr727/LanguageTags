@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-
 namespace ptr727.LanguageTags.Tests;
 
 internal static class Fixture // : IDisposable

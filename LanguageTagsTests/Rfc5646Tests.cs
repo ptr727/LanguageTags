@@ -1,7 +1,3 @@
-using System;
-using AwesomeAssertions;
-using Xunit;
-
 namespace ptr727.LanguageTags.Tests;
 
 public class Rfc5646Tests
@@ -16,9 +12,9 @@ public class Rfc5646Tests
     }
 
     [Fact]
-    public void LoadData()
+    public async Task LoadData()
     {
-        Rfc5646Data rfc5646 = Rfc5646Data.LoadData(
+        Rfc5646Data rfc5646 = await Rfc5646Data.LoadDataAsync(
             Fixture.GetDataFilePath(Rfc5646Data.DataFileName)
         );
         _ = rfc5646.Should().NotBeNull();
@@ -26,13 +22,36 @@ public class Rfc5646Tests
     }
 
     [Fact]
-    public void LoadJson()
+    public async Task LoadJson()
     {
-        Rfc5646Data? rfc5646 = Rfc5646Data.LoadJson(
+        Rfc5646Data? rfc5646 = await Rfc5646Data.LoadJsonAsync(
             Fixture.GetDataFilePath(Rfc5646Data.DataFileName + ".json")
         );
         _ = rfc5646.Should().NotBeNull();
         _ = rfc5646.RecordList.Length.Should().BeGreaterThan(0);
+    }
+
+    [Fact]
+    public async Task SaveJsonAsync_RoundTrip()
+    {
+        Rfc5646Data rfc5646 = Rfc5646Data.Create();
+        _ = rfc5646.RecordList.Length.Should().BeGreaterThan(0);
+
+        string tempFile = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.json");
+        try
+        {
+            await Rfc5646Data.SaveJsonAsync(tempFile, rfc5646);
+            Rfc5646Data? roundTrip = await Rfc5646Data.LoadJsonAsync(tempFile);
+            _ = roundTrip.Should().NotBeNull();
+            _ = roundTrip!.RecordList.Length.Should().Be(rfc5646.RecordList.Length);
+        }
+        finally
+        {
+            if (File.Exists(tempFile))
+            {
+                File.Delete(tempFile);
+            }
+        }
     }
 
     [Theory]
@@ -79,5 +98,23 @@ public class Rfc5646Tests
         // Fail to find matching language
         Rfc5646Record? record = rfc5646.Find(input, false);
         _ = record.Should().BeNull();
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public void Find_NullOrEmpty_ReturnsNull(string? input)
+    {
+        Rfc5646Data rfc5646 = Rfc5646Data.Create();
+        Rfc5646Record? record = rfc5646.Find(input, false);
+        _ = record.Should().BeNull();
+    }
+
+    [Fact]
+    public void FileDate_IsSet()
+    {
+        Rfc5646Data rfc5646 = Rfc5646Data.Create();
+        _ = rfc5646.FileDate.Should().NotBeNull();
+        _ = rfc5646.FileDate.Should().HaveValue();
     }
 }

@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
-using AwesomeAssertions;
-using Xunit;
+using System.Linq;
 
 namespace ptr727.LanguageTags.Tests;
 
@@ -531,5 +530,90 @@ public class LanguageTagTests
 
         _ = tag.IsValid.Should().BeTrue();
         _ = tag.Validate().Should().BeTrue();
+    }
+
+    [Fact]
+    public void ExtensionTag_DefaultConstructor_CreatesEmptyTag()
+    {
+        ExtensionTag extension = new();
+        _ = extension.Prefix.Should().Be('\0');
+        _ = extension.Tags.IsEmpty.Should().BeTrue();
+    }
+
+    [Fact]
+    public void ExtensionTag_EmptyTags_ToStringReturnsEmpty()
+    {
+        ExtensionTag extension = new('u', []);
+        _ = extension.ToString().Should().Be(string.Empty);
+    }
+
+    [Fact]
+    public void ExtensionTag_EnumerableConstructor_CreatesTag()
+    {
+        List<string> tags = ["tag1", "tag2", "tag3"];
+        ExtensionTag extension = new('u', tags);
+
+        _ = extension.Prefix.Should().Be('u');
+        _ = extension.Tags.Length.Should().Be(3);
+        _ = extension.Tags[0].Should().Be("tag1");
+        _ = extension.Tags[1].Should().Be("tag2");
+        _ = extension.Tags[2].Should().Be("tag3");
+    }
+
+    [Fact]
+    public void ExtensionTag_RecordEquality_WorksCorrectly()
+    {
+        ExtensionTag ext1 = new('u', ["ca", "buddhist"]);
+        ExtensionTag ext2 = new('u', ["ca", "buddhist"]);
+        ExtensionTag ext3 = new('t', ["ca", "buddhist"]);
+
+        // Records with ImmutableArray need element-wise comparison
+        _ = ext1.Prefix.Should().Be(ext2.Prefix);
+        _ = ext1.Tags.SequenceEqual(ext2.Tags).Should().BeTrue();
+        _ = ext1.ToString().Should().Be(ext2.ToString());
+
+        _ = ext1.Prefix.Should().NotBe(ext3.Prefix);
+        _ = ext1.ToString().Should().NotBe(ext3.ToString());
+    }
+
+    [Fact]
+    public void PrivateUseTag_DefaultConstructor_CreatesEmptyTag()
+    {
+        PrivateUseTag privateUse = new();
+        _ = privateUse.Tags.IsEmpty.Should().BeTrue();
+        _ = privateUse.ToString().Should().Be(string.Empty);
+    }
+
+    [Fact]
+    public void PrivateUseTag_EnumerableConstructor_CreatesTag()
+    {
+        List<string> tags = ["private1", "private2"];
+        PrivateUseTag privateUse = new(tags);
+
+        _ = privateUse.Tags.Length.Should().Be(2);
+        _ = privateUse.Tags[0].Should().Be("private1");
+        _ = privateUse.Tags[1].Should().Be("private2");
+    }
+
+    [Fact]
+    public void PrivateUseTag_RecordEquality_WorksCorrectly()
+    {
+        PrivateUseTag priv1 = new(["private1", "private2"]);
+        PrivateUseTag priv2 = new(["private1", "private2"]);
+        PrivateUseTag priv3 = new(["other"]);
+
+        // Records with ImmutableArray need element-wise comparison
+        _ = priv1.Tags.SequenceEqual(priv2.Tags).Should().BeTrue();
+        _ = priv1.ToString().Should().Be(priv2.ToString());
+
+        _ = priv1.Tags.SequenceEqual(priv3.Tags).Should().BeFalse();
+        _ = priv1.ToString().Should().NotBe(priv3.ToString());
+    }
+
+    [Fact]
+    public void PrivateUseTag_EmptyTag_ToStringReturnsEmpty()
+    {
+        PrivateUseTag privateUse = new();
+        _ = privateUse.ToString().Should().Be(string.Empty);
     }
 }

@@ -1,12 +1,9 @@
-using System;
-using System.Collections.Generic;
-
 namespace ptr727.LanguageTags;
 
 /// <summary>
 /// Provides a fluent API for building RFC 5646 / BCP 47 language tags.
 /// </summary>
-public class LanguageTagBuilder
+public sealed class LanguageTagBuilder
 {
     private readonly LanguageTag _languageTag = new();
 
@@ -88,7 +85,7 @@ public class LanguageTagBuilder
     public LanguageTagBuilder ExtensionAdd(char prefix, IEnumerable<string> values)
     {
         ArgumentNullException.ThrowIfNull(values);
-        _languageTag._extensions.Add(new() { Prefix = prefix, _tags = [.. values] });
+        _languageTag._extensions.Add(new ExtensionTag(prefix, values));
         return this;
     }
 
@@ -99,7 +96,8 @@ public class LanguageTagBuilder
     /// <returns>The builder instance for method chaining.</returns>
     public LanguageTagBuilder PrivateUseAdd(string value)
     {
-        _languageTag.PrivateUse._tags.Add(value);
+        List<string> tags = [.. _languageTag.PrivateUse.Tags, value];
+        _languageTag.PrivateUse = new PrivateUseTag(tags);
         return this;
     }
 
@@ -112,7 +110,8 @@ public class LanguageTagBuilder
     public LanguageTagBuilder PrivateUseAddRange(IEnumerable<string> values)
     {
         ArgumentNullException.ThrowIfNull(values);
-        _languageTag.PrivateUse._tags.AddRange(values);
+        List<string> tags = [.. _languageTag.PrivateUse.Tags, .. values];
+        _languageTag.PrivateUse = new PrivateUseTag(tags);
         return this;
     }
 
@@ -127,4 +126,12 @@ public class LanguageTagBuilder
     /// </summary>
     /// <returns>A normalized <see cref="LanguageTag"/> or null if normalization fails.</returns>
     public LanguageTag? Normalize() => new LanguageTagParser().Normalize(_languageTag);
+
+    /// <summary>
+    /// Builds and normalizes the constructed language tag according to RFC 5646 rules using the specified options.
+    /// </summary>
+    /// <param name="options">The options used to configure logging.</param>
+    /// <returns>A normalized <see cref="LanguageTag"/> or null if normalization fails.</returns>
+    public LanguageTag? Normalize(Options? options) =>
+        new LanguageTagParser(options).Normalize(_languageTag);
 }

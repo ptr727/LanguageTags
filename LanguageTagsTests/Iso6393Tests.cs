@@ -1,6 +1,3 @@
-using AwesomeAssertions;
-using Xunit;
-
 namespace ptr727.LanguageTags.Tests;
 
 public sealed class Iso6393Tests
@@ -14,9 +11,9 @@ public sealed class Iso6393Tests
     }
 
     [Fact]
-    public void LoadData()
+    public async Task LoadData()
     {
-        Iso6393Data iso6393 = Iso6393Data.LoadData(
+        Iso6393Data iso6393 = await Iso6393Data.LoadDataAsync(
             Fixture.GetDataFilePath(Iso6393Data.DataFileName)
         );
         _ = iso6393.Should().NotBeNull();
@@ -24,12 +21,35 @@ public sealed class Iso6393Tests
     }
 
     [Fact]
-    public void LoadJson()
+    public async Task LoadJson()
     {
-        Iso6393Data? iso6393 = Iso6393Data.LoadJson(
+        Iso6393Data? iso6393 = await Iso6393Data.LoadJsonAsync(
             Fixture.GetDataFilePath(Iso6393Data.DataFileName + ".json")
         );
         _ = iso6393.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task SaveJsonAsync_RoundTrip()
+    {
+        Iso6393Data iso6393 = Iso6393Data.Create();
+        _ = iso6393.RecordList.Length.Should().BeGreaterThan(0);
+
+        string tempFile = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.json");
+        try
+        {
+            await Iso6393Data.SaveJsonAsync(tempFile, iso6393);
+            Iso6393Data? roundTrip = await Iso6393Data.LoadJsonAsync(tempFile);
+            _ = roundTrip.Should().NotBeNull();
+            _ = roundTrip!.RecordList.Length.Should().Be(iso6393.RecordList.Length);
+        }
+        finally
+        {
+            if (File.Exists(tempFile))
+            {
+                File.Delete(tempFile);
+            }
+        }
     }
 
     [Theory]
@@ -67,6 +87,16 @@ public sealed class Iso6393Tests
         _ = iso6393.RecordList.Length.Should().BeGreaterThan(0);
 
         // Fail to find matching language
+        Iso6393Record? record = iso6393.Find(input, false);
+        _ = record.Should().BeNull();
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public void Find_NullOrEmpty_ReturnsNull(string? input)
+    {
+        Iso6393Data iso6393 = Iso6393Data.Create();
         Iso6393Record? record = iso6393.Find(input, false);
         _ = record.Should().BeNull();
     }

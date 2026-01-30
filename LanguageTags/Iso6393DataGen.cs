@@ -3,7 +3,7 @@ namespace ptr727.LanguageTags;
 /// <summary>
 /// Provides access to ISO 639-3 language code data.
 /// </summary>
-public partial class Iso6393Data
+public sealed partial class Iso6393Data
 {
     public static Iso6393Data Create() =>
         new()
@@ -8528,7 +8528,7 @@ public partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Mundabli",
+                    RefName = "Mundabli-Mufu",
                 },
                 new()
                 {
@@ -17529,6 +17529,16 @@ public partial class Iso6393Data
                     Scope = "I",
                     LanguageType = "L",
                     RefName = "Djimini Senoufo",
+                },
+                new()
+                {
+                    Id = "dyl",
+                    Part2B = null,
+                    Part2T = null,
+                    Part1 = null,
+                    Scope = "I",
+                    LanguageType = "L",
+                    RefName = "Bhutanese Sign Language",
                 },
                 new()
                 {
@@ -35752,6 +35762,16 @@ public partial class Iso6393Data
                 },
                 new()
                 {
+                    Id = "lfb",
+                    Part2B = null,
+                    Part2T = null,
+                    Part1 = null,
+                    Scope = "I",
+                    LanguageType = "L",
+                    RefName = "Buu (Cameroon)",
+                },
+                new()
+                {
                     Id = "lfn",
                     Part2B = null,
                     Part2T = null,
@@ -37868,7 +37888,7 @@ public partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "E",
-                    RefName = "Luiseno",
+                    RefName = "Luiseño",
                 },
                 new()
                 {

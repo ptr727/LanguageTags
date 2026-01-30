@@ -324,7 +324,10 @@ public sealed record ExtensionTag(char Prefix, ImmutableArray<string> Tags)
         this with
         {
             Prefix = char.ToLowerInvariant(Prefix),
-            Tags = [.. Tags.Select(t => t.ToLowerInvariant()).OrderBy(t => t)],
+            Tags =
+            [
+                .. Tags.Select(t => t.ToLowerInvariant()).OrderBy(t => t, StringComparer.Ordinal),
+            ],
         };
 
     /// <summary>
@@ -391,7 +394,10 @@ public sealed record PrivateUseTag(ImmutableArray<string> Tags)
     internal PrivateUseTag Normalize() =>
         this with
         {
-            Tags = [.. Tags.Select(t => t.ToLowerInvariant()).OrderBy(t => t)],
+            Tags =
+            [
+                .. Tags.Select(t => t.ToLowerInvariant()).OrderBy(t => t, StringComparer.Ordinal),
+            ],
         };
 
     /// <summary>

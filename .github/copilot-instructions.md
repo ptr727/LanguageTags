@@ -45,7 +45,7 @@
   - `run-periodic-codegen-pull-request.yml`: Weekly scheduled job to update language data
   - `publish-release.yml`: Release and NuGet publishing workflow
   - `merge-bot-pull-request.yml`: Automated PR merge workflow
-  - `build-release-task.yml`, `build-library-task.yml`, `build-executable-task.yml`: Build tasks
+  - `build-release-task.yml`, `build-library-task.yml`: Build tasks
   - `get-version-task.yml`, `build-datebadge-task.yml`: Version and badge generation
 
 ## Core Components

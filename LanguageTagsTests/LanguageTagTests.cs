@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace ptr727.LanguageTags.Tests;
 
@@ -564,16 +563,15 @@ public class LanguageTagTests
     public void ExtensionTag_RecordEquality_WorksCorrectly()
     {
         ExtensionTag ext1 = new('u', ["ca", "buddhist"]);
-        ExtensionTag ext2 = new('u', ["ca", "buddhist"]);
+        ExtensionTag ext2 = new('U', ["CA", "BUDDHIST"]);
         ExtensionTag ext3 = new('t', ["ca", "buddhist"]);
 
-        // Records with ImmutableArray need element-wise comparison
-        _ = ext1.Prefix.Should().Be(ext2.Prefix);
-        _ = ext1.Tags.SequenceEqual(ext2.Tags).Should().BeTrue();
-        _ = ext1.ToString().Should().Be(ext2.ToString());
+        _ = ext1.Equals(ext2).Should().BeTrue();
+        _ = (ext1 == ext2).Should().BeTrue();
+        _ = ext1.GetHashCode().Should().Be(ext2.GetHashCode());
 
-        _ = ext1.Prefix.Should().NotBe(ext3.Prefix);
-        _ = ext1.ToString().Should().NotBe(ext3.ToString());
+        _ = ext1.Equals(ext3).Should().BeFalse();
+        _ = (ext1 != ext3).Should().BeTrue();
     }
 
     [Fact]
@@ -599,15 +597,15 @@ public class LanguageTagTests
     public void PrivateUseTag_RecordEquality_WorksCorrectly()
     {
         PrivateUseTag priv1 = new(["private1", "private2"]);
-        PrivateUseTag priv2 = new(["private1", "private2"]);
+        PrivateUseTag priv2 = new(["PRIVATE1", "PRIVATE2"]);
         PrivateUseTag priv3 = new(["other"]);
 
-        // Records with ImmutableArray need element-wise comparison
-        _ = priv1.Tags.SequenceEqual(priv2.Tags).Should().BeTrue();
-        _ = priv1.ToString().Should().Be(priv2.ToString());
+        _ = priv1.Equals(priv2).Should().BeTrue();
+        _ = (priv1 == priv2).Should().BeTrue();
+        _ = priv1.GetHashCode().Should().Be(priv2.GetHashCode());
 
-        _ = priv1.Tags.SequenceEqual(priv3.Tags).Should().BeFalse();
-        _ = priv1.ToString().Should().NotBe(priv3.ToString());
+        _ = priv1.Equals(priv3).Should().BeFalse();
+        _ = (priv1 != priv3).Should().BeTrue();
     }
 
     [Fact]

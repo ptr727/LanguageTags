@@ -82,10 +82,17 @@ public sealed class LanguageTagBuilder
     /// <param name="values">The extension values.</param>
     /// <returns>The builder instance for method chaining.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="values"/> is empty.</exception>
     public LanguageTagBuilder ExtensionAdd(char prefix, IEnumerable<string> values)
     {
         ArgumentNullException.ThrowIfNull(values);
-        _languageTag._extensions.Add(new ExtensionTag(prefix, values));
+        ImmutableArray<string> tags = [.. values];
+        if (tags.IsEmpty)
+        {
+            throw new ArgumentException("Extension tags cannot be empty.", nameof(values));
+        }
+
+        _languageTag._extensions.Add(new ExtensionTag(prefix, tags));
         return this;
     }
 

@@ -28,8 +28,11 @@ internal static class HttpClientFactory
                         MaxDelay = TimeSpan.FromSeconds(30),
                         ShouldHandle = args =>
                             ValueTask.FromResult(
-                                args.Outcome.Result != null
-                                    && !args.Outcome.Result.IsSuccessStatusCode
+                                args.Outcome.Exception != null
+                                    || (
+                                        args.Outcome.Result != null
+                                        && !args.Outcome.Result.IsSuccessStatusCode
+                                    )
                             ),
                     }
                 )
@@ -42,8 +45,11 @@ internal static class HttpClientFactory
                         BreakDuration = TimeSpan.FromSeconds(30),
                         ShouldHandle = args =>
                             ValueTask.FromResult(
-                                args.Outcome.Result != null
-                                    && !args.Outcome.Result.IsSuccessStatusCode
+                                args.Outcome.Exception != null
+                                    || (
+                                        args.Outcome.Result != null
+                                        && !args.Outcome.Result.IsSuccessStatusCode
+                                    )
                             ),
                     }
                 )

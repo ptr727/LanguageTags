@@ -40,8 +40,9 @@ Available VS Code tasks (use via `run_task` tool):
    - Verify no changes: `dotnet format style --verify-no-changes --severity=info --verbosity=detailed`
 
 3. **Husky.Net**: Git hooks for automated checks
-   - Installed via restore target in `.csproj`
-   - Pre-commit hooks run formatting checks
+   - Installed as a local dotnet tool (via `dotnet tool restore`)
+   - Install Git hooks locally with `dotnet husky install`
+   - Pre-commit hooks run formatting and style checks
 
 4. **Other tools**
    - `dotnet-outdated-tool`: Dependency update checks

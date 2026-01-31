@@ -3,8 +3,8 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace ptr727.LanguageTags.Tests;
 
-[Collection("DisableParallelDefinition")]
-public sealed class LogOptionsTests
+[Collection("Sequential Test Collection")]
+public sealed class LogOptionsTests : SingleInstanceFixture
 {
     [Fact]
     public void CreateLogger_UsesFactory_WhenFactorySet()

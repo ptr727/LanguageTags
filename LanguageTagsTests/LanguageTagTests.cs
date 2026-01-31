@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 
 namespace ptr727.LanguageTags.Tests;
 
-public class LanguageTagTests
+public class LanguageTagTests : SingleInstanceFixture
 {
     [Theory]
     [InlineData("en-US")]
@@ -13,7 +13,7 @@ public class LanguageTagTests
     {
         LanguageTag? languageTag = LanguageTag.Parse(tag);
         _ = languageTag.Should().NotBeNull();
-        _ = languageTag!.Validate().Should().BeTrue();
+        _ = languageTag.Validate().Should().BeTrue();
         _ = languageTag.ToString().Should().Be(tag);
     }
 
@@ -27,7 +27,7 @@ public class LanguageTagTests
         Options options = new();
         LanguageTag? languageTag = LanguageTag.Parse(tag, options);
         _ = languageTag.Should().NotBeNull();
-        _ = languageTag!.Validate().Should().BeTrue();
+        _ = languageTag.Validate().Should().BeTrue();
         _ = languageTag.ToString().Should().Be(tag);
     }
 
@@ -69,7 +69,7 @@ public class LanguageTagTests
         bool result = LanguageTag.TryParse(tag, out LanguageTag? languageTag);
         _ = result.Should().BeTrue();
         _ = languageTag.Should().NotBeNull();
-        _ = languageTag!.Validate().Should().BeTrue();
+        _ = languageTag.Validate().Should().BeTrue();
         _ = languageTag.ToString().Should().Be(tag);
     }
 
@@ -83,7 +83,7 @@ public class LanguageTagTests
         bool result = LanguageTag.TryParse(tag, out LanguageTag? languageTag, options);
         _ = result.Should().BeTrue();
         _ = languageTag.Should().NotBeNull();
-        _ = languageTag!.Validate().Should().BeTrue();
+        _ = languageTag.Validate().Should().BeTrue();
         _ = languageTag.ToString().Should().Be(tag);
     }
 
@@ -144,9 +144,9 @@ public class LanguageTagTests
         LanguageTag? languageTag = LanguageTag.Parse(tag);
         _ = languageTag.Should().NotBeNull();
 
-        LanguageTag? normalizedTag = languageTag!.Normalize();
+        LanguageTag? normalizedTag = languageTag.Normalize();
         _ = normalizedTag.Should().NotBeNull();
-        _ = normalizedTag!.Validate().Should().BeTrue();
+        _ = normalizedTag.Validate().Should().BeTrue();
         _ = normalizedTag.ToString().Should().Be(normalized);
     }
 
@@ -176,7 +176,7 @@ public class LanguageTagTests
         LanguageTag? parsed = LanguageTag.Parse(original);
         _ = parsed.Should().NotBeNull();
 
-        LanguageTag? normalized = parsed!.Normalize();
+        LanguageTag? normalized = parsed.Normalize();
         _ = normalized.Should().NotBeNull();
         _ = normalized.ToString().Should().Be("en-GB-boont");
 
@@ -212,7 +212,7 @@ public class LanguageTagTests
     {
         LanguageTag? result = LanguageTag.ParseAndNormalize(tag);
         _ = result.Should().NotBeNull();
-        _ = result!.ToString().Should().Be(expected);
+        _ = result.ToString().Should().Be(expected);
     }
 
     [Fact]
@@ -233,7 +233,7 @@ public class LanguageTagTests
         Options options = new();
         LanguageTag? result = LanguageTag.ParseAndNormalize(tag, options);
         _ = result.Should().NotBeNull();
-        _ = result!.ToString().Should().Be(expected);
+        _ = result.ToString().Should().Be(expected);
     }
 
     [Fact]
@@ -249,7 +249,7 @@ public class LanguageTagTests
     {
         LanguageTag? tag = LanguageTag.Parse("en-US");
         _ = tag.Should().NotBeNull();
-        _ = tag!.IsValid.Should().BeTrue();
+        _ = tag.IsValid.Should().BeTrue();
     }
 
     [Theory]
@@ -311,7 +311,7 @@ public class LanguageTagTests
 
         _ = tag1.Should().NotBeNull();
         _ = tag2.Should().NotBeNull();
-        _ = tag1!.Equals(tag2).Should().BeTrue();
+        _ = tag1.Equals(tag2).Should().BeTrue();
         _ = tag1.Equals((object?)tag2).Should().BeTrue();
     }
 
@@ -323,7 +323,7 @@ public class LanguageTagTests
 
         _ = tag1.Should().NotBeNull();
         _ = tag2.Should().NotBeNull();
-        _ = tag1!.Equals(tag2).Should().BeFalse();
+        _ = tag1.Equals(tag2).Should().BeFalse();
     }
 
     [Fact]
@@ -498,7 +498,7 @@ public class LanguageTagTests
         _ = languageTag.Should().NotBeNull();
 
         // Verify all properties are accessible
-        _ = languageTag!.Language.Should().NotBeNull();
+        _ = languageTag.Language.Should().NotBeNull();
         _ = languageTag.ExtendedLanguage.Should().NotBeNull();
         _ = languageTag.Script.Should().NotBeNull();
         _ = languageTag.Region.Should().NotBeNull();

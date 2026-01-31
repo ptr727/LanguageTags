@@ -212,16 +212,11 @@ public sealed partial class Iso6393Data
             .ConfigureAwait(false);
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Reliability",
-        "CA2007:Consider calling ConfigureAwait on the awaited task",
-        Justification = "https://github.com/dotnet/roslyn-analyzers/issues/7185"
-    )]
     internal static async Task GenCodeAsync(string fileName, Iso6393Data iso6393)
     {
         ArgumentNullException.ThrowIfNull(iso6393);
 
-        StreamWriter writer = new(
+        using StreamWriter writer = new(
             new FileStream(
                 fileName,
                 FileMode.Create,
@@ -235,18 +230,25 @@ public sealed partial class Iso6393Data
         {
             NewLine = "\r\n",
         };
-        await using ConfiguredAsyncDisposable writerScope = writer.ConfigureAwait(false);
-
-        ConfiguredTaskAwaitable WriteLineAsync(string value) =>
-            writer.WriteLineAsync(value).ConfigureAwait(false);
 
         await WriteLineAsync("namespace ptr727.LanguageTags;");
         await WriteLineAsync(string.Empty);
         await WriteLineAsync("/// <summary>");
         await WriteLineAsync("/// Provides access to ISO 639-3 language code data.");
         await WriteLineAsync("/// </summary>");
+        await WriteLineAsync(
+            $"[System.CodeDom.Compiler.GeneratedCode(\"{typeof(Iso6393Data).FullName}\", \"1.0\")]"
+        );
         await WriteLineAsync("public sealed partial class Iso6393Data");
         await WriteLineAsync("{");
+        await WriteLineAsync("    /// <summary>");
+        await WriteLineAsync(
+            "    /// Creates an instance loaded from the embedded ISO 639-3 dataset."
+        );
+        await WriteLineAsync("    /// </summary>");
+        await WriteLineAsync(
+            "    /// <returns>The populated <see cref=\"Iso6393Data\"/> instance.</returns>"
+        );
         await WriteLineAsync("    public static Iso6393Data Create() =>");
         await WriteLineAsync("        new()");
         await WriteLineAsync("        {");
@@ -284,6 +286,10 @@ public sealed partial class Iso6393Data
         await WriteLineAsync("            ],");
         await WriteLineAsync("        };");
         await WriteLineAsync("}");
+        return;
+
+        ConfiguredTaskAwaitable WriteLineAsync(string value) =>
+            writer.WriteLineAsync(value).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -294,6 +300,9 @@ public sealed partial class Iso6393Data
     /// <summary>
     /// Finds an ISO 639-3 language record by language code or description.
     /// </summary>
+    /// <remarks>
+    /// Matching is case-insensitive and checks Id, Part 2/B, Part 2/T, Part 1, then (optionally) reference name.
+    /// </remarks>
     /// <param name="languageTag">The language code or description to search for.</param>
     /// <param name="includeDescription">If true, searches in the reference name field; otherwise, only searches language codes.</param>
     /// <returns>The matching <see cref="Iso6393Record"/> or null if not found.</returns>
@@ -303,6 +312,9 @@ public sealed partial class Iso6393Data
     /// <summary>
     /// Finds an ISO 639-3 language record by language code or description using the specified options.
     /// </summary>
+    /// <remarks>
+    /// Matching is case-insensitive and checks Id, Part 2/B, Part 2/T, Part 1, then (optionally) reference name.
+    /// </remarks>
     /// <param name="languageTag">The language code or description to search for.</param>
     /// <param name="includeDescription">If true, searches in the reference name field; otherwise, only searches language codes.</param>
     /// <param name="options">The options used to configure logging.</param>

@@ -1,6 +1,6 @@
 namespace ptr727.LanguageTags.Tests;
 
-public sealed class LanguageTagBuilderTests
+public sealed class LanguageTagBuilderTests : SingleInstanceFixture
 {
     [Fact]
     public void Build_Pass()
@@ -106,7 +106,7 @@ public sealed class LanguageTagBuilderTests
             .PrivateUseAdd("private")
             .Normalize(options);
         _ = languageTag.Should().NotBeNull();
-        _ = languageTag!.Validate().Should().BeTrue();
+        _ = languageTag.Validate().Should().BeTrue();
         _ = languageTag.ToString().Should().Be("en-GB-boont-r-extended-sequence-x-private");
     }
 

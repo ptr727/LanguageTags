@@ -365,7 +365,7 @@ internal sealed class LanguageTagParser
 
     private static bool ValidatePrivateUsePrefix(string tag) =>
         // x
-        !string.IsNullOrEmpty(tag) && tag.Length == 1 && tag[0] == PrivateUseTag.Prefix;
+        !string.IsNullOrEmpty(tag) && tag is [PrivateUseTag.Prefix];
 
     private static bool ValidatePrivateUse(string tag) =>
         // 1 to 8 chars
@@ -594,19 +594,15 @@ internal sealed class LanguageTagParser
         return parsedTag == null ? null : Normalize(parsedTag);
     }
 
-    internal LanguageTag? Normalize(LanguageTag languageTag)
+    internal LanguageTag Normalize(LanguageTag languageTag)
     {
+        ArgumentNullException.ThrowIfNull(languageTag);
+
         // Canonicalization of Language Tags
         // https://www.rfc-editor.org/rfc/rfc5646#section-4.5
 
-        if (languageTag == null)
-        {
-            return null;
-        }
-
-        string originalTag = languageTag.ToString();
-
         // Create a copy and do not modify the original
+        string originalTag = languageTag.ToString();
         LanguageTag normalizeTag = new(languageTag);
 
         // Language with preferred value
@@ -756,13 +752,10 @@ internal sealed class LanguageTagParser
 
     internal static bool Validate(LanguageTag languageTag)
     {
+        ArgumentNullException.ThrowIfNull(languageTag);
+
         // Classes of Conformance
         // https://www.rfc-editor.org/rfc/rfc5646#section-2.2.9
-
-        if (languageTag == null)
-        {
-            return false;
-        }
 
         // Validate tags
         if (!string.IsNullOrEmpty(languageTag.Language) && !ValidateLanguage(languageTag.Language))

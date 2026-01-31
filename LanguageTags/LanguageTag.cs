@@ -68,18 +68,18 @@ public sealed class LanguageTag : IEquatable<LanguageTag>
     public PrivateUseTag PrivateUse { get; internal set; }
 
     /// <summary>
-    /// Parses a language tag string into a LanguageTag object.
+    /// Parses a language tag string into a <see cref="LanguageTag"/> instance.
     /// </summary>
     /// <param name="tag">The language tag string to parse (e.g., "en-US", "zh-Hans-CN").</param>
-    /// <returns>A parsed and normalized LanguageTag object, or null if parsing fails.</returns>
+    /// <returns>The parsed language tag, or null if parsing fails.</returns>
     public static LanguageTag? Parse(string tag) => new LanguageTagParser().Parse(tag);
 
     /// <summary>
-    /// Parses a language tag string into a LanguageTag object using the specified options.
+    /// Parses a language tag string into a <see cref="LanguageTag"/> instance using the specified options.
     /// </summary>
     /// <param name="tag">The language tag string to parse (e.g., "en-US", "zh-Hans-CN").</param>
     /// <param name="options">The options used to configure logging.</param>
-    /// <returns>A parsed and normalized LanguageTag object, or null if parsing fails.</returns>
+    /// <returns>The parsed language tag, or null if parsing fails.</returns>
     public static LanguageTag? Parse(string tag, Options? options) =>
         new LanguageTagParser(options).Parse(tag);
 
@@ -88,7 +88,7 @@ public sealed class LanguageTag : IEquatable<LanguageTag>
     /// </summary>
     /// <param name="tag">The language tag string to parse.</param>
     /// <param name="defaultTag">The default tag to return if parsing fails (defaults to "und").</param>
-    /// <returns>The parsed tag or the default tag.</returns>
+    /// <returns>The parsed tag, the supplied default tag, or "und" if parsing fails and no default is provided.</returns>
     public static LanguageTag ParseOrDefault(string tag, LanguageTag? defaultTag = null)
     {
         LanguageTag? parsed = Parse(tag);
@@ -99,7 +99,7 @@ public sealed class LanguageTag : IEquatable<LanguageTag>
     /// Parses and normalizes a language tag string.
     /// </summary>
     /// <param name="tag">The language tag string.</param>
-    /// <returns>A normalized language tag or null if parsing/normalization fails.</returns>
+    /// <returns>A normalized language tag, or null if parsing fails.</returns>
     public static LanguageTag? ParseAndNormalize(string tag) => Parse(tag)?.Normalize();
 
     /// <summary>
@@ -107,15 +107,15 @@ public sealed class LanguageTag : IEquatable<LanguageTag>
     /// </summary>
     /// <param name="tag">The language tag string.</param>
     /// <param name="options">The options used to configure logging.</param>
-    /// <returns>A normalized language tag or null if parsing/normalization fails.</returns>
+    /// <returns>A normalized language tag, or null if parsing fails.</returns>
     public static LanguageTag? ParseAndNormalize(string tag, Options? options) =>
         Parse(tag, options)?.Normalize(options);
 
     /// <summary>
-    /// Tries to parse a language tag string into a LanguageTag object.
+    /// Tries to parse a language tag string into a <see cref="LanguageTag"/> instance.
     /// </summary>
     /// <param name="tag">The language tag string to parse (e.g., "en-US", "zh-Hans-CN").</param>
-    /// <param name="result">When this method returns, contains the parsed LanguageTag if successful, or null if parsing fails.</param>
+    /// <param name="result">When this method returns, contains the parsed language tag if successful, or null if parsing fails.</param>
     /// <returns>true if the tag was successfully parsed; otherwise, false.</returns>
     public static bool TryParse(string tag, [NotNullWhen(true)] out LanguageTag? result)
     {
@@ -124,10 +124,10 @@ public sealed class LanguageTag : IEquatable<LanguageTag>
     }
 
     /// <summary>
-    /// Tries to parse a language tag string into a LanguageTag object using the specified options.
+    /// Tries to parse a language tag string into a <see cref="LanguageTag"/> instance using the specified options.
     /// </summary>
     /// <param name="tag">The language tag string to parse (e.g., "en-US", "zh-Hans-CN").</param>
-    /// <param name="result">When this method returns, contains the parsed LanguageTag if successful, or null if parsing fails.</param>
+    /// <param name="result">When this method returns, contains the parsed language tag if successful, or null if parsing fails.</param>
     /// <param name="options">The options used to configure logging.</param>
     /// <returns>true if the tag was successfully parsed; otherwise, false.</returns>
     public static bool TryParse(
@@ -147,13 +147,16 @@ public sealed class LanguageTag : IEquatable<LanguageTag>
     public static LanguageTagBuilder CreateBuilder() => new();
 
     /// <summary>
-    /// Validates this language tag.
+    /// Validates this language tag for RFC 5646 structural correctness.
     /// </summary>
-    /// <returns>true if the tag is valid; otherwise, false.</returns>
+    /// <remarks>
+    /// This method validates structure and duplication rules only; it does not validate subtags against the registry.
+    /// </remarks>
+    /// <returns>true if the tag is structurally valid; otherwise, false.</returns>
     public bool Validate() => LanguageTagParser.Validate(this);
 
     /// <summary>
-    /// Gets whether this language tag is valid according to RFC 5646 rules.
+    /// Gets whether this language tag is structurally valid according to RFC 5646 rules.
     /// </summary>
     public bool IsValid => Validate();
 
@@ -174,7 +177,10 @@ public sealed class LanguageTag : IEquatable<LanguageTag>
     /// <summary>
     /// Converts this language tag to its string representation.
     /// </summary>
-    /// <returns>A string representation of the language tag (e.g., "en-US", "zh-Hans-CN").</returns>
+    /// <returns>
+    /// A string representation of the language tag (e.g., "en-US", "zh-Hans-CN"), or an empty string
+    /// when no subtags are present.
+    /// </returns>
     public override string ToString()
     {
         StringBuilder stringBuilder = new();
@@ -214,7 +220,7 @@ public sealed class LanguageTag : IEquatable<LanguageTag>
             {
                 _ = stringBuilder.Append('-');
             }
-            _ = stringBuilder.Append(PrivateUse.ToString());
+            _ = stringBuilder.Append(PrivateUse);
         }
         return stringBuilder.ToString();
     }
@@ -316,7 +322,7 @@ public sealed record ExtensionTag(char Prefix, ImmutableArray<string> Tags)
     /// <summary>
     /// Converts this extension tag to its string representation.
     /// </summary>
-    /// <returns>A string representation of the extension tag (e.g., "u-ca-buddhist").</returns>
+    /// <returns>A string representation of the extension tag (e.g., "u-ca-buddhist"), or an empty string when no tags are present.</returns>
     public override string ToString() =>
         Tags.IsEmpty ? string.Empty : $"{Prefix}-{string.Join('-', Tags)}";
 
@@ -387,7 +393,7 @@ public sealed record PrivateUseTag(ImmutableArray<string> Tags)
     /// <summary>
     /// Converts this private use tag to its string representation.
     /// </summary>
-    /// <returns>A string representation of the private use tag (e.g., "x-private").</returns>
+    /// <returns>A string representation of the private use tag (e.g., "x-private"), or an empty string when no tags are present.</returns>
     public override string ToString() =>
         Tags.IsEmpty ? string.Empty : $"{Prefix}-{string.Join('-', Tags)}";
 

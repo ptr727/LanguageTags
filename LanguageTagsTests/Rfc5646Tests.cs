@@ -1,6 +1,6 @@
 namespace ptr727.LanguageTags.Tests;
 
-public class Rfc5646Tests
+public class Rfc5646Tests : SingleInstanceFixture
 {
     [Fact]
     public void Create()
@@ -15,7 +15,7 @@ public class Rfc5646Tests
     public async Task LoadData()
     {
         Rfc5646Data rfc5646 = await Rfc5646Data.LoadDataAsync(
-            Fixture.GetDataFilePath(Rfc5646Data.DataFileName)
+            GetDataFilePath(Rfc5646Data.DataFileName)
         );
         _ = rfc5646.Should().NotBeNull();
         _ = rfc5646.RecordList.Length.Should().BeGreaterThan(0);
@@ -25,7 +25,7 @@ public class Rfc5646Tests
     public async Task LoadJson()
     {
         Rfc5646Data? rfc5646 = await Rfc5646Data.LoadJsonAsync(
-            Fixture.GetDataFilePath(Rfc5646Data.DataFileName + ".json")
+            GetDataFilePath(Rfc5646Data.DataFileName + ".json")
         );
         _ = rfc5646.Should().NotBeNull();
         _ = rfc5646.RecordList.Length.Should().BeGreaterThan(0);
@@ -43,7 +43,7 @@ public class Rfc5646Tests
             await Rfc5646Data.SaveJsonAsync(tempFile, rfc5646);
             Rfc5646Data? roundTrip = await Rfc5646Data.LoadJsonAsync(tempFile);
             _ = roundTrip.Should().NotBeNull();
-            _ = roundTrip!.RecordList.Length.Should().Be(rfc5646.RecordList.Length);
+            _ = roundTrip.RecordList.Length.Should().Be(rfc5646.RecordList.Length);
         }
         finally
         {

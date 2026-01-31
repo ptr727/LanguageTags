@@ -120,7 +120,7 @@ public sealed class LanguageLookup(Options? options = null)
     /// Converts an IETF BCP 47 language tag to its ISO equivalent.
     /// </summary>
     /// <param name="languageTag">The IETF BCP 47 language tag to convert.</param>
-    /// <returns>The ISO language code, or "und" if the conversion fails.</returns>
+    /// <returns>The ISO 639-2/B language code, or "und" if the conversion fails.</returns>
     public string GetIsoFromIetf(string languageTag)
     {
         // Undetermined
@@ -260,12 +260,18 @@ public sealed class LanguageLookup(Options? options = null)
     /// <summary>
     /// Determines if two language tags are equivalent (case-insensitive).
     /// </summary>
+    /// <param name="tag1">The first language tag.</param>
+    /// <param name="tag2">The second language tag.</param>
+    /// <returns>true when the tags are equal ignoring case; otherwise, false.</returns>
     public static bool AreEquivalent(string tag1, string tag2) =>
         string.Equals(tag1, tag2, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Normalizes and compares two language tags for equivalence.
     /// </summary>
+    /// <param name="tag1">The first language tag.</param>
+    /// <param name="tag2">The second language tag.</param>
+    /// <returns>true when both tags can be parsed and normalize to the same value; otherwise, false.</returns>
     public static bool AreEquivalentNormalized(string tag1, string tag2)
     {
         LanguageTag? parsed1 = LanguageTag.Parse(tag1)?.Normalize();

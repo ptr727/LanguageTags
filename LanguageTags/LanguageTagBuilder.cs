@@ -8,7 +8,7 @@ public sealed class LanguageTagBuilder
     private readonly LanguageTag _languageTag = new();
 
     /// <summary>
-    /// Sets the primary language subtag.
+    /// Sets the primary language subtag without validation.
     /// </summary>
     /// <param name="value">The language code (e.g., "en", "zh").</param>
     /// <returns>The builder instance for method chaining.</returns>
@@ -19,7 +19,7 @@ public sealed class LanguageTagBuilder
     }
 
     /// <summary>
-    /// Sets the extended language subtag.
+    /// Sets the extended language subtag without validation.
     /// </summary>
     /// <param name="value">The extended language code (e.g., "yue" for zh-yue).</param>
     /// <returns>The builder instance for method chaining.</returns>
@@ -30,7 +30,7 @@ public sealed class LanguageTagBuilder
     }
 
     /// <summary>
-    /// Sets the script subtag.
+    /// Sets the script subtag without validation.
     /// </summary>
     /// <param name="value">The ISO 15924 script code (e.g., "Hans", "Latn").</param>
     /// <returns>The builder instance for method chaining.</returns>
@@ -41,7 +41,7 @@ public sealed class LanguageTagBuilder
     }
 
     /// <summary>
-    /// Sets the region subtag.
+    /// Sets the region subtag without validation.
     /// </summary>
     /// <param name="value">The ISO 3166-1 country code or UN M.49 region code (e.g., "US", "CN").</param>
     /// <returns>The builder instance for method chaining.</returns>
@@ -52,7 +52,7 @@ public sealed class LanguageTagBuilder
     }
 
     /// <summary>
-    /// Adds a variant subtag.
+    /// Adds a variant subtag without validation.
     /// </summary>
     /// <param name="value">The variant code to add.</param>
     /// <returns>The builder instance for method chaining.</returns>
@@ -63,7 +63,7 @@ public sealed class LanguageTagBuilder
     }
 
     /// <summary>
-    /// Adds multiple variant subtags.
+    /// Adds multiple variant subtags without validation.
     /// </summary>
     /// <param name="values">The variant codes to add.</param>
     /// <returns>The builder instance for method chaining.</returns>
@@ -76,7 +76,7 @@ public sealed class LanguageTagBuilder
     }
 
     /// <summary>
-    /// Adds an extension subtag with the specified prefix and values.
+    /// Adds an extension subtag with the specified prefix and values without validation.
     /// </summary>
     /// <param name="prefix">The single-character extension prefix (e.g., 'u' for Unicode extensions).</param>
     /// <param name="values">The extension values.</param>
@@ -97,7 +97,7 @@ public sealed class LanguageTagBuilder
     }
 
     /// <summary>
-    /// Adds a private use subtag.
+    /// Adds a private use subtag without validation.
     /// </summary>
     /// <param name="value">The private use value to add.</param>
     /// <returns>The builder instance for method chaining.</returns>
@@ -109,7 +109,7 @@ public sealed class LanguageTagBuilder
     }
 
     /// <summary>
-    /// Adds multiple private use subtags.
+    /// Adds multiple private use subtags without validation.
     /// </summary>
     /// <param name="values">The private use values to add.</param>
     /// <returns>The builder instance for method chaining.</returns>
@@ -123,22 +123,28 @@ public sealed class LanguageTagBuilder
     }
 
     /// <summary>
-    /// Builds and returns the constructed language tag.
+    /// Builds and returns the constructed language tag without validation or normalization.
     /// </summary>
-    /// <returns>The constructed <see cref="LanguageTag"/>.</returns>
+    /// <returns>The constructed <see cref="LanguageTag"/> instance; the builder continues to mutate this instance.</returns>
     public LanguageTag Build() => _languageTag;
 
     /// <summary>
     /// Builds and normalizes the constructed language tag according to RFC 5646 rules.
     /// </summary>
-    /// <returns>A normalized <see cref="LanguageTag"/> or null if normalization fails.</returns>
+    /// <remarks>
+    /// Normalization does not validate the tag; call <see cref="LanguageTag.Validate"/> on the result if needed.
+    /// </remarks>
+    /// <returns>A normalized <see cref="LanguageTag"/>.</returns>
     public LanguageTag? Normalize() => new LanguageTagParser().Normalize(_languageTag);
 
     /// <summary>
     /// Builds and normalizes the constructed language tag according to RFC 5646 rules using the specified options.
     /// </summary>
     /// <param name="options">The options used to configure logging.</param>
-    /// <returns>A normalized <see cref="LanguageTag"/> or null if normalization fails.</returns>
+    /// <remarks>
+    /// Normalization does not validate the tag; call <see cref="LanguageTag.Validate"/> on the result if needed.
+    /// </remarks>
+    /// <returns>A normalized <see cref="LanguageTag"/>.</returns>
     public LanguageTag? Normalize(Options? options) =>
         new LanguageTagParser(options).Normalize(_languageTag);
 }

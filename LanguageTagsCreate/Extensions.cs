@@ -34,7 +34,7 @@ internal static partial class LogExtensions
             [CallerMemberName] string function = "unknown"
         )
         {
-            LogCatchException(logger, function, exception);
+            logger.LogCatchException(function, exception);
             return false;
         }
 
@@ -43,7 +43,7 @@ internal static partial class LogExtensions
             [CallerMemberName] string function = "unknown"
         )
         {
-            LogCatchException(logger, function, exception);
+            logger.LogCatchException(function, exception);
             return true;
         }
     }

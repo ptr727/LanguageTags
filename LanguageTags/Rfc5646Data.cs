@@ -168,16 +168,11 @@ public sealed partial class Rfc5646Data
             .ConfigureAwait(false);
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Reliability",
-        "CA2007:Consider calling ConfigureAwait on the awaited task",
-        Justification = "https://github.com/dotnet/roslyn-analyzers/issues/7185"
-    )]
     internal static async Task GenCodeAsync(string fileName, Rfc5646Data rfc5646)
     {
         ArgumentNullException.ThrowIfNull(rfc5646);
 
-        StreamWriter writer = new(
+        using StreamWriter writer = new(
             new FileStream(
                 fileName,
                 FileMode.Create,
@@ -191,10 +186,6 @@ public sealed partial class Rfc5646Data
         {
             NewLine = "\r\n",
         };
-        await using ConfiguredAsyncDisposable writerScope = writer.ConfigureAwait(false);
-
-        ConfiguredTaskAwaitable WriteLineAsync(string value) =>
-            writer.WriteLineAsync(value).ConfigureAwait(false);
 
         await WriteLineAsync("namespace ptr727.LanguageTags;");
         await WriteLineAsync(string.Empty);
@@ -203,8 +194,19 @@ public sealed partial class Rfc5646Data
             "/// Provides access to RFC 5646 / BCP 47 language subtag registry data."
         );
         await WriteLineAsync("/// </summary>");
+        await WriteLineAsync(
+            $"[System.CodeDom.Compiler.GeneratedCode(\"{typeof(Rfc5646Data).FullName}\", \"1.0\")]"
+        );
         await WriteLineAsync("public sealed partial class Rfc5646Data");
         await WriteLineAsync("{");
+        await WriteLineAsync("    /// <summary>");
+        await WriteLineAsync(
+            "    /// Creates an instance loaded from the embedded RFC 5646 subtag registry dataset."
+        );
+        await WriteLineAsync("    /// </summary>");
+        await WriteLineAsync(
+            "    /// <returns>The populated <see cref=\"Rfc5646Data\"/> instance.</returns>"
+        );
         await WriteLineAsync("    public static Rfc5646Data Create() =>");
         await WriteLineAsync("        new()");
         await WriteLineAsync("        {");
@@ -260,6 +262,10 @@ public sealed partial class Rfc5646Data
         await WriteLineAsync("            ],");
         await WriteLineAsync("        };");
         await WriteLineAsync("}");
+        return;
+
+        ConfiguredTaskAwaitable WriteLineAsync(string value) =>
+            writer.WriteLineAsync(value).ConfigureAwait(false);
     }
 
     internal sealed class Parser
@@ -297,7 +303,7 @@ public sealed partial class Rfc5646Data
                 }
 
                 // Multiline record starts with two spaces
-                // Peek at the next line an look for a space
+                // Peek at the next line and look for a space
                 while (true)
                 {
                     // Read next line to check for multiline continuation
@@ -495,6 +501,9 @@ public sealed partial class Rfc5646Data
     /// <summary>
     /// Finds a language subtag record by tag, subtag, preferred value, or description.
     /// </summary>
+    /// <remarks>
+    /// Matching is case-insensitive and checks Tag, SubTag, PreferredValue, then (optionally) Description.
+    /// </remarks>
     /// <param name="languageTag">The language tag, subtag, or description to search for.</param>
     /// <param name="includeDescription">If true, searches in the description field; otherwise, only searches tags and subtags.</param>
     /// <returns>The matching <see cref="Rfc5646Record"/> or null if not found.</returns>
@@ -504,6 +513,9 @@ public sealed partial class Rfc5646Data
     /// <summary>
     /// Finds a language subtag record by tag, subtag, preferred value, or description using the specified options.
     /// </summary>
+    /// <remarks>
+    /// Matching is case-insensitive and checks Tag, SubTag, PreferredValue, then (optionally) Description.
+    /// </remarks>
     /// <param name="languageTag">The language tag, subtag, or description to search for.</param>
     /// <param name="includeDescription">If true, searches in the description field; otherwise, only searches tags and subtags.</param>
     /// <param name="options">The options used to configure logging.</param>

@@ -1,6 +1,6 @@
 namespace ptr727.LanguageTags.Tests;
 
-public sealed class Iso6393Tests
+public sealed class Iso6393Tests : SingleInstanceFixture
 {
     [Fact]
     public void Create()
@@ -14,7 +14,7 @@ public sealed class Iso6393Tests
     public async Task LoadData()
     {
         Iso6393Data iso6393 = await Iso6393Data.LoadDataAsync(
-            Fixture.GetDataFilePath(Iso6393Data.DataFileName)
+            GetDataFilePath(Iso6393Data.DataFileName)
         );
         _ = iso6393.Should().NotBeNull();
         _ = iso6393.RecordList.Length.Should().BeGreaterThan(0);
@@ -24,7 +24,7 @@ public sealed class Iso6393Tests
     public async Task LoadJson()
     {
         Iso6393Data? iso6393 = await Iso6393Data.LoadJsonAsync(
-            Fixture.GetDataFilePath(Iso6393Data.DataFileName + ".json")
+            GetDataFilePath(Iso6393Data.DataFileName + ".json")
         );
         _ = iso6393.Should().NotBeNull();
     }
@@ -41,7 +41,7 @@ public sealed class Iso6393Tests
             await Iso6393Data.SaveJsonAsync(tempFile, iso6393);
             Iso6393Data? roundTrip = await Iso6393Data.LoadJsonAsync(tempFile);
             _ = roundTrip.Should().NotBeNull();
-            _ = roundTrip!.RecordList.Length.Should().Be(iso6393.RecordList.Length);
+            _ = roundTrip.RecordList.Length.Should().Be(iso6393.RecordList.Length);
         }
         finally
         {

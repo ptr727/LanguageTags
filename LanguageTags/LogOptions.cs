@@ -13,6 +13,9 @@ public static class LogOptions
     /// <summary>
     /// Gets or sets the logger factory used to create category loggers.
     /// </summary>
+    /// <remarks>
+    /// Changes to this property after loggers have been created will not affect existing cached loggers.
+    /// </remarks>
     public static ILoggerFactory LoggerFactory
     {
         get => Volatile.Read(ref s_loggerFactory);
@@ -20,8 +23,11 @@ public static class LogOptions
     }
 
     /// <summary>
-    /// Gets or sets the global fallback logger.
+    /// Gets or sets the global fallback logger used when no factory is configured.
     /// </summary>
+    /// <remarks>
+    /// Changes to this property after loggers have been created will not affect existing cached loggers.
+    /// </remarks>
     public static ILogger Logger
     {
         get => Volatile.Read(ref s_logger);
@@ -66,13 +72,16 @@ public static class LogOptions
     public static ILogger CreateLogger(string categoryName, Options? options) =>
         options is null ? CreateLogger(categoryName)
         : options.LoggerFactory is not null ? options.LoggerFactory.CreateLogger(categoryName)
-        : options.Logger is not null ? options.Logger
-        : CreateLogger(categoryName);
+        : options.Logger ?? CreateLogger(categoryName);
 
     /// <summary>
     /// Configures the library to use the specified logger factory.
     /// </summary>
     /// <param name="loggerFactory">The factory to use for new loggers.</param>
+    /// <remarks>
+    /// This will only affect loggers created after this call.
+    /// Existing cached loggers remain unchanged.
+    /// </remarks>
     public static void SetFactory(ILoggerFactory loggerFactory) => LoggerFactory = loggerFactory;
 
     /// <summary>
@@ -82,6 +91,9 @@ public static class LogOptions
     /// <returns>
     /// <c>true</c> when the factory was set because no factory was configured; otherwise, <c>false</c>.
     /// </returns>
+    /// <remarks>
+    /// Use this method for one-time initialization to avoid overwriting an existing factory.
+    /// </remarks>
     public static bool TrySetFactory(ILoggerFactory loggerFactory)
     {
         ILoggerFactory candidate = loggerFactory ?? NullLoggerFactory.Instance;
@@ -98,6 +110,10 @@ public static class LogOptions
     /// Configures the library to use the specified global logger.
     /// </summary>
     /// <param name="logger">The logger used as the global fallback.</param>
+    /// <remarks>
+    /// This will only affect loggers created after this call.
+    /// Existing cached loggers remain unchanged.
+    /// </remarks>
     public static void SetLogger(ILogger logger) => Logger = logger;
 
     /// <summary>
@@ -107,6 +123,9 @@ public static class LogOptions
     /// <returns>
     /// <c>true</c> when the logger was set because no logger was configured; otherwise, <c>false</c>.
     /// </returns>
+    /// <remarks>
+    /// Use this method for one-time initialization to avoid overwriting an existing logger.
+    /// </remarks>
     public static bool TrySetLogger(ILogger logger)
     {
         ILogger candidate = logger ?? NullLogger.Instance;

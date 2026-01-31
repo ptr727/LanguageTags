@@ -1,6 +1,6 @@
 namespace ptr727.LanguageTags.Tests;
 
-public sealed class LanguageLookupTests
+public sealed class LanguageLookupTests : SingleInstanceFixture
 {
     [Theory]
     [InlineData("afr", "af")]

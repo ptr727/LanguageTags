@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 namespace ptr727.LanguageTags.Create;
 
 internal sealed class CreateTagData(
@@ -46,9 +44,9 @@ internal sealed class CreateTagData(
 
     internal async Task CreateJsonDataAsync()
     {
-        ArgumentNullException.ThrowIfNull(_iso6392DataFile, nameof(_iso6392DataFile));
-        ArgumentNullException.ThrowIfNull(_iso6393DataFile, nameof(_iso6393DataFile));
-        ArgumentNullException.ThrowIfNull(_rfc5646DataFile, nameof(_rfc5646DataFile));
+        ArgumentNullException.ThrowIfNull(_iso6392DataFile);
+        ArgumentNullException.ThrowIfNull(_iso6393DataFile);
+        ArgumentNullException.ThrowIfNull(_rfc5646DataFile);
 
         // Convert data files to JSON
         Log.Information("Converting data files to JSON ...");
@@ -76,9 +74,9 @@ internal sealed class CreateTagData(
 
     internal async Task GenerateCodeAsync()
     {
-        ArgumentNullException.ThrowIfNull(_iso6392, nameof(_iso6392));
-        ArgumentNullException.ThrowIfNull(_iso6393, nameof(_iso6393));
-        ArgumentNullException.ThrowIfNull(_rfc5646, nameof(_rfc5646));
+        ArgumentNullException.ThrowIfNull(_iso6392);
+        ArgumentNullException.ThrowIfNull(_iso6393);
+        ArgumentNullException.ThrowIfNull(_rfc5646);
 
         // Generate code files
         Log.Information("Generating code files ...");
@@ -103,18 +101,17 @@ internal sealed class CreateTagData(
 
     private async Task DownloadFileAsync(Uri uri, string fileName)
     {
-        ArgumentNullException.ThrowIfNull(uri, nameof(uri));
-        ArgumentException.ThrowIfNullOrWhiteSpace(fileName, nameof(fileName));
+        ArgumentNullException.ThrowIfNull(uri);
+        ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
 
         Log.Information("Downloading \"{Uri}\" to \"{FileName}\" ...", uri.ToString(), fileName);
 
-        Stream httpStream = await HttpClientFactory
+        using Stream httpStream = await HttpClientFactory
             .GetHttpClient()
             .GetStreamAsync(uri, cancellationToken)
             .ConfigureAwait(false);
-        await using ConfiguredAsyncDisposable httpStreamScope = httpStream.ConfigureAwait(false);
 
-        FileStream fileStream = new(
+        using FileStream fileStream = new(
             fileName,
             FileMode.Create,
             FileAccess.Write,
@@ -122,7 +119,6 @@ internal sealed class CreateTagData(
             8192,
             FileOptions.Asynchronous | FileOptions.SequentialScan
         );
-        await using ConfiguredAsyncDisposable fileStreamScope = fileStream.ConfigureAwait(false);
 
         await httpStream.CopyToAsync(fileStream, cancellationToken).ConfigureAwait(false);
     }

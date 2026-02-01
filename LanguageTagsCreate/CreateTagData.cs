@@ -52,22 +52,22 @@ internal sealed class CreateTagData(
         Log.Information("Converting data files to JSON ...");
 
         Log.Information("Converting ISO 639-2 data to JSON ...");
-        _iso6392 = await Iso6392Data.LoadDataAsync(_iso6392DataFile).ConfigureAwait(false);
+        _iso6392 = await Iso6392Data.FromDataAsync(_iso6392DataFile).ConfigureAwait(false);
         _iso6392JsonFile = Path.Combine(dataDirectory, Iso6392Data.DataFileName + ".json");
         Log.Information("Writing ISO 639-2 data to {JsonPath}", _iso6392JsonFile);
-        await Iso6392Data.SaveJsonAsync(_iso6392JsonFile, _iso6392).ConfigureAwait(false);
+        await _iso6392.SaveJsonAsync(_iso6392JsonFile).ConfigureAwait(false);
 
         Log.Information("Converting ISO 639-3 data to JSON ...");
-        _iso6393 = await Iso6393Data.LoadDataAsync(_iso6393DataFile).ConfigureAwait(false);
+        _iso6393 = await Iso6393Data.FromDataAsync(_iso6393DataFile).ConfigureAwait(false);
         _iso6393JsonFile = Path.Combine(dataDirectory, Iso6393Data.DataFileName + ".json");
         Log.Information("Writing ISO 639-3 data to {JsonPath}", _iso6393JsonFile);
-        await Iso6393Data.SaveJsonAsync(_iso6393JsonFile, _iso6393).ConfigureAwait(false);
+        await _iso6393.SaveJsonAsync(_iso6393JsonFile).ConfigureAwait(false);
 
         Log.Information("Converting RFC 5646 data to JSON ...");
-        _rfc5646 = await Rfc5646Data.LoadDataAsync(_rfc5646DataFile).ConfigureAwait(false);
+        _rfc5646 = await Rfc5646Data.FromDataAsync(_rfc5646DataFile).ConfigureAwait(false);
         _rfc5646JsonFile = Path.Combine(dataDirectory, Rfc5646Data.DataFileName + ".json");
         Log.Information("Writing RFC 5646 data to {JsonPath}", _rfc5646JsonFile);
-        await Rfc5646Data.SaveJsonAsync(_rfc5646JsonFile, _rfc5646).ConfigureAwait(false);
+        await _rfc5646.SaveJsonAsync(_rfc5646JsonFile).ConfigureAwait(false);
 
         Log.Information("Data files converted to JSON successfully.");
     }
@@ -84,17 +84,17 @@ internal sealed class CreateTagData(
         Log.Information("Generating ISO 639-2 code ...");
         _iso6392CodeFile = Path.Combine(codeDirectory, nameof(Iso6392Data) + "Gen.cs");
         Log.Information("Writing ISO 639-2 code to {CodePath}", _iso6392CodeFile);
-        await Iso6392Data.GenCodeAsync(_iso6392CodeFile, _iso6392).ConfigureAwait(false);
+        await _iso6392.SaveCodeAsync(_iso6392CodeFile).ConfigureAwait(false);
 
         Log.Information("Generating ISO 639-3 code ...");
         _iso6393CodeFile = Path.Combine(codeDirectory, nameof(Iso6393Data) + "Gen.cs");
         Log.Information("Writing ISO 639-3 code to {CodePath}", _iso6393CodeFile);
-        await Iso6393Data.GenCodeAsync(_iso6393CodeFile, _iso6393).ConfigureAwait(false);
+        await _iso6393.SaveCodeAsync(_iso6393CodeFile).ConfigureAwait(false);
 
         Log.Information("Generating RFC 5646 code ...");
         _rfc5646CodeFile = Path.Combine(codeDirectory, nameof(Rfc5646Data) + "Gen.cs");
         Log.Information("Writing RFC 5646 code to {CodePath}", _rfc5646CodeFile);
-        await Rfc5646Data.GenCodeAsync(_rfc5646CodeFile, _rfc5646).ConfigureAwait(false);
+        await _rfc5646.SaveCodeAsync(_rfc5646CodeFile).ConfigureAwait(false);
 
         Log.Information("Code files generated successfully.");
     }

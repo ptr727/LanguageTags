@@ -35,15 +35,16 @@ For comprehensive coding standards and detailed conventions, refer to [`.github/
 - `LanguageTag`: Main class for working with language tags (parse, build, normalize, validate)
 - `LanguageTagBuilder`: Fluent builder for constructing language tags
 - `LanguageLookup`: Language code conversion and matching (IETF ↔ ISO)
-- `Iso6392Data`: ISO 639-2 language code data
-- `Iso6393Data`: ISO 639-3 language code data
-- `Rfc5646Data`: RFC 5646 / BCP 47 language subtag registry data
-- `ExtensionTag`: Represents extension subtags
-- `PrivateUseTag`: Represents private use subtags
+- `Iso6392Data`: ISO 639-2 language code data (`Create()`, `FromDataAsync()`, `FromJsonAsync()`)
+- `Iso6393Data`: ISO 639-3 language code data (`Create()`, `FromDataAsync()`, `FromJsonAsync()`)
+- `Rfc5646Data`: RFC 5646 / BCP 47 language subtag registry data (`Create()`, `FromDataAsync()`, `FromJsonAsync()`)
+- `ExtensionTag`: Represents extension subtags (sealed record)
+- `PrivateUseTag`: Represents private use subtags (sealed record)
+- `LogOptions`: Static class for configuring library-wide logging via `ILoggerFactory`
 
 **Internal Classes:**
 
-- `LanguageTagParser`: Internal parser (use `LanguageTag.Parse()` instead)
+- `LanguageTagParser`: Internal parser implementation (use `LanguageTag.Parse()` instead)
 
 ## Authoritative References
 

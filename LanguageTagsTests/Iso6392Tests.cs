@@ -11,9 +11,9 @@ public sealed class Iso6392Tests : SingleInstanceFixture
     }
 
     [Fact]
-    public async Task LoadData()
+    public async Task FromData()
     {
-        Iso6392Data iso6392 = await Iso6392Data.LoadDataAsync(
+        Iso6392Data iso6392 = await Iso6392Data.FromDataAsync(
             GetDataFilePath(Iso6392Data.DataFileName)
         );
         _ = iso6392.Should().NotBeNull();
@@ -21,12 +21,32 @@ public sealed class Iso6392Tests : SingleInstanceFixture
     }
 
     [Fact]
-    public async Task LoadJson()
+    public async Task FromJson()
     {
-        Iso6392Data? iso6392 = await Iso6392Data.LoadJsonAsync(
+        Iso6392Data iso6392 = await Iso6392Data.FromJsonAsync(
             GetDataFilePath(Iso6392Data.DataFileName + ".json")
         );
         _ = iso6392.Should().NotBeNull();
+        _ = iso6392.RecordList.Length.Should().BeGreaterThan(0);
+    }
+
+    [Fact]
+    public async Task Create_FromData_FromJson_RecordsMatch()
+    {
+        Iso6392Data created = Iso6392Data.Create();
+        Iso6392Data fromData = await Iso6392Data.FromDataAsync(
+            GetDataFilePath(Iso6392Data.DataFileName)
+        );
+        Iso6392Data fromJson = await Iso6392Data.FromJsonAsync(
+            GetDataFilePath(Iso6392Data.DataFileName + ".json")
+        );
+
+        _ = created.RecordList.Length.Should().BeGreaterThan(0);
+        _ = fromData.RecordList.Length.Should().BeGreaterThan(0);
+        _ = fromJson.RecordList.Length.Should().BeGreaterThan(0);
+
+        _ = fromData.RecordList.Should().BeEquivalentTo(created.RecordList);
+        _ = fromJson.RecordList.Should().BeEquivalentTo(created.RecordList);
     }
 
     [Fact]
@@ -38,8 +58,8 @@ public sealed class Iso6392Tests : SingleInstanceFixture
         string tempFile = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.json");
         try
         {
-            await Iso6392Data.SaveJsonAsync(tempFile, iso6392);
-            Iso6392Data? roundTrip = await Iso6392Data.LoadJsonAsync(tempFile);
+            await iso6392.SaveJsonAsync(tempFile);
+            Iso6392Data roundTrip = await Iso6392Data.FromJsonAsync(tempFile);
             _ = roundTrip.Should().NotBeNull();
             _ = roundTrip.RecordList.Length.Should().Be(iso6392.RecordList.Length);
         }
@@ -92,10 +112,11 @@ public sealed class Iso6392Tests : SingleInstanceFixture
     }
 
     [Fact]
-    public void Find_Null_ThrowsArgumentNullException()
+    public void Find_Null_ReturnsNull()
     {
         Iso6392Data iso6392 = Iso6392Data.Create();
-        _ = Assert.Throws<ArgumentNullException>(() => iso6392.Find(null!, false));
+        Iso6392Record? record = iso6392.Find(null!, false);
+        _ = record.Should().BeNull();
     }
 
     [Fact]

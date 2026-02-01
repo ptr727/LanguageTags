@@ -27,9 +27,13 @@ C# .NET library for ISO 639-2, ISO 639-3, RFC 5646 / BCP 47 language tags.
 
 **Summary**:
 
-- Refactored the project to follow standard patterns across other projects.
-- IO APIs are now async-only (`LoadDataAsync`, `LoadJsonAsync`, `SaveJsonAsync`, `GenCodeAsync`).
-- Added logging support for `ILogger` or `ILoggerFactory` per class instance or statically.
+- Refactored the project to follow standard patterns used across other projects.
+- Added logging support configured through `LogOptions.SetFactory(ILoggerFactory)`.
+
+> **⚠️ Breaking Changes**:
+>
+> - IO API's are async only, e.g. `LoadJson()` -> `async FromJsonAsync()`'.
+> - Collection instantiation follows the `From` pattern, e.g. `LoadData()` -> `FromDataAsync()`.
 
 See [Release History](./HISTORY.md) for complete release notes and older versions.
 
@@ -115,7 +119,8 @@ See [Usage](#usage) for detailed usage instructions.
 
 ### Tag Lookup
 
-Tag records can be constructed by calling `Create()`, or loaded from data `LoadDataAsync()`, or loaded from JSON `LoadJsonAsync()`.\
+Tag records can be created from embedded data by calling `Create()`, or loaded from data `FromDataAsync()`, or loaded from JSON `FromJsonAsync()`.\
+`FromDataAsync()` and `FromJsonAsync()` are static methods that return populated data instances.
 The records and record collections are immutable and can safely be reused and shared across threads.
 
 Each class implements a `Find(string languageTag, bool includeDescription)` method that will search all tags in all records for a matching tag.\
@@ -132,7 +137,7 @@ record = iso6392.Find("zulu", true);
 ```
 
 ```csharp
-Iso6393Data iso6393 = await Iso6393Data.LoadDataAsync("iso6393");
+Iso6393Data iso6393 = await Iso6393Data.FromDataAsync("iso6393");
 Iso6393Record? record = iso6393.Find("zh", false);
 // record.Id = "zho"
 // record.Part1 = "zh"
@@ -143,7 +148,7 @@ record = iso6393.Find("yue chinese", true);
 ```
 
 ```csharp
-Rfc5646Data rfc5646 = await Rfc5646Data.LoadJsonAsync("rfc5646.json");
+Rfc5646Data rfc5646 = await Rfc5646Data.FromJsonAsync("rfc5646.json");
 Rfc5646Record? record = rfc5646.Find("de", false);
 // record.SubTag = "de"
 // record.Description[0] = "German"
@@ -212,8 +217,8 @@ The `LanguageTagBuilder` class supports fluent builder style tag construction, a
 The `Build()` method will construct the tag, but will not perform any correctness validation or normalization.\
 Use the `Validate()` method to test for shape correctness. See [Tag Validation](#tag-validation) for details.
 
-The `Normalize()` method will build the tag and perform validation and normalization.\
-See [Tag Normalization](#tag-normalization) for details.
+The `Normalize()` method will build the tag and perform normalization only.\
+Use `Validate()` to check structural correctness. See [Tag Normalization](#tag-normalization) for details.
 
 ```csharp
 LanguageTag languageTag = LanguageTag.CreateBuilder()
@@ -235,7 +240,7 @@ string tag = languageTag.ToString(); // "x-private-use"
 ```
 
 ```csharp
-LanguageTag? languageTag = LanguageTag.CreateBuilder()
+LanguageTag languageTag = LanguageTag.CreateBuilder()
     .Language("ar")
     .ExtendedLanguage("arb")
     .Script("latn")
@@ -243,7 +248,7 @@ LanguageTag? languageTag = LanguageTag.CreateBuilder()
     .VariantAdd("nedis")
     .VariantAdd("foobar")
     .Normalize();
-string tag = languageTag?.ToString(); // "arb-Latn-DE-foobar-nedis"
+string tag = languageTag.ToString(); // "arb-Latn-DE-foobar-nedis"
 ```
 
 ### Tag Parser
@@ -255,7 +260,7 @@ Parsing will validate all subtags for correctness in type, length, and position,
 Grandfathered tags will be converted to their current preferred form and parsed as such.\
 E.g. `en-gb-oed` -> `en-GB-oxendict`, `i-klingon` -> `tlh`.
 
-The `Normalize()` method will parse the text tag, and perform validation and normalization.\
+The `ParseAndNormalize()` method will parse the text tag and perform normalization.\
 See [Tag Normalization](#tag-normalization) for details.
 
 ```csharp
@@ -290,7 +295,7 @@ Normalization includes the following:
   - E.g. `iw` -> `he`, `in` -> `id`
 - Replace extended language subtags with their preferred language subtag values.
   - E.g. `ar-afb` -> `afb`, `zh-yue` -> `yue`
-- Remove or replace redundant subtags their preferred values.
+- Remove or replace redundant subtags with their preferred values.
   - E.g. `zh-cmn-Hant` -> `cmn-Hant`, `zh-gan` -> `gan`, `sgn-CO` -> `csn`
 - Remove redundant script subtags.
   - E.g. `af-Latn` -> `af`, `en-Latn` -> `en`
@@ -304,13 +309,13 @@ Normalization includes the following:
   - Sort private use subtags by value.
 
 ```csharp
-LanguageTag? languageTag = LanguageTag.CreateBuilder()
+LanguageTag languageTag = LanguageTag.CreateBuilder()
     .Language("en")
     .ExtensionAdd('b', ["ccc"]) // Add b before a to force a sort
     .ExtensionAdd('a', ["bbb", "aaa"]) // Add bbb before aaa to force a sort
     .PrivateUseAddRange(["ccc", "a"]) // Add ccc before a to force a sort
     .Normalize();
-string tag = languageTag?.ToString(); // "en-a-aaa-bbb-b-ccc-x-a-ccc"
+string tag = languageTag.ToString(); // "en-a-aaa-bbb-b-ccc-x-a-ccc"
 ```
 
 ```csharp
@@ -337,7 +342,7 @@ Validation includes the following:
 
 - Subtag shape correctness, see [Format](#format) for a summary.
 - No duplicate variants, extension prefixes, extension tags, or private tags.
-- No missing subtags.
+- Does not validate subtag values against the registry or enforce the full grammar beyond these checks.
 
 ```csharp
 LanguageTag languageTag = LanguageTag.CreateBuilder()
@@ -366,7 +371,7 @@ using ptr727.LanguageTags;
 **Debug log configuration**:
 
 ```csharp
-// Configure global logging (static fallback)
+// Configure global logging (static override/factory)
 using Microsoft.Extensions.Logging;
 using ptr727.LanguageTags;
 using Serilog;
@@ -379,25 +384,6 @@ Log.Logger = new LoggerConfiguration()
 
 ILoggerFactory loggerFactory = new SerilogLoggerFactory(Log.Logger, dispose: true);
 LogOptions.SetFactory(loggerFactory);
-```
-
-```csharp
-// Configure per-call logging (instance logger or factory)
-using Microsoft.Extensions.Logging;
-using ptr727.LanguageTags;
-using Serilog;
-using Serilog.Extensions.Logging;
-
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Debug()
-    .WriteTo.Debug()
-    .CreateLogger();
-
-ILoggerFactory loggerFactory = new SerilogLoggerFactory(Log.Logger, dispose: true);
-Options options = new() { LoggerFactory = loggerFactory };
-
-LanguageTag? tag = LanguageTag.Parse("en-US", options);
-LanguageLookup lookup = new(options);
 ```
 
 ## Questions or Issues
@@ -428,7 +414,7 @@ LanguageLookup lookup = new(options);
 - **[`LanguageData`](./LanguageData/) directory**:
   - ISO 639-2: [Source](https://www.loc.gov/standards/iso639-2/ISO-639-2_utf-8.txt), [Data](./LanguageData/iso6392), [JSON](./LanguageData/iso6392.json), [Code](./LanguageTags/Iso6392DataGen.cs)
   - ISO 639-3: [Source](https://iso639-3.sil.org/sites/iso639-3/files/downloads/iso-639-3.tab), [Data](./LanguageData/iso6393), [JSON](./LanguageData/iso6393.json), [Code](./LanguageTags/Iso6393DataGen.cs)
-  - RFC 5646 : [Source](https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry), [Data](./LanguageData/rfc5646), [JSON](./LanguageData/rfc5646.json), [Code](./LanguageTags/rfc5646DataGen.cs)
+  - RFC 5646 : [Source](https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry), [Data](./LanguageData/rfc5646), [JSON](./LanguageData/rfc5646.json), [Code](./LanguageTags/Rfc5646DataGen.cs)
 - A weekly [GitHub Actions](./.github/workflows/run-periodic-codegen-pull-request.yml) job keeps the data files up to date and automatically publishes new releases.
 
 ## Tag Theory

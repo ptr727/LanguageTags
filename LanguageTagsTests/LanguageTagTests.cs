@@ -18,20 +18,6 @@ public class LanguageTagTests : SingleInstanceFixture
     }
 
     [Theory]
-    [InlineData("en-US")]
-    [InlineData("zh-Hans-CN")]
-    [InlineData("en-latn-gb-boont-r-extended-sequence-x-private")]
-    [InlineData("x-all-private")]
-    public void Parse_WithOptions_Pass(string tag)
-    {
-        Options options = new();
-        LanguageTag? languageTag = LanguageTag.Parse(tag, options);
-        _ = languageTag.Should().NotBeNull();
-        _ = languageTag.Validate().Should().BeTrue();
-        _ = languageTag.ToString().Should().Be(tag);
-    }
-
-    [Theory]
     [InlineData("")] // Empty string
     [InlineData("i")] // Too short
     [InlineData("abcdefghi")] // Too long
@@ -46,41 +32,12 @@ public class LanguageTagTests : SingleInstanceFixture
     }
 
     [Theory]
-    [InlineData("")] // Empty string
-    [InlineData("i")] // Too short
-    [InlineData("abcdefghi")] // Too long
-    [InlineData("en--gb")] // Empty tag
-    [InlineData("en-€-extension")] // Non-ASCII
-    [InlineData("a-extension")] // Only start with x or grandfathered
-    [InlineData("en-gb-x")] // Private must have parts
-    public void Parse_WithOptions_ReturnsNull(string tag)
-    {
-        Options options = new();
-        LanguageTag? languageTag = LanguageTag.Parse(tag, options);
-        _ = languageTag.Should().BeNull();
-    }
-
-    [Theory]
     [InlineData("en-US")]
     [InlineData("zh-Hans-CN")]
     [InlineData("en-latn-gb-boont-r-extended-sequence-x-private")]
     public void TryParse_Success(string tag)
     {
         bool result = LanguageTag.TryParse(tag, out LanguageTag? languageTag);
-        _ = result.Should().BeTrue();
-        _ = languageTag.Should().NotBeNull();
-        _ = languageTag.Validate().Should().BeTrue();
-        _ = languageTag.ToString().Should().Be(tag);
-    }
-
-    [Theory]
-    [InlineData("en-US")]
-    [InlineData("zh-Hans-CN")]
-    [InlineData("en-latn-gb-boont-r-extended-sequence-x-private")]
-    public void TryParse_WithOptions_Success(string tag)
-    {
-        Options options = new();
-        bool result = LanguageTag.TryParse(tag, out LanguageTag? languageTag, options);
         _ = result.Should().BeTrue();
         _ = languageTag.Should().NotBeNull();
         _ = languageTag.Validate().Should().BeTrue();
@@ -99,23 +56,6 @@ public class LanguageTagTests : SingleInstanceFixture
     public void TryParse_Failure(string tag)
     {
         bool result = LanguageTag.TryParse(tag, out LanguageTag? languageTag);
-        _ = result.Should().BeFalse();
-        _ = languageTag.Should().BeNull();
-    }
-
-    [Theory]
-    [InlineData("")] // Empty string
-    [InlineData("i")] // Too short
-    [InlineData("abcdefghi")] // Too long
-    [InlineData("en--gb")] // Empty tag
-    [InlineData("en-€-extension")] // Non-ASCII
-    [InlineData("a-extension")] // Only start with x or grandfathered
-    [InlineData("en-gb-x")] // Private must have parts
-    [InlineData("x")] // Private missing
-    public void TryParse_WithOptions_Failure(string tag)
-    {
-        Options options = new();
-        bool result = LanguageTag.TryParse(tag, out LanguageTag? languageTag, options);
         _ = result.Should().BeFalse();
         _ = languageTag.Should().BeNull();
     }
@@ -219,28 +159,6 @@ public class LanguageTagTests : SingleInstanceFixture
     public void ParseAndNormalize_InvalidTag_ReturnsNull()
     {
         LanguageTag? result = LanguageTag.ParseAndNormalize("invalid-tag");
-        _ = result.Should().BeNull();
-    }
-
-    [Theory]
-    [InlineData("en-latn-us", "en-US")]
-    [InlineData("zh-cmn-Hans-CN", "cmn-Hans-CN")]
-    public void ParseAndNormalize_WithOptions_ValidTag_ReturnsNormalized(
-        string tag,
-        string expected
-    )
-    {
-        Options options = new();
-        LanguageTag? result = LanguageTag.ParseAndNormalize(tag, options);
-        _ = result.Should().NotBeNull();
-        _ = result.ToString().Should().Be(expected);
-    }
-
-    [Fact]
-    public void ParseAndNormalize_WithOptions_InvalidTag_ReturnsNull()
-    {
-        Options options = new();
-        LanguageTag? result = LanguageTag.ParseAndNormalize("invalid-tag", options);
         _ = result.Should().BeNull();
     }
 

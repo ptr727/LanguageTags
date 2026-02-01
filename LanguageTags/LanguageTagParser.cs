@@ -19,13 +19,11 @@ namespace ptr727.LanguageTags;
 
 internal sealed class LanguageTagParser
 {
-    private readonly ILogger _logger;
+    private readonly Lazy<ILogger> _logger = new(LogOptions.CreateLogger<LanguageTagParser>);
+    internal ILogger Log => _logger.Value;
     private readonly Rfc5646Data _rfc5646 = Rfc5646Data.Create();
     private readonly List<string> _tagList = [];
     private LanguageTag _languageTag = new();
-
-    internal LanguageTagParser(Options? options = null) =>
-        _logger = LogOptions.CreateLogger<LanguageTagParser>(options);
 
     private string ParseGrandfathered(string languageTag)
     {
@@ -365,7 +363,7 @@ internal sealed class LanguageTagParser
 
     private static bool ValidatePrivateUsePrefix(string tag) =>
         // x
-        !string.IsNullOrEmpty(tag) && tag.Length == 1 && tag[0] == PrivateUseTag.Prefix;
+        !string.IsNullOrEmpty(tag) && tag is [PrivateUseTag.Prefix];
 
     private static bool ValidatePrivateUse(string tag) =>
         // 1 to 8 chars
@@ -466,14 +464,14 @@ internal sealed class LanguageTagParser
         // Must be non-empty
         if (string.IsNullOrEmpty(languageTag))
         {
-            _logger.LogParseFailure(originalTag, "Tag is null or empty.");
+            Log.LogParseFailure(originalTag, "Tag is null or empty.");
             return null;
         }
 
         // Must be all ASCII
         if (languageTag.Any(c => !char.IsAscii(c)))
         {
-            _logger.LogParseFailure(originalTag, "Tag contains non-ASCII characters.");
+            Log.LogParseFailure(originalTag, "Tag contains non-ASCII characters.");
             return null;
         }
 
@@ -484,21 +482,21 @@ internal sealed class LanguageTagParser
         _tagList.AddRange([.. languageTag.Split('-')]);
         if (_tagList.Count == 0)
         {
-            _logger.LogParseFailure(originalTag, "Tag split resulted in no segments.");
+            Log.LogParseFailure(originalTag, "Tag split resulted in no segments.");
             return null;
         }
 
         // All parts must be non-empty
         if (_tagList.Any(string.IsNullOrEmpty))
         {
-            _logger.LogParseFailure(originalTag, "Tag contains empty segments.");
+            Log.LogParseFailure(originalTag, "Tag contains empty segments.");
             return null;
         }
 
         // Private use
         if (!ParsePrivateUse())
         {
-            _logger.LogParseFailure(originalTag, "Invalid private use section.");
+            Log.LogParseFailure(originalTag, "Invalid private use section.");
             return null;
         }
         if (_tagList.Count == 0)
@@ -509,7 +507,7 @@ internal sealed class LanguageTagParser
         // Language
         if (!ParseLanguage())
         {
-            _logger.LogParseFailure(originalTag, "Invalid primary language subtag.");
+            Log.LogParseFailure(originalTag, "Invalid primary language subtag.");
             return null;
         }
         if (_tagList.Count == 0)
@@ -520,7 +518,7 @@ internal sealed class LanguageTagParser
         // Extended language
         if (!ParseExtendedLanguage())
         {
-            _logger.LogParseFailure(originalTag, "Invalid extended language subtag.");
+            Log.LogParseFailure(originalTag, "Invalid extended language subtag.");
             return null;
         }
         if (_tagList.Count == 0)
@@ -531,7 +529,7 @@ internal sealed class LanguageTagParser
         // Script
         if (!ParseScript())
         {
-            _logger.LogParseFailure(originalTag, "Invalid script subtag.");
+            Log.LogParseFailure(originalTag, "Invalid script subtag.");
             return null;
         }
         if (_tagList.Count == 0)
@@ -542,7 +540,7 @@ internal sealed class LanguageTagParser
         // Region
         if (!ParseRegion())
         {
-            _logger.LogParseFailure(originalTag, "Invalid region subtag.");
+            Log.LogParseFailure(originalTag, "Invalid region subtag.");
             return null;
         }
         if (_tagList.Count == 0)
@@ -553,7 +551,7 @@ internal sealed class LanguageTagParser
         // Variant
         if (!ParseVariant())
         {
-            _logger.LogParseFailure(originalTag, "Invalid variant subtag.");
+            Log.LogParseFailure(originalTag, "Invalid variant subtag.");
             return null;
         }
         if (_tagList.Count == 0)
@@ -564,7 +562,7 @@ internal sealed class LanguageTagParser
         // Extension
         if (!ParseExtension())
         {
-            _logger.LogParseFailure(originalTag, "Invalid extension subtag.");
+            Log.LogParseFailure(originalTag, "Invalid extension subtag.");
             return null;
         }
         if (_tagList.Count == 0)
@@ -575,7 +573,7 @@ internal sealed class LanguageTagParser
         // Private use
         if (!ParsePrivateUse())
         {
-            _logger.LogParseFailure(originalTag, "Invalid private use subtag.");
+            Log.LogParseFailure(originalTag, "Invalid private use subtag.");
             return null;
         }
         if (_tagList.Count == 0)
@@ -584,7 +582,7 @@ internal sealed class LanguageTagParser
         }
 
         // Should be done
-        _logger.LogParseFailure(originalTag, "Unexpected trailing segments.");
+        Log.LogParseFailure(originalTag, "Unexpected trailing segments.");
         return null;
     }
 
@@ -594,19 +592,15 @@ internal sealed class LanguageTagParser
         return parsedTag == null ? null : Normalize(parsedTag);
     }
 
-    internal LanguageTag? Normalize(LanguageTag languageTag)
+    internal LanguageTag Normalize(LanguageTag languageTag)
     {
+        ArgumentNullException.ThrowIfNull(languageTag);
+
         // Canonicalization of Language Tags
         // https://www.rfc-editor.org/rfc/rfc5646#section-4.5
 
-        if (languageTag == null)
-        {
-            return null;
-        }
-
-        string originalTag = languageTag.ToString();
-
         // Create a copy and do not modify the original
+        string originalTag = languageTag.ToString();
         LanguageTag normalizeTag = new(languageTag);
 
         // Language with preferred value
@@ -747,7 +741,7 @@ internal sealed class LanguageTagParser
         string normalizedTag = normalizeTag.ToString();
         if (!string.Equals(originalTag, normalizedTag, StringComparison.OrdinalIgnoreCase))
         {
-            _logger.LogNormalizedTag(originalTag, normalizedTag);
+            Log.LogNormalizedTag(originalTag, normalizedTag);
         }
 
         // Done
@@ -756,13 +750,10 @@ internal sealed class LanguageTagParser
 
     internal static bool Validate(LanguageTag languageTag)
     {
+        ArgumentNullException.ThrowIfNull(languageTag);
+
         // Classes of Conformance
         // https://www.rfc-editor.org/rfc/rfc5646#section-2.2.9
-
-        if (languageTag == null)
-        {
-            return false;
-        }
 
         // Validate tags
         if (!string.IsNullOrEmpty(languageTag.Language) && !ValidateLanguage(languageTag.Language))

@@ -1,6 +1,6 @@
 namespace ptr727.LanguageTags.Tests;
 
-public sealed class Iso6393Tests
+public sealed class Iso6393Tests : SingleInstanceFixture
 {
     [Fact]
     public void Create()
@@ -11,22 +11,42 @@ public sealed class Iso6393Tests
     }
 
     [Fact]
-    public async Task LoadData()
+    public async Task FromData()
     {
-        Iso6393Data iso6393 = await Iso6393Data.LoadDataAsync(
-            Fixture.GetDataFilePath(Iso6393Data.DataFileName)
+        Iso6393Data iso6393 = await Iso6393Data.FromDataAsync(
+            GetDataFilePath(Iso6393Data.DataFileName)
         );
         _ = iso6393.Should().NotBeNull();
         _ = iso6393.RecordList.Length.Should().BeGreaterThan(0);
     }
 
     [Fact]
-    public async Task LoadJson()
+    public async Task FromJson()
     {
-        Iso6393Data? iso6393 = await Iso6393Data.LoadJsonAsync(
-            Fixture.GetDataFilePath(Iso6393Data.DataFileName + ".json")
+        Iso6393Data iso6393 = await Iso6393Data.FromJsonAsync(
+            GetDataFilePath(Iso6393Data.DataFileName + ".json")
         );
         _ = iso6393.Should().NotBeNull();
+        _ = iso6393.RecordList.Length.Should().BeGreaterThan(0);
+    }
+
+    [Fact]
+    public async Task Create_FromData_FromJson_RecordsMatch()
+    {
+        Iso6393Data created = Iso6393Data.Create();
+        Iso6393Data fromData = await Iso6393Data.FromDataAsync(
+            GetDataFilePath(Iso6393Data.DataFileName)
+        );
+        Iso6393Data fromJson = await Iso6393Data.FromJsonAsync(
+            GetDataFilePath(Iso6393Data.DataFileName + ".json")
+        );
+
+        _ = created.RecordList.Length.Should().BeGreaterThan(0);
+        _ = fromData.RecordList.Length.Should().BeGreaterThan(0);
+        _ = fromJson.RecordList.Length.Should().BeGreaterThan(0);
+
+        _ = fromData.RecordList.Should().BeEquivalentTo(created.RecordList);
+        _ = fromJson.RecordList.Should().BeEquivalentTo(created.RecordList);
     }
 
     [Fact]
@@ -38,10 +58,10 @@ public sealed class Iso6393Tests
         string tempFile = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.json");
         try
         {
-            await Iso6393Data.SaveJsonAsync(tempFile, iso6393);
-            Iso6393Data? roundTrip = await Iso6393Data.LoadJsonAsync(tempFile);
+            await iso6393.SaveJsonAsync(tempFile);
+            Iso6393Data roundTrip = await Iso6393Data.FromJsonAsync(tempFile);
             _ = roundTrip.Should().NotBeNull();
-            _ = roundTrip!.RecordList.Length.Should().Be(iso6393.RecordList.Length);
+            _ = roundTrip.RecordList.Length.Should().Be(iso6393.RecordList.Length);
         }
         finally
         {
@@ -91,13 +111,19 @@ public sealed class Iso6393Tests
         _ = record.Should().BeNull();
     }
 
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    public void Find_NullOrEmpty_ReturnsNull(string? input)
+    [Fact]
+    public void Find_Null_ReturnsNull()
     {
         Iso6393Data iso6393 = Iso6393Data.Create();
-        Iso6393Record? record = iso6393.Find(input, false);
+        Iso6393Record? record = iso6393.Find(null!, false);
+        _ = record.Should().BeNull();
+    }
+
+    [Fact]
+    public void Find_Empty_ReturnsNull()
+    {
+        Iso6393Data iso6393 = Iso6393Data.Create();
+        Iso6393Record? record = iso6393.Find(string.Empty, false);
         _ = record.Should().BeNull();
     }
 }

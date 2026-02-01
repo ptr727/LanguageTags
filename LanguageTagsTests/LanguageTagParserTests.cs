@@ -1,6 +1,6 @@
 namespace ptr727.LanguageTags.Tests;
 
-public class LanguageTagParserTests
+public class LanguageTagParserTests : SingleInstanceFixture
 {
     [Theory]
     [InlineData("en-latn-gb-boont-r-extended-sequence-x-private")]

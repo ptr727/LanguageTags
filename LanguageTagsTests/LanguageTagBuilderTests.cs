@@ -1,6 +1,6 @@
 namespace ptr727.LanguageTags.Tests;
 
-public sealed class LanguageTagBuilderTests
+public sealed class LanguageTagBuilderTests : SingleInstanceFixture
 {
     [Fact]
     public void Build_Pass()
@@ -89,25 +89,6 @@ public sealed class LanguageTagBuilderTests
         _ = languageTag.Should().NotBeNull();
         _ = languageTag.Validate().Should().BeTrue();
         _ = languageTag.ToString().Should().Be("en-a-aaa-bbb-b-ccc-x-a-ccc");
-    }
-
-    [Fact]
-    public void Normalize_WithOptions_Pass()
-    {
-        Options options = new();
-
-        // en-Latn-GB-boont-r-extended-sequence-x-private
-        LanguageTag? languageTag = new LanguageTagBuilder()
-            .Language("en")
-            .Script("latn")
-            .Region("gb")
-            .VariantAdd("boont")
-            .ExtensionAdd('r', ["extended", "sequence"])
-            .PrivateUseAdd("private")
-            .Normalize(options);
-        _ = languageTag.Should().NotBeNull();
-        _ = languageTag!.Validate().Should().BeTrue();
-        _ = languageTag.ToString().Should().Be("en-GB-boont-r-extended-sequence-x-private");
     }
 
     [Fact]

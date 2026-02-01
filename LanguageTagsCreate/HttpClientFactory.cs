@@ -29,10 +29,7 @@ internal static class HttpClientFactory
                         ShouldHandle = args =>
                             ValueTask.FromResult(
                                 args.Outcome.Exception != null
-                                    || (
-                                        args.Outcome.Result != null
-                                        && !args.Outcome.Result.IsSuccessStatusCode
-                                    )
+                                    || args.Outcome.Result is { IsSuccessStatusCode: false }
                             ),
                     }
                 )
@@ -46,10 +43,7 @@ internal static class HttpClientFactory
                         ShouldHandle = args =>
                             ValueTask.FromResult(
                                 args.Outcome.Exception != null
-                                    || (
-                                        args.Outcome.Result != null
-                                        && !args.Outcome.Result.IsSuccessStatusCode
-                                    )
+                                    || args.Outcome.Result is { IsSuccessStatusCode: false }
                             ),
                     }
                 )

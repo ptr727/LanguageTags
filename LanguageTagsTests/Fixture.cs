@@ -1,18 +1,22 @@
+// Single instance for all tests in assembly
+[assembly: AssemblyFixture(typeof(ptr727.LanguageTags.Tests.SingleInstanceFixture))]
+
 namespace ptr727.LanguageTags.Tests;
 
-[CollectionDefinition("DisableParallelDefinition", DisableParallelization = true)]
+// Sequential execution fixture
+[CollectionDefinition("Sequential Test Collection", DisableParallelization = true)]
+public class SequentialCollectionDefinition;
+
 [System.Diagnostics.CodeAnalysis.SuppressMessage(
-    "Maintainability",
-    "CA1515:Consider making public types internal",
-    Justification = "https://xunit.net/docs/running-tests-in-parallel"
+    "Design",
+    "CA1063:Implement IDisposable Correctly",
+    Justification = "No unmanaged resources to dispose"
 )]
-public sealed class DisableParallelDefinition { }
-
-internal static class Fixture // : IDisposable
+public class SingleInstanceFixture : IDisposable
 {
-    // public void Dispose() => GC.SuppressFinalize(this);
+    public void Dispose() => GC.SuppressFinalize(this);
 
-    public static string GetDataFilePath(string fileName) =>
+    protected static string GetDataFilePath(string fileName) =>
         Path.GetFullPath(
             Path.Combine(AppContext.BaseDirectory, "../../../../LanguageData", fileName)
         );

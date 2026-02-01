@@ -29,9 +29,8 @@
   - Target framework: .NET 10.0
 
 - **LanguageTagsTests** (`LanguageTagsTests/LanguageTagsTests.csproj`)
-  - xUnit test suite with 211+ comprehensive tests
+  - xUnit test suite with comprehensive coverage
   - Uses AwesomeAssertions for test assertions
-  - 100% coverage of all public APIs
   - Target framework: .NET 10.0
 
 ### Key Directories
@@ -56,12 +55,9 @@ The main public API for working with language tags:
 
 **Static Factory Methods:**
 - `Parse(string tag)`: Parse a language tag string, returns null on failure
-- `Parse(string tag, Options? options)`: Parse with per-call logging options
 - `TryParse(string tag, out LanguageTag? result)`: Safe parsing with out parameter
-- `TryParse(string tag, out LanguageTag? result, Options? options)`: Safe parsing with per-call logging options
 - `ParseOrDefault(string tag, LanguageTag? defaultTag = null)`: Parse with fallback to "und"
 - `ParseAndNormalize(string tag)`: Parse and normalize in one step
-- `ParseAndNormalize(string tag, Options? options)`: Parse and normalize with per-call logging options
 - `CreateBuilder()`: Create a fluent builder instance
 - `FromLanguage(string language)`: Factory for simple language tags
 - `FromLanguageRegion(string language, string region)`: Factory for language+region tags
@@ -78,9 +74,8 @@ The main public API for working with language tags:
 - `IsValid`: Property to check if tag is valid
 
 **Instance Methods:**
-- `Validate()`: Verify tag correctness
-- `Normalize()`: Return normalized copy of tag
-- `Normalize(Options? options)`: Return normalized copy with per-call logging options
+- `Validate()`: Verify structural correctness
+- `Normalize()`: Return normalized copy of tag (does not validate)
 - `ToString()`: String representation
 - `Equals()`: Equality comparison (case-insensitive)
 - `GetHashCode()`: Hash code for collections
@@ -107,8 +102,7 @@ Fluent builder for constructing language tags:
 - `PrivateUseAdd(string value)`: Add private use tag
 - `PrivateUseAddRange(IEnumerable<string> values)`: Add multiple private use tags
 - `Build()`: Return constructed tag (no validation)
-- `Normalize()`: Return normalized tag (with validation)
-- `Normalize(Options? options)`: Return normalized tag with per-call logging options
+- `Normalize()`: Return normalized tag (no validation)
 
 ### LanguageTagParser Class (LanguageTagParser.cs)
 
@@ -138,8 +132,25 @@ Provides language code conversion and matching:
 - `GetIsoFromIetf(string languageTag)`: Convert IETF to ISO format
 - `IsMatch(string prefix, string languageTag)`: Prefix matching for content selection
 
-**Construction:**
-- `new LanguageLookup(Options? options = null)`: Optional per-instance logging
+### LogOptions Class (LogOptions.cs)
+
+Static class for configuring global logging for the entire library:
+
+**Properties:**
+- `LoggerFactory`: Gets or sets the global logger factory for creating category loggers
+
+**Methods:**
+- `SetFactory(ILoggerFactory loggerFactory)`: Configure the library to use a logger factory
+- `TrySetFactory(ILoggerFactory loggerFactory)`: Set factory only if none is configured
+
+**Logger Resolution Priority:**
+1. `LoggerFactory` property (when not `NullLoggerFactory`)
+2. `NullLogger.Instance` (default fallback)
+
+**Important Notes:**
+- Loggers are created and cached at time of use by each class instance
+- Changes to `LoggerFactory` after a logger is created do not affect existing cached loggers
+- Only new logger requests use updated configuration
 
 ### Data Models
 
@@ -147,47 +158,51 @@ Provides language code conversion and matching:
 - ISO 639-2 language codes (3-letter bibliographic/terminologic codes)
 - **Public Methods:**
   - `Create()`: Load embedded data
-  - `LoadDataAsync(string fileName)`: Load from file
-  - `LoadJsonAsync(string fileName)`: Load from JSON
+  - `FromDataAsync(string fileName)`: Load from file
+  - `FromJsonAsync(string fileName)`: Load from JSON
   - `Find(string? languageTag, bool includeDescription)`: Find record by tag
-  - `Find(string? languageTag, bool includeDescription, Options? options)`: Find record by tag with logging options
+- **Internal Methods:** `SaveJsonAsync(string fileName)`, `SaveCodeAsync(string fileName)`
 - **Record Properties:** `Part2B`, `Part2T`, `Part1`, `RefName`
 
 #### Iso6393Data.cs
 - ISO 639-3 language codes (comprehensive language codes)
 - **Public Methods:**
   - `Create()`: Load embedded data
-  - `LoadDataAsync(string fileName)`: Load from file
-  - `LoadJsonAsync(string fileName)`: Load from JSON
+  - `FromDataAsync(string fileName)`: Load from file
+  - `FromJsonAsync(string fileName)`: Load from JSON
   - `Find(string? languageTag, bool includeDescription)`: Find record by tag
-  - `Find(string? languageTag, bool includeDescription, Options? options)`: Find record by tag with logging options
+- **Internal Methods:** `SaveJsonAsync(string fileName)`, `SaveCodeAsync(string fileName)`
 - **Record Properties:** `Id`, `Part2B`, `Part2T`, `Part1`, `Scope`, `LanguageType`, `RefName`, `Comment`
 
 #### Rfc5646Data.cs
 - RFC 5646 / BCP 47 language subtag registry
 - **Public Methods:**
   - `Create()`: Load embedded data
-  - `LoadDataAsync(string fileName)`: Load from file
-  - `LoadJsonAsync(string fileName)`: Load from JSON
+  - `FromDataAsync(string fileName)`: Load from file
+  - `FromJsonAsync(string fileName)`: Load from JSON
   - `Find(string? languageTag, bool includeDescription)`: Find record by tag
-  - `Find(string? languageTag, bool includeDescription, Options? options)`: Find record by tag with logging options
 - **Properties:** `FileDate`, `RecordList`
-- **Record Properties:** `Type`, `Tag`, `SubTag`, `Description` (ImmutableArray), `Added`, `SuppressScript`, `Scope`, `MacroLanguage`, `Deprecated`, `Comments` (ImmutableArray), `Prefix` (ImmutableArray), `PreferredValue`, `TagAny`
+- **Internal Methods:** `SaveJsonAsync(string fileName)`, `SaveCodeAsync(string fileName)`
+- **Record Properties:** `Type`, `Tag`, `SubTag`, `Description` (ImmutableArray), `Added`, `SuppressScript`, `Scope`, `MacroLanguage`, `Deprecated`, `Comments` (ImmutableArray), `Prefix` (ImmutableArray), `PreferredValue`, `TagValue`
 - **Enums:**
   - `RecordType`: None, Language, ExtLanguage, Script, Variant, Grandfathered, Region, Redundant
   - `RecordScope`: None, MacroLanguage, Collection, Special, PrivateUse
 
 #### Supporting Classes
 
-**ExtensionTag:**
+**ExtensionTag (sealed record):**
 - `Prefix`: Single-character extension prefix (char)
 - `Tags`: ImmutableArray of extension values
 - `ToString()`: Format as "prefix-tag1-tag2"
+- `Normalize()`: Returns normalized copy with sorted, lowercase tags
+- `Equals()`: Case-insensitive equality comparison
 
-**PrivateUseTag:**
+**PrivateUseTag (sealed record):**
 - `Prefix`: Constant 'x'
 - `Tags`: ImmutableArray of private use values
 - `ToString()`: Format as "x-tag1-tag2"
+- `Normalize()`: Returns normalized copy with sorted, lowercase tags
+- `Equals()`: Case-insensitive equality comparison
 
 ### Language Tag Structure
 
@@ -279,18 +294,18 @@ LanguageTag tag = LanguageTag.ParseOrDefault(input); // Falls back to "und"
   - `VariantList` → `Variants`
   - `ExtensionList` → `Extensions`
   - `TagList` → `Tags`
-- Data file APIs are async-only: `LoadDataAsync()`/`LoadJsonAsync()`; sync versions removed
+- Data file APIs are async-only and use static creators: `FromDataAsync()`/`FromJsonAsync()`
+- Logging configuration now uses `ILoggerFactory` only; `ILogger` support was removed from `LogOptions`
 - Tag construction requires use of factory methods or builder (constructors are internal)
 
 ### Added (Non-Breaking)
 - `LanguageTag.ParseOrDefault()`: Safe parsing with fallback
 - `LanguageTag.ParseAndNormalize()`: Combined parse and normalize
-- `LanguageTag.ParseAndNormalize(string, Options?)`: Combined parse and normalize with logging options
 - `LanguageTag.IsValid`: Property for validation
 - `LanguageTag.FromLanguage()`, `FromLanguageRegion()`, `FromLanguageScriptRegion()`: Factory methods
 - `IEquatable<LanguageTag>` implementation with operators
-- Options-aware logging for parsing/normalization and lookup (`Options` + `LogOptions`)
-- `LanguageLookup` supports optional logging via primary constructor
+- `LogOptions` static class for global logging configuration with `ILoggerFactory`
+- `ExtensionTag` and `PrivateUseTag` are now sealed records with `Normalize()` and case-insensitive `Equals()` methods
 - Comprehensive XML documentation for all public APIs
 
 ## Future Improvements
@@ -300,7 +315,6 @@ Consider these areas for enhancement:
 - Implement comprehensive subtag content validation against registry data
 - Add more language lookup and validation features
 - Improve error messages and diagnostics
-- Consider making `ExtensionTag` and `PrivateUseTag` immutable records
 
 ## Contributing
 

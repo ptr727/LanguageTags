@@ -3,8 +3,13 @@ namespace ptr727.LanguageTags;
 /// <summary>
 /// Provides access to ISO 639-2 language code data.
 /// </summary>
+[System.CodeDom.Compiler.GeneratedCode("ptr727.LanguageTags.Iso6392Data", "1.0")]
 public sealed partial class Iso6392Data
 {
+    /// <summary>
+    /// Creates an instance loaded from the embedded ISO 639-2 dataset.
+    /// </summary>
+    /// <returns>The populated <see cref="Iso6392Data"/> instance.</returns>
     public static Iso6392Data Create() =>
         new()
         {

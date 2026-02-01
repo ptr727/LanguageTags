@@ -168,20 +168,38 @@ Note: Code snippets are illustrative examples only. Replace namespaces/types to 
    - C#, XML, YAML, JSON, Windows scripts: CRLF
    - Linux scripts (`.sh`): LF
 
-6. **`#region`**: Do not use. Prefer logical file/folder/namespace organization.
-7. **Member ordering (StyleCop-like)**: Constants → fields → constructors → properties → indexers → methods → events → operators → finalizers → delegates → nested types
+6. **`#region`**: Do not use regions. Prefer logical file/folder/namespace organization.
+7. **Member ordering (StyleCop SA1201)**: const → static readonly → static fields → instance readonly fields → instance fields → constructors → public (events → properties → indexers → methods → operators) → non-public in same order → nested types
 
 ### Comments and Documentation
 
 1. **XML documentation**
    - `<GenerateDocumentationFile>true</GenerateDocumentationFile>`
    - Missing XML comments for public APIs are suppressed (`.editorconfig`)
-   - Single-line summaries
+   - Must document all public surfaces.
+   - Single-line summaries, additional details in remarks, document input parameters, returns values, exceptions, and add crefs
 
    ```csharp
    /// <summary>
-   /// This property always returns a value < 1.
+   /// Example of a single line summary.
    /// </summary>
+   /// <remarks>
+   /// Additional important details about usage.
+   /// Multiple lines if needed.
+   /// </remarks>
+   /// <param name="category">
+   /// The quote category to request
+   /// </param>
+   /// <param name="cancellationToken">
+   /// A <see cref="System.Threading.CancellationToken"/> that can be used to cancel the request.
+   /// </param>
+   /// <returns>
+   /// A <see cref="string"/> containing the quote text.
+   /// </returns>
+   /// <exception cref="System.ArgumentException">
+   /// Thrown when <paramref name="category"/> is not a supported value.
+   /// </exception>
+   public async Task<string> GetQuoteOfTheDayAsync(string category, CancellationToken cancellationToken) {}
    ```
 
 2. **Code analysis suppressions**
@@ -248,7 +266,7 @@ Note: Code snippets are illustrative examples only. Replace namespaces/types to 
 
 ### Testing Conventions
 
-1. **Framework**: xUnit with FluentAssertions
+1. **Framework**: xUnit with AwesomeAssertions
 
    ```csharp
    [Fact]

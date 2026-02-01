@@ -12,7 +12,8 @@ internal sealed class CommandLine
 
     private static readonly FrozenSet<string> s_cliBypassList = FrozenSet.Create(
         StringComparer.OrdinalIgnoreCase,
-        ["--help", "--version"]
+        "--help",
+        "--version"
     );
 
     internal CommandLine(string[] args)

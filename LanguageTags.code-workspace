@@ -13,6 +13,7 @@
             "ANTLR",
             "arevela",
             "boont",
+            "chamí",
             "CLDR",
             "codegen",
             "csdevkit",
@@ -20,6 +21,7 @@
             "davidanson",
             "derbend",
             "dotnettools",
+            "Emberá",
             "extlang",
             "finalizers",
             "gruntfuggly",
@@ -52,6 +54,7 @@
             "pyfisch",
             "Qaaa",
             "Qabx",
+            "reparsed",
             "rspeer",
             "Serilog",
             "Simoncic",
@@ -99,7 +102,6 @@
             "github.vscode-github-actions",
             "ms-azuretools.vscode-docker",
             "ms-dotnettools.csdevkit",
-            "sanjulaganepola.github-local-actions",
             "yzhang.markdown-all-in-one",
 		]
 	}

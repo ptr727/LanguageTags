@@ -12,31 +12,44 @@ public sealed partial class Rfc5646Data
         "https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry";
     internal const string DataFileName = "rfc5646";
 
-    /// <summary>
-    /// Loads RFC 5646 data from a file asynchronously.
-    /// </summary>
-    /// <param name="fileName">The path to the data file.</param>
-    /// <returns>The loaded <see cref="Rfc5646Data"/>.</returns>
-    /// <exception cref="InvalidDataException">Thrown when the file contains invalid data.</exception>
-    public static Task<Rfc5646Data> LoadDataAsync(string fileName) =>
-        LoadDataAsync(fileName, LogOptions.CreateLogger<Rfc5646Data>());
+    private readonly Lazy<ILogger> _logger = new(LogOptions.CreateLogger<Rfc5646Data>);
+    internal ILogger Log => _logger.Value;
+
+    [JsonConstructor]
+    internal Rfc5646Data() { }
 
     /// <summary>
-    /// Loads RFC 5646 data from a file asynchronously using the specified options.
+    /// Gets the file date of the language subtag registry.
+    /// </summary>
+    [JsonInclude]
+    public DateOnly? FileDate { get; internal set; }
+
+    /// <summary>
+    /// Gets the collection of RFC 5646 language subtag records.
+    /// </summary>
+    [JsonInclude]
+    public ImmutableArray<Rfc5646Record> RecordList { get; internal set; } = [];
+
+    /// <summary>
+    /// Creates a <see cref="Rfc5646Data"/> instance from a data file asynchronously.
     /// </summary>
     /// <param name="fileName">The path to the data file.</param>
-    /// <param name="options">The options used to configure logging.</param>
     /// <returns>The loaded <see cref="Rfc5646Data"/>.</returns>
+    /// <exception cref="IOException">Thrown when the file cannot be read.</exception>
     /// <exception cref="InvalidDataException">Thrown when the file contains invalid data.</exception>
-    public static Task<Rfc5646Data> LoadDataAsync(string fileName, Options? options) =>
-        LoadDataAsync(fileName, LogOptions.CreateLogger<Rfc5646Data>(options));
+    public static async Task<Rfc5646Data> FromDataAsync(string fileName)
+    {
+        Rfc5646Data rfc5646Data = new();
+        await rfc5646Data.LoadDataAsync(fileName).ConfigureAwait(false);
+        return rfc5646Data;
+    }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Reliability",
         "CA2007:Consider calling ConfigureAwait on the awaited task",
         Justification = "https://github.com/dotnet/roslyn-analyzers/issues/7185"
     )]
-    private static async Task<Rfc5646Data> LoadDataAsync(string fileName, ILogger logger)
+    private async Task LoadDataAsync(string fileName)
     {
         // File Format
         // https://www.rfc-editor.org/rfc/rfc5646#section-3.1
@@ -71,52 +84,37 @@ public sealed partial class Rfc5646Data
 
             if (recordList.Count == 0)
             {
-                logger.LogDataLoadEmpty(nameof(Rfc5646Data), fileName);
+                Log.LogDataLoadEmpty(nameof(Rfc5646Data), fileName);
+                throw new InvalidDataException($"No data found in RFC 5646 file: {fileName}");
             }
 
-            Rfc5646Data data = new() { FileDate = fileDate, RecordList = [.. recordList] };
-            logger.LogDataLoaded(nameof(Rfc5646Data), fileName, data.RecordList.Length);
-            return data;
+            FileDate = fileDate;
+            RecordList = [.. recordList];
+            Log.LogDataLoaded(nameof(Rfc5646Data), fileName, RecordList.Length);
         }
         catch (Exception exception)
         {
-            logger.LogDataLoadFailed(nameof(Rfc5646Data), fileName, exception);
+            Log.LogDataLoadFailed(nameof(Rfc5646Data), fileName, exception);
             throw;
         }
     }
 
     /// <summary>
-    /// Loads RFC 5646 data from a JSON file asynchronously.
+    /// Creates a <see cref="Rfc5646Data"/> instance from a JSON file asynchronously.
     /// </summary>
     /// <param name="fileName">The path to the JSON file.</param>
-    /// <returns>
-    /// The loaded <see cref="Rfc5646Data"/>, or null when deserialization yields no data.
-    /// </returns>
+    /// <returns>The loaded <see cref="Rfc5646Data"/>.</returns>
     /// <exception cref="IOException">Thrown when the file cannot be read.</exception>
     /// <exception cref="JsonException">Thrown when the JSON is invalid.</exception>
-    public static Task<Rfc5646Data?> LoadJsonAsync(string fileName) =>
-        LoadJsonAsync(fileName, LogOptions.CreateLogger<Rfc5646Data>());
-
-    /// <summary>
-    /// Loads RFC 5646 data from a JSON file asynchronously using the specified options.
-    /// </summary>
-    /// <param name="fileName">The path to the JSON file.</param>
-    /// <param name="options">The options used to configure logging.</param>
-    /// <returns>
-    /// The loaded <see cref="Rfc5646Data"/>, or null when deserialization yields no data.
-    /// </returns>
-    /// <exception cref="IOException">Thrown when the file cannot be read.</exception>
-    /// <exception cref="JsonException">Thrown when the JSON is invalid.</exception>
-    public static Task<Rfc5646Data?> LoadJsonAsync(string fileName, Options? options) =>
-        LoadJsonAsync(fileName, LogOptions.CreateLogger<Rfc5646Data>(options));
-
+    /// <exception cref="InvalidDataException">Thrown when the file contains invalid data.</exception>
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
         "Reliability",
         "CA2007:Consider calling ConfigureAwait on the awaited task",
         Justification = "https://github.com/dotnet/roslyn-analyzers/issues/7185"
     )]
-    private static async Task<Rfc5646Data?> LoadJsonAsync(string fileName, ILogger logger)
+    public static async Task<Rfc5646Data> FromJsonAsync(string fileName)
     {
+        ILogger logger = LogOptions.CreateLogger<Rfc5646Data>();
         try
         {
             await using FileStream fileStream = new(
@@ -133,12 +131,10 @@ public sealed partial class Rfc5646Data
             if (data == null)
             {
                 logger.LogDataLoadEmpty(nameof(Rfc5646Data), fileName);
-            }
-            else
-            {
-                logger.LogDataLoaded(nameof(Rfc5646Data), fileName, data.RecordList.Length);
+                throw new InvalidDataException($"No data found in RFC 5646 file: {fileName}");
             }
 
+            logger.LogDataLoaded(nameof(Rfc5646Data), fileName, data.RecordList.Length);
             return data;
         }
         catch (Exception exception)
@@ -153,7 +149,7 @@ public sealed partial class Rfc5646Data
         "CA2007:Consider calling ConfigureAwait on the awaited task",
         Justification = "https://github.com/dotnet/roslyn-analyzers/issues/7185"
     )]
-    internal static async Task SaveJsonAsync(string fileName, Rfc5646Data rfc5646)
+    internal async Task SaveJsonAsync(string fileName)
     {
         await using FileStream fileStream = new(
             fileName,
@@ -164,20 +160,13 @@ public sealed partial class Rfc5646Data
             FileOptions.Asynchronous | FileOptions.SequentialScan
         );
         await JsonSerializer
-            .SerializeAsync(fileStream, rfc5646, LanguageJsonContext.Default.Rfc5646Data)
+            .SerializeAsync(fileStream, this, LanguageJsonContext.Default.Rfc5646Data)
             .ConfigureAwait(false);
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Reliability",
-        "CA2007:Consider calling ConfigureAwait on the awaited task",
-        Justification = "https://github.com/dotnet/roslyn-analyzers/issues/7185"
-    )]
-    internal static async Task GenCodeAsync(string fileName, Rfc5646Data rfc5646)
+    internal async Task SaveCodeAsync(string fileName)
     {
-        ArgumentNullException.ThrowIfNull(rfc5646);
-
-        StreamWriter writer = new(
+        using StreamWriter writer = new(
             new FileStream(
                 fileName,
                 FileMode.Create,
@@ -191,10 +180,6 @@ public sealed partial class Rfc5646Data
         {
             NewLine = "\r\n",
         };
-        await using ConfiguredAsyncDisposable writerScope = writer.ConfigureAwait(false);
-
-        ConfiguredTaskAwaitable WriteLineAsync(string value) =>
-            writer.WriteLineAsync(value).ConfigureAwait(false);
 
         await WriteLineAsync("namespace ptr727.LanguageTags;");
         await WriteLineAsync(string.Empty);
@@ -203,18 +188,29 @@ public sealed partial class Rfc5646Data
             "/// Provides access to RFC 5646 / BCP 47 language subtag registry data."
         );
         await WriteLineAsync("/// </summary>");
+        await WriteLineAsync(
+            $"[System.CodeDom.Compiler.GeneratedCode(\"{typeof(Rfc5646Data).FullName}\", \"1.0\")]"
+        );
         await WriteLineAsync("public sealed partial class Rfc5646Data");
         await WriteLineAsync("{");
+        await WriteLineAsync("    /// <summary>");
+        await WriteLineAsync(
+            "    /// Creates an instance loaded from the embedded RFC 5646 subtag registry dataset."
+        );
+        await WriteLineAsync("    /// </summary>");
+        await WriteLineAsync(
+            "    /// <returns>The populated <see cref=\"Rfc5646Data\"/> instance.</returns>"
+        );
         await WriteLineAsync("    public static Rfc5646Data Create() =>");
         await WriteLineAsync("        new()");
         await WriteLineAsync("        {");
         await WriteLineAsync(
-            $"            FileDate = {LanguageSchema.GetCodeGenString(rfc5646.FileDate)},"
+            $"            FileDate = {LanguageSchema.GetCodeGenString(FileDate)},"
         );
         await WriteLineAsync("            RecordList =");
         await WriteLineAsync("            [");
 
-        foreach (Rfc5646Record record in rfc5646.RecordList)
+        foreach (Rfc5646Record record in RecordList)
         {
             await WriteLineAsync("                new()");
             await WriteLineAsync("                {");
@@ -260,6 +256,10 @@ public sealed partial class Rfc5646Data
         await WriteLineAsync("            ],");
         await WriteLineAsync("        };");
         await WriteLineAsync("}");
+        return;
+
+        ConfiguredTaskAwaitable WriteLineAsync(string value) =>
+            writer.WriteLineAsync(value).ConfigureAwait(false);
     }
 
     internal sealed class Parser
@@ -297,7 +297,7 @@ public sealed partial class Rfc5646Data
                 }
 
                 // Multiline record starts with two spaces
-                // Peek at the next line an look for a space
+                // Peek at the next line and look for a space
                 while (true)
                 {
                     // Read next line to check for multiline continuation
@@ -459,16 +459,6 @@ public sealed partial class Rfc5646Data
             DateOnly.ParseExact(value, "yyyy-MM-dd", CultureInfo.InvariantCulture);
     }
 
-    /// <summary>
-    /// Gets the file date of the language subtag registry.
-    /// </summary>
-    public required DateOnly? FileDate { get; init; }
-
-    /// <summary>
-    /// Gets the collection of RFC 5646 language subtag records.
-    /// </summary>
-    public ImmutableArray<Rfc5646Record> RecordList { get; init; }
-
     private static Rfc5646Record.RecordType TypeFromString(string value) =>
         value.ToUpperInvariant() switch
         {
@@ -495,27 +485,18 @@ public sealed partial class Rfc5646Data
     /// <summary>
     /// Finds a language subtag record by tag, subtag, preferred value, or description.
     /// </summary>
+    /// <remarks>
+    /// Matching is case-insensitive and checks Tag, SubTag, PreferredValue, then (optionally) Description.
+    /// Null or empty values return null.
+    /// </remarks>
     /// <param name="languageTag">The language tag, subtag, or description to search for.</param>
     /// <param name="includeDescription">If true, searches in the description field; otherwise, only searches tags and subtags.</param>
     /// <returns>The matching <see cref="Rfc5646Record"/> or null if not found.</returns>
-    public Rfc5646Record? Find(string? languageTag, bool includeDescription) =>
-        Find(languageTag, includeDescription, LogOptions.CreateLogger<Rfc5646Data>());
-
-    /// <summary>
-    /// Finds a language subtag record by tag, subtag, preferred value, or description using the specified options.
-    /// </summary>
-    /// <param name="languageTag">The language tag, subtag, or description to search for.</param>
-    /// <param name="includeDescription">If true, searches in the description field; otherwise, only searches tags and subtags.</param>
-    /// <param name="options">The options used to configure logging.</param>
-    /// <returns>The matching <see cref="Rfc5646Record"/> or null if not found.</returns>
-    public Rfc5646Record? Find(string? languageTag, bool includeDescription, Options? options) =>
-        Find(languageTag, includeDescription, LogOptions.CreateLogger<Rfc5646Data>(options));
-
-    private Rfc5646Record? Find(string? languageTag, bool includeDescription, ILogger logger)
+    public Rfc5646Record? Find(string languageTag, bool includeDescription)
     {
         if (string.IsNullOrEmpty(languageTag))
         {
-            logger.LogFindRecordNotFound(nameof(Rfc5646Data), languageTag, includeDescription);
+            Log.LogFindRecordNotFound(nameof(Rfc5646Data), languageTag, includeDescription);
             return null;
         }
 
@@ -529,7 +510,7 @@ public sealed partial class Rfc5646Data
         );
         if (record != null)
         {
-            logger.LogFindRecordFound(nameof(Rfc5646Data), languageTag, includeDescription);
+            Log.LogFindRecordFound(nameof(Rfc5646Data), languageTag, includeDescription);
             return record;
         }
 
@@ -540,7 +521,7 @@ public sealed partial class Rfc5646Data
         );
         if (record != null)
         {
-            logger.LogFindRecordFound(nameof(Rfc5646Data), languageTag, includeDescription);
+            Log.LogFindRecordFound(nameof(Rfc5646Data), languageTag, includeDescription);
             return record;
         }
 
@@ -551,7 +532,7 @@ public sealed partial class Rfc5646Data
         );
         if (record != null)
         {
-            logger.LogFindRecordFound(nameof(Rfc5646Data), languageTag, includeDescription);
+            Log.LogFindRecordFound(nameof(Rfc5646Data), languageTag, includeDescription);
             return record;
         }
 
@@ -566,7 +547,7 @@ public sealed partial class Rfc5646Data
             );
             if (record != null)
             {
-                logger.LogFindRecordFound(nameof(Rfc5646Data), languageTag, includeDescription);
+                Log.LogFindRecordFound(nameof(Rfc5646Data), languageTag, includeDescription);
                 return record;
             }
 
@@ -578,13 +559,13 @@ public sealed partial class Rfc5646Data
             );
             if (record != null)
             {
-                logger.LogFindRecordFound(nameof(Rfc5646Data), languageTag, includeDescription);
+                Log.LogFindRecordFound(nameof(Rfc5646Data), languageTag, includeDescription);
                 return record;
             }
         }
 
         // Not found
-        logger.LogFindRecordNotFound(nameof(Rfc5646Data), languageTag, includeDescription);
+        Log.LogFindRecordNotFound(nameof(Rfc5646Data), languageTag, includeDescription);
         return null;
     }
 }

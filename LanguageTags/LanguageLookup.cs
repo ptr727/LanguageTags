@@ -3,15 +3,15 @@ namespace ptr727.LanguageTags;
 /// <summary>
 /// Provides language code lookup and conversion functionality between IETF and ISO standards.
 /// </summary>
-/// <param name="options">The options used to configure logging.</param>
-public sealed class LanguageLookup(Options? options = null)
+public sealed class LanguageLookup
 {
     /// <summary>
     /// The language code for undetermined languages ("und").
     /// </summary>
     public const string Undetermined = "und";
 
-    private readonly ILogger _logger = LogOptions.CreateLogger<LanguageLookup>(options);
+    private readonly Lazy<ILogger> _logger = new(LogOptions.CreateLogger<LanguageLookup>);
+    internal ILogger Log => _logger.Value;
     private readonly Iso6392Data _iso6392 = Iso6392Data.Create();
     private readonly Iso6393Data _iso6393 = Iso6393Data.Create();
     private readonly Rfc5646Data _rfc5646 = Rfc5646Data.Create();
@@ -84,8 +84,14 @@ public sealed class LanguageLookup(Options? options = null)
         if (iso6393 != null)
         {
             // Find a matching subtag record from the ISO 639-3 or ISO 639-1 tag
-            subtag = _rfc5646.Find(iso6393.Id, false);
-            subtag ??= _rfc5646.Find(iso6393.Part1, false);
+            if (!string.IsNullOrEmpty(iso6393.Id))
+            {
+                subtag = _rfc5646.Find(iso6393.Id, false);
+            }
+            if (subtag == null && !string.IsNullOrEmpty(iso6393.Part1))
+            {
+                subtag = _rfc5646.Find(iso6393.Part1, false);
+            }
             if (subtag != null)
             {
                 return subtag.TagValue;
@@ -97,8 +103,14 @@ public sealed class LanguageLookup(Options? options = null)
         if (iso6392 != null)
         {
             // Find a matching RFC 5646 record from the ISO 639-2 or ISO 639-1 tag
-            subtag = _rfc5646.Find(iso6392.Part2B, false);
-            subtag ??= _rfc5646.Find(iso6392.Part1, false);
+            if (!string.IsNullOrEmpty(iso6392.Part2B))
+            {
+                subtag = _rfc5646.Find(iso6392.Part2B, false);
+            }
+            if (subtag == null && !string.IsNullOrEmpty(iso6392.Part1))
+            {
+                subtag = _rfc5646.Find(iso6392.Part1, false);
+            }
             if (subtag != null)
             {
                 return subtag.TagValue;
@@ -112,7 +124,7 @@ public sealed class LanguageLookup(Options? options = null)
             return cultureInfo.IetfLanguageTag;
         }
 
-        _logger.LogUndeterminedFallback(languageTag, nameof(GetIetfFromIso));
+        Log.LogUndeterminedFallback(languageTag, nameof(GetIetfFromIso));
         return Undetermined;
     }
 
@@ -120,7 +132,7 @@ public sealed class LanguageLookup(Options? options = null)
     /// Converts an IETF BCP 47 language tag to its ISO equivalent.
     /// </summary>
     /// <param name="languageTag">The IETF BCP 47 language tag to convert.</param>
-    /// <returns>The ISO language code, or "und" if the conversion fails.</returns>
+    /// <returns>The ISO 639-2/B language code, or "und" if the conversion fails.</returns>
     public string GetIsoFromIetf(string languageTag)
     {
         // Undetermined
@@ -177,7 +189,7 @@ public sealed class LanguageLookup(Options? options = null)
         CultureInfo? cultureInfo = CreateCultureInfo(languageTag);
         if (cultureInfo == null)
         {
-            _logger.LogUndeterminedFallback(languageTag, nameof(GetIsoFromIetf));
+            Log.LogUndeterminedFallback(languageTag, nameof(GetIsoFromIetf));
             return Undetermined;
         }
 
@@ -188,7 +200,8 @@ public sealed class LanguageLookup(Options? options = null)
             // Return the Part 2B code
             return iso6393.Part2B!;
         }
-        _logger.LogUndeterminedFallback(languageTag, nameof(GetIsoFromIetf));
+
+        Log.LogUndeterminedFallback(languageTag, nameof(GetIsoFromIetf));
         return Undetermined;
     }
 
@@ -252,7 +265,7 @@ public sealed class LanguageLookup(Options? options = null)
             }
 
             // No match
-            _logger.LogPrefixMatchFailed(originalPrefix, originalTag);
+            Log.LogPrefixMatchFailed(originalPrefix, originalTag);
             return false;
         }
     }
@@ -260,12 +273,18 @@ public sealed class LanguageLookup(Options? options = null)
     /// <summary>
     /// Determines if two language tags are equivalent (case-insensitive).
     /// </summary>
+    /// <param name="tag1">The first language tag.</param>
+    /// <param name="tag2">The second language tag.</param>
+    /// <returns>true when the tags are equal ignoring case; otherwise, false.</returns>
     public static bool AreEquivalent(string tag1, string tag2) =>
         string.Equals(tag1, tag2, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Normalizes and compares two language tags for equivalence.
     /// </summary>
+    /// <param name="tag1">The first language tag.</param>
+    /// <param name="tag2">The second language tag.</param>
+    /// <returns>true when both tags can be parsed and normalize to the same value; otherwise, false.</returns>
     public static bool AreEquivalentNormalized(string tag1, string tag2)
     {
         LanguageTag? parsed1 = LanguageTag.Parse(tag1)?.Normalize();

@@ -22,7 +22,7 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 
 # Markdown files
-[*.{md}]
+[*.md]
 end_of_line = crlf
 trim_trailing_whitespace = false
 
@@ -39,7 +39,6 @@ indent_size = 2
 # Json files
 [*.json]
 end_of_line = crlf
-indent_size = 4
 
 # Linux scripts
 [*.sh]
@@ -73,7 +72,7 @@ csharp_prefer_simple_using_statement = true
 csharp_prefer_static_anonymous_function = true
 csharp_prefer_static_local_function = true
 csharp_prefer_system_threading_lock = true
-csharp_preferred_modifier_order = public,private,protected,internal,file,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,required,volatile,async
+csharp_preferred_modifier_order = public,private,protected,internal,file,static,abstract,sealed,virtual,override,readonly,unsafe,volatile,async,extern,new,partial:warning
 csharp_preserve_single_line_blocks = true
 csharp_preserve_single_line_statements = false
 csharp_space_after_cast = false
@@ -204,3 +203,9 @@ dotnet_style_qualification_for_method = false
 dotnet_style_qualification_for_property = false
 dotnet_style_readonly_field = true
 dotnet_style_require_accessibility_modifiers = for_non_interface_members
+
+# ReSharper settings
+resharper_csharp_trailing_comma_in_multiline_lists = true
+resharper_csharp_var_for_built_in_types = false
+resharper_csharp_var_when_type_is_apparent = false
+resharper_csharp_var_when_type_is_not_apparent = false

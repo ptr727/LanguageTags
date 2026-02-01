@@ -32,7 +32,7 @@ C# .NET library for ISO 639-2, ISO 639-3, RFC 5646 / BCP 47 language tags.
 
 > **⚠️ Breaking Changes**:
 >
-> - IO API's are async only, e.g. `LoadJson()` -> `async FromJsonAsync()`'.
+> - IO API's are async only, e.g. `LoadJson()` -> `async FromJsonAsync()`.
 > - Collection instantiation follows the `From` pattern, e.g. `LoadData()` -> `FromDataAsync()`.
 
 See [Release History](./HISTORY.md) for complete release notes and older versions.

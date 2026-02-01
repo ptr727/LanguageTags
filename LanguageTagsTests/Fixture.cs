@@ -3,7 +3,9 @@
 
 namespace ptr727.LanguageTags.Tests;
 
-public sealed class DisableParallelDefinition;
+// Sequential execution fixture
+[CollectionDefinition("Sequential Test Collection", DisableParallelization = true)]
+public class SequentialCollectionDefinition;
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage(
     "Design",

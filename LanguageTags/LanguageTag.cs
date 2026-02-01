@@ -71,16 +71,9 @@ public sealed class LanguageTag : IEquatable<LanguageTag>
     /// Parses a language tag string into a <see cref="LanguageTag"/> instance.
     /// </summary>
     /// <param name="tag">The language tag string to parse (e.g., "en-US", "zh-Hans-CN").</param>
+    /// <param name="options">The options used to configure logging. If null, uses default logging configuration.</param>
     /// <returns>The parsed language tag, or null if parsing fails.</returns>
-    public static LanguageTag? Parse(string tag) => new LanguageTagParser().Parse(tag);
-
-    /// <summary>
-    /// Parses a language tag string into a <see cref="LanguageTag"/> instance using the specified options.
-    /// </summary>
-    /// <param name="tag">The language tag string to parse (e.g., "en-US", "zh-Hans-CN").</param>
-    /// <param name="options">The options used to configure logging.</param>
-    /// <returns>The parsed language tag, or null if parsing fails.</returns>
-    public static LanguageTag? Parse(string tag, Options? options) =>
+    public static LanguageTag? Parse(string tag, Options? options = null) =>
         new LanguageTagParser(options).Parse(tag);
 
     /// <summary>
@@ -88,52 +81,44 @@ public sealed class LanguageTag : IEquatable<LanguageTag>
     /// </summary>
     /// <param name="tag">The language tag string to parse.</param>
     /// <param name="defaultTag">The default tag to return if parsing fails (defaults to "und").</param>
+    /// <param name="options">The options used to configure logging. If null, uses default logging configuration.</param>
     /// <returns>The parsed tag, the supplied default tag, or "und" if parsing fails and no default is provided.</returns>
-    public static LanguageTag ParseOrDefault(string tag, LanguageTag? defaultTag = null)
+    public static LanguageTag ParseOrDefault(
+        string tag,
+        LanguageTag? defaultTag = null,
+        Options? options = null
+    )
     {
-        LanguageTag? parsed = Parse(tag);
-        return parsed ?? defaultTag ?? Parse(LanguageLookup.Undetermined)!;
+        LanguageTag? parsed = Parse(tag, options);
+        return parsed ?? defaultTag ?? Parse(LanguageLookup.Undetermined, options)!;
     }
 
     /// <summary>
     /// Parses and normalizes a language tag string.
     /// </summary>
     /// <param name="tag">The language tag string.</param>
+    /// <param name="options">The options used to configure logging. If null, uses default logging configuration.</param>
     /// <returns>A normalized language tag, or null if parsing fails.</returns>
-    public static LanguageTag? ParseAndNormalize(string tag) => Parse(tag)?.Normalize();
-
-    /// <summary>
-    /// Parses and normalizes a language tag string using the specified options.
-    /// </summary>
-    /// <param name="tag">The language tag string.</param>
-    /// <param name="options">The options used to configure logging.</param>
-    /// <returns>A normalized language tag, or null if parsing fails.</returns>
-    public static LanguageTag? ParseAndNormalize(string tag, Options? options) =>
-        Parse(tag, options)?.Normalize(options);
+    /// <remarks>
+    /// Logging for both parsing and normalization uses the provided <paramref name="options"/> when supplied.
+    /// </remarks>
+    public static LanguageTag? ParseAndNormalize(string tag, Options? options = null)
+    {
+        LanguageTag? parsed = Parse(tag, options);
+        return parsed == null ? null : new LanguageTagParser(options).Normalize(parsed);
+    }
 
     /// <summary>
     /// Tries to parse a language tag string into a <see cref="LanguageTag"/> instance.
     /// </summary>
     /// <param name="tag">The language tag string to parse (e.g., "en-US", "zh-Hans-CN").</param>
     /// <param name="result">When this method returns, contains the parsed language tag if successful, or null if parsing fails.</param>
-    /// <returns>true if the tag was successfully parsed; otherwise, false.</returns>
-    public static bool TryParse(string tag, [NotNullWhen(true)] out LanguageTag? result)
-    {
-        result = Parse(tag);
-        return result != null;
-    }
-
-    /// <summary>
-    /// Tries to parse a language tag string into a <see cref="LanguageTag"/> instance using the specified options.
-    /// </summary>
-    /// <param name="tag">The language tag string to parse (e.g., "en-US", "zh-Hans-CN").</param>
-    /// <param name="result">When this method returns, contains the parsed language tag if successful, or null if parsing fails.</param>
-    /// <param name="options">The options used to configure logging.</param>
+    /// <param name="options">The options used to configure logging. If null, uses default logging configuration.</param>
     /// <returns>true if the tag was successfully parsed; otherwise, false.</returns>
     public static bool TryParse(
         string tag,
         [NotNullWhen(true)] out LanguageTag? result,
-        Options? options
+        Options? options = null
     )
     {
         result = Parse(tag, options);
@@ -164,15 +149,7 @@ public sealed class LanguageTag : IEquatable<LanguageTag>
     /// Normalizes this language tag according to RFC 5646 rules.
     /// </summary>
     /// <returns>A normalized copy of this language tag.</returns>
-    public LanguageTag? Normalize() => new LanguageTagParser().Normalize(this);
-
-    /// <summary>
-    /// Normalizes this language tag according to RFC 5646 rules using the specified options.
-    /// </summary>
-    /// <param name="options">The options used to configure logging.</param>
-    /// <returns>A normalized copy of this language tag.</returns>
-    public LanguageTag? Normalize(Options? options) =>
-        new LanguageTagParser(options).Normalize(this);
+    public LanguageTag Normalize() => new LanguageTagParser().Normalize(this);
 
     /// <summary>
     /// Converts this language tag to its string representation.

@@ -7,7 +7,7 @@ namespace ptr727.LanguageTags.Tests;
 public sealed class LogOptionsTests : SingleInstanceFixture
 {
     [Fact]
-    public void CreateLogger_UsesFactory_WhenFactorySet()
+    public void CreateLogger_UsesLogger_WhenBothSet()
     {
         ILoggerFactory originalFactory = LogOptions.LoggerFactory;
         ILogger originalLogger = LogOptions.Logger;
@@ -21,8 +21,10 @@ public sealed class LogOptionsTests : SingleInstanceFixture
 
             ILogger logger = LogOptions.CreateLogger("category");
 
-            _ = logger.Should().BeSameAs(testFactory.Logger);
-            _ = testFactory.LastCategory.Should().Be("category");
+            // Logger should take precedence over LoggerFactory
+            _ = logger.Should().BeSameAs(testLogger);
+            // Factory should not be called
+            _ = testFactory.LastCategory.Should().BeNull();
         }
         finally
         {
@@ -55,7 +57,7 @@ public sealed class LogOptionsTests : SingleInstanceFixture
     }
 
     [Fact]
-    public void CreateLogger_WithOptions_UsesOptionsFactory()
+    public void CreateLogger_WithOptions_UsesOptionsLoggerFirst()
     {
         ILoggerFactory originalFactory = LogOptions.LoggerFactory;
         ILogger originalLogger = LogOptions.Logger;
@@ -70,8 +72,10 @@ public sealed class LogOptionsTests : SingleInstanceFixture
 
             ILogger logger = LogOptions.CreateLogger("category", options);
 
-            _ = logger.Should().BeSameAs(testFactory.Logger);
-            _ = testFactory.LastCategory.Should().Be("category");
+            // Logger should take precedence over LoggerFactory
+            _ = logger.Should().BeSameAs(testLogger);
+            // Factory should not be called
+            _ = testFactory.LastCategory.Should().BeNull();
         }
         finally
         {
@@ -106,17 +110,93 @@ public sealed class LogOptionsTests : SingleInstanceFixture
     }
 
     [Fact]
+    public void CreateLogger_WithOptions_UsesOptionsFactoryWhenLoggerNotSet()
+    {
+        ILoggerFactory originalFactory = LogOptions.LoggerFactory;
+        ILogger originalLogger = LogOptions.Logger;
+        using TestLoggerFactory testFactory = new();
+        Options options = new() { LoggerFactory = testFactory };
+
+        try
+        {
+            LogOptions.LoggerFactory = NullLoggerFactory.Instance;
+            LogOptions.Logger = NullLogger.Instance;
+
+            ILogger logger = LogOptions.CreateLogger("category", options);
+
+            // Factory should be used when Logger is not set
+            _ = logger.Should().BeSameAs(testFactory.Logger);
+            _ = testFactory.LastCategory.Should().Be("category");
+        }
+        finally
+        {
+            LogOptions.LoggerFactory = originalFactory;
+            LogOptions.Logger = originalLogger;
+        }
+    }
+
+    [Fact]
     public void CreateLogger_WithOptions_FallsBackToGlobal()
     {
         ILoggerFactory originalFactory = LogOptions.LoggerFactory;
         ILogger originalLogger = LogOptions.Logger;
         using TestLoggerFactory testFactory = new();
+        TestLogger testLogger = new();
         Options options = new();
 
         try
         {
             LogOptions.LoggerFactory = testFactory;
-            LogOptions.Logger = new TestLogger();
+            LogOptions.Logger = testLogger;
+
+            ILogger logger = LogOptions.CreateLogger("category", options);
+
+            _ = logger.Should().BeSameAs(testLogger);
+            _ = testFactory.LastCategory.Should().BeNull();
+        }
+        finally
+        {
+            LogOptions.LoggerFactory = originalFactory;
+            LogOptions.Logger = originalLogger;
+        }
+    }
+
+    [Fact]
+    public void CreateLogger_FallsBackToFactory_WhenGlobalLoggerIsNullLogger()
+    {
+        ILoggerFactory originalFactory = LogOptions.LoggerFactory;
+        ILogger originalLogger = LogOptions.Logger;
+        using TestLoggerFactory testFactory = new();
+
+        try
+        {
+            LogOptions.LoggerFactory = testFactory;
+            LogOptions.Logger = NullLogger.Instance;
+
+            ILogger logger = LogOptions.CreateLogger("category");
+
+            _ = logger.Should().BeSameAs(testFactory.Logger);
+            _ = testFactory.LastCategory.Should().Be("category");
+        }
+        finally
+        {
+            LogOptions.LoggerFactory = originalFactory;
+            LogOptions.Logger = originalLogger;
+        }
+    }
+
+    [Fact]
+    public void CreateLogger_WithOptions_IgnoresNullLoggerAndFallsBackToFactory()
+    {
+        ILoggerFactory originalFactory = LogOptions.LoggerFactory;
+        ILogger originalLogger = LogOptions.Logger;
+        using TestLoggerFactory testFactory = new();
+        Options options = new() { Logger = NullLogger.Instance, LoggerFactory = testFactory };
+
+        try
+        {
+            LogOptions.LoggerFactory = NullLoggerFactory.Instance;
+            LogOptions.Logger = NullLogger.Instance;
 
             ILogger logger = LogOptions.CreateLogger("category", options);
 
@@ -129,6 +209,14 @@ public sealed class LogOptionsTests : SingleInstanceFixture
             LogOptions.Logger = originalLogger;
         }
     }
+
+    [Fact]
+    public void CreateLogger_WithNullCategory_ThrowsArgumentNullException() =>
+        _ = Assert.Throws<ArgumentNullException>(() => LogOptions.CreateLogger(null!));
+
+    [Fact]
+    public void CreateLogger_WithEmptyCategory_ThrowsArgumentException() =>
+        _ = Assert.Throws<ArgumentException>(() => LogOptions.CreateLogger(" "));
 
     [Fact]
     public void TrySetFactory_WhenUnset_ReturnsTrueAndSets()

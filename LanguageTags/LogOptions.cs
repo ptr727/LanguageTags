@@ -35,44 +35,109 @@ public static class LogOptions
     }
 
     /// <summary>
-    /// Creates a logger for the specified type using the current factory or fallback logger.
-    /// </summary>
-    /// <typeparam name="T">The type used to derive the logger category.</typeparam>
-    /// <returns>The configured logger for the category.</returns>
-    public static ILogger CreateLogger<T>() => CreateLogger(typeof(T).FullName ?? typeof(T).Name);
-
-    /// <summary>
     /// Creates a logger for the specified type using the provided options or global configuration.
     /// </summary>
     /// <typeparam name="T">The type used to derive the logger category.</typeparam>
-    /// <param name="options">The options used to configure logging.</param>
+    /// <param name="options">The options used to configure logging. If null, uses global configuration.</param>
     /// <returns>The configured logger for the category.</returns>
-    public static ILogger CreateLogger<T>(Options? options) =>
+    /// <remarks>
+    /// <para>
+    /// When options is provided, the logger is resolved using this priority order:
+    /// <list type="number">
+    /// <item><description>options.Logger if set</description></item>
+    /// <item><description>options.LoggerFactory if set, creating a logger for the category</description></item>
+    /// <item><description>Global Logger if set</description></item>
+    /// <item><description>Global LoggerFactory if set, creating a logger for the category</description></item>
+    /// </list>
+    /// </para>
+    /// <para>
+    /// When options is null, the global logger is resolved using this priority order:
+    /// <list type="number">
+    /// <item><description>Global Logger if set</description></item>
+    /// <item><description>Global LoggerFactory if set, creating a logger for the category</description></item>
+    /// </list>
+    /// </para>
+    /// <para>
+    /// Null logger instances are treated as not configured.
+    /// </para>
+    /// </remarks>
+    public static ILogger CreateLogger<T>(Options? options = null) =>
         CreateLogger(typeof(T).FullName ?? typeof(T).Name, options);
-
-    /// <summary>
-    /// Creates a logger for the specified category using the current factory or fallback logger.
-    /// </summary>
-    /// <param name="categoryName">The category name for the logger.</param>
-    /// <returns>The configured logger for the category.</returns>
-    public static ILogger CreateLogger(string categoryName)
-    {
-        ILoggerFactory loggerFactory = LoggerFactory;
-        return !ReferenceEquals(loggerFactory, NullLoggerFactory.Instance)
-            ? loggerFactory.CreateLogger(categoryName)
-            : Logger;
-    }
 
     /// <summary>
     /// Creates a logger for the specified category using the provided options or global configuration.
     /// </summary>
     /// <param name="categoryName">The category name for the logger.</param>
-    /// <param name="options">The options used to configure logging.</param>
+    /// <param name="options">The options used to configure logging. If null, uses global configuration.</param>
     /// <returns>The configured logger for the category.</returns>
-    public static ILogger CreateLogger(string categoryName, Options? options) =>
-        options is null ? CreateLogger(categoryName)
-        : options.LoggerFactory is not null ? options.LoggerFactory.CreateLogger(categoryName)
-        : options.Logger ?? CreateLogger(categoryName);
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="categoryName"/> is null.
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// Thrown when <paramref name="categoryName"/> is empty or whitespace.
+    /// </exception>
+    /// <remarks>
+    /// <para>
+    /// When options is provided, the logger is resolved using this priority order:
+    /// <list type="number">
+    /// <item><description>options.Logger if set</description></item>
+    /// <item><description>options.LoggerFactory if set, creating a logger for the category</description></item>
+    /// <item><description>Global Logger if set</description></item>
+    /// <item><description>Global LoggerFactory if set, creating a logger for the category</description></item>
+    /// </list>
+    /// </para>
+    /// <para>
+    /// When options is null, the global logger is resolved using this priority order:
+    /// <list type="number">
+    /// <item><description>Global Logger if set</description></item>
+    /// <item><description>Global LoggerFactory if set, creating a logger for the category</description></item>
+    /// </list>
+    /// </para>
+    /// <para>
+    /// Null logger instances are treated as not configured.
+    /// </para>
+    /// </remarks>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Style",
+        "IDE0046:Convert to conditional expression",
+        Justification = "Logic clarity."
+    )]
+    public static ILogger CreateLogger(string categoryName, Options? options = null)
+    {
+        ArgumentNullException.ThrowIfNull(categoryName);
+        if (string.IsNullOrWhiteSpace(categoryName))
+        {
+            throw new ArgumentException("Category name must not be empty.", nameof(categoryName));
+        }
+
+        if (options is not null)
+        {
+            if (options.Logger is not null && !ReferenceEquals(options.Logger, NullLogger.Instance))
+            {
+                return options.Logger;
+            }
+
+            if (
+                options.LoggerFactory is not null
+                && !ReferenceEquals(options.LoggerFactory, NullLoggerFactory.Instance)
+            )
+            {
+                return options.LoggerFactory.CreateLogger(categoryName);
+            }
+        }
+
+        if (!ReferenceEquals(Logger, NullLogger.Instance))
+        {
+            return Logger;
+        }
+
+        if (!ReferenceEquals(LoggerFactory, NullLoggerFactory.Instance))
+        {
+            return LoggerFactory.CreateLogger(categoryName);
+        }
+
+        return NullLogger.Instance;
+    }
 
     /// <summary>
     /// Configures the library to use the specified logger factory.

@@ -100,13 +100,18 @@ public class Rfc5646Tests : SingleInstanceFixture
         _ = record.Should().BeNull();
     }
 
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    public void Find_NullOrEmpty_ReturnsNull(string? input)
+    [Fact]
+    public void Find_Null_ThrowsArgumentNullException()
     {
         Rfc5646Data rfc5646 = Rfc5646Data.Create();
-        Rfc5646Record? record = rfc5646.Find(input, false);
+        _ = Assert.Throws<ArgumentNullException>(() => rfc5646.Find(null!, false));
+    }
+
+    [Fact]
+    public void Find_Empty_ReturnsNull()
+    {
+        Rfc5646Data rfc5646 = Rfc5646Data.Create();
+        Rfc5646Record? record = rfc5646.Find(string.Empty, false);
         _ = record.Should().BeNull();
     }
 

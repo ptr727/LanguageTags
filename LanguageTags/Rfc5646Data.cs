@@ -16,19 +16,11 @@ public sealed partial class Rfc5646Data
     /// Loads RFC 5646 data from a file asynchronously.
     /// </summary>
     /// <param name="fileName">The path to the data file.</param>
+    /// <param name="options">The options used to configure logging. If null, uses default logging configuration.</param>
     /// <returns>The loaded <see cref="Rfc5646Data"/>.</returns>
+    /// <exception cref="IOException">Thrown when the file cannot be read.</exception>
     /// <exception cref="InvalidDataException">Thrown when the file contains invalid data.</exception>
-    public static Task<Rfc5646Data> LoadDataAsync(string fileName) =>
-        LoadDataAsync(fileName, LogOptions.CreateLogger<Rfc5646Data>());
-
-    /// <summary>
-    /// Loads RFC 5646 data from a file asynchronously using the specified options.
-    /// </summary>
-    /// <param name="fileName">The path to the data file.</param>
-    /// <param name="options">The options used to configure logging.</param>
-    /// <returns>The loaded <see cref="Rfc5646Data"/>.</returns>
-    /// <exception cref="InvalidDataException">Thrown when the file contains invalid data.</exception>
-    public static Task<Rfc5646Data> LoadDataAsync(string fileName, Options? options) =>
+    public static Task<Rfc5646Data> LoadDataAsync(string fileName, Options? options = null) =>
         LoadDataAsync(fileName, LogOptions.CreateLogger<Rfc5646Data>(options));
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -72,6 +64,7 @@ public sealed partial class Rfc5646Data
             if (recordList.Count == 0)
             {
                 logger.LogDataLoadEmpty(nameof(Rfc5646Data), fileName);
+                throw new InvalidDataException($"No data found in RFC 5646 file: {fileName}");
             }
 
             Rfc5646Data data = new() { FileDate = fileDate, RecordList = [.. recordList] };
@@ -89,25 +82,12 @@ public sealed partial class Rfc5646Data
     /// Loads RFC 5646 data from a JSON file asynchronously.
     /// </summary>
     /// <param name="fileName">The path to the JSON file.</param>
-    /// <returns>
-    /// The loaded <see cref="Rfc5646Data"/>, or null when deserialization yields no data.
-    /// </returns>
+    /// <param name="options">The options used to configure logging. If null, uses default logging configuration.</param>
+    /// <returns>The loaded <see cref="Rfc5646Data"/>.</returns>
     /// <exception cref="IOException">Thrown when the file cannot be read.</exception>
     /// <exception cref="JsonException">Thrown when the JSON is invalid.</exception>
-    public static Task<Rfc5646Data?> LoadJsonAsync(string fileName) =>
-        LoadJsonAsync(fileName, LogOptions.CreateLogger<Rfc5646Data>());
-
-    /// <summary>
-    /// Loads RFC 5646 data from a JSON file asynchronously using the specified options.
-    /// </summary>
-    /// <param name="fileName">The path to the JSON file.</param>
-    /// <param name="options">The options used to configure logging.</param>
-    /// <returns>
-    /// The loaded <see cref="Rfc5646Data"/>, or null when deserialization yields no data.
-    /// </returns>
-    /// <exception cref="IOException">Thrown when the file cannot be read.</exception>
-    /// <exception cref="JsonException">Thrown when the JSON is invalid.</exception>
-    public static Task<Rfc5646Data?> LoadJsonAsync(string fileName, Options? options) =>
+    /// <exception cref="InvalidDataException">Thrown when the file contains invalid data.</exception>
+    public static Task<Rfc5646Data> LoadJsonAsync(string fileName, Options? options = null) =>
         LoadJsonAsync(fileName, LogOptions.CreateLogger<Rfc5646Data>(options));
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -115,7 +95,7 @@ public sealed partial class Rfc5646Data
         "CA2007:Consider calling ConfigureAwait on the awaited task",
         Justification = "https://github.com/dotnet/roslyn-analyzers/issues/7185"
     )]
-    private static async Task<Rfc5646Data?> LoadJsonAsync(string fileName, ILogger logger)
+    private static async Task<Rfc5646Data> LoadJsonAsync(string fileName, ILogger logger)
     {
         try
         {
@@ -133,12 +113,10 @@ public sealed partial class Rfc5646Data
             if (data == null)
             {
                 logger.LogDataLoadEmpty(nameof(Rfc5646Data), fileName);
-            }
-            else
-            {
-                logger.LogDataLoaded(nameof(Rfc5646Data), fileName, data.RecordList.Length);
+                throw new InvalidDataException($"No data found in RFC 5646 file: {fileName}");
             }
 
+            logger.LogDataLoaded(nameof(Rfc5646Data), fileName, data.RecordList.Length);
             return data;
         }
         catch (Exception exception)
@@ -507,23 +485,14 @@ public sealed partial class Rfc5646Data
     /// <param name="languageTag">The language tag, subtag, or description to search for.</param>
     /// <param name="includeDescription">If true, searches in the description field; otherwise, only searches tags and subtags.</param>
     /// <returns>The matching <see cref="Rfc5646Record"/> or null if not found.</returns>
-    public Rfc5646Record? Find(string? languageTag, bool includeDescription) =>
-        Find(languageTag, includeDescription, LogOptions.CreateLogger<Rfc5646Data>());
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="languageTag"/> is null.</exception>
+    public Rfc5646Record? Find(string languageTag, bool includeDescription)
+    {
+        ArgumentNullException.ThrowIfNull(languageTag);
+        return Find(languageTag, includeDescription, LogOptions.CreateLogger<Rfc5646Data>());
+    }
 
-    /// <summary>
-    /// Finds a language subtag record by tag, subtag, preferred value, or description using the specified options.
-    /// </summary>
-    /// <remarks>
-    /// Matching is case-insensitive and checks Tag, SubTag, PreferredValue, then (optionally) Description.
-    /// </remarks>
-    /// <param name="languageTag">The language tag, subtag, or description to search for.</param>
-    /// <param name="includeDescription">If true, searches in the description field; otherwise, only searches tags and subtags.</param>
-    /// <param name="options">The options used to configure logging.</param>
-    /// <returns>The matching <see cref="Rfc5646Record"/> or null if not found.</returns>
-    public Rfc5646Record? Find(string? languageTag, bool includeDescription, Options? options) =>
-        Find(languageTag, includeDescription, LogOptions.CreateLogger<Rfc5646Data>(options));
-
-    private Rfc5646Record? Find(string? languageTag, bool includeDescription, ILogger logger)
+    private Rfc5646Record? Find(string languageTag, bool includeDescription, ILogger logger)
     {
         if (string.IsNullOrEmpty(languageTag))
         {

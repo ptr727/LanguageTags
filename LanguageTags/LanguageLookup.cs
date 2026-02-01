@@ -84,8 +84,14 @@ public sealed class LanguageLookup(Options? options = null)
         if (iso6393 != null)
         {
             // Find a matching subtag record from the ISO 639-3 or ISO 639-1 tag
-            subtag = _rfc5646.Find(iso6393.Id, false);
-            subtag ??= _rfc5646.Find(iso6393.Part1, false);
+            if (!string.IsNullOrEmpty(iso6393.Id))
+            {
+                subtag = _rfc5646.Find(iso6393.Id, false);
+            }
+            if (subtag == null && !string.IsNullOrEmpty(iso6393.Part1))
+            {
+                subtag = _rfc5646.Find(iso6393.Part1, false);
+            }
             if (subtag != null)
             {
                 return subtag.TagValue;
@@ -97,8 +103,14 @@ public sealed class LanguageLookup(Options? options = null)
         if (iso6392 != null)
         {
             // Find a matching RFC 5646 record from the ISO 639-2 or ISO 639-1 tag
-            subtag = _rfc5646.Find(iso6392.Part2B, false);
-            subtag ??= _rfc5646.Find(iso6392.Part1, false);
+            if (!string.IsNullOrEmpty(iso6392.Part2B))
+            {
+                subtag = _rfc5646.Find(iso6392.Part2B, false);
+            }
+            if (subtag == null && !string.IsNullOrEmpty(iso6392.Part1))
+            {
+                subtag = _rfc5646.Find(iso6392.Part1, false);
+            }
             if (subtag != null)
             {
                 return subtag.TagValue;

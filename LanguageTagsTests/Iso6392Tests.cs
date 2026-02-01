@@ -91,13 +91,18 @@ public sealed class Iso6392Tests : SingleInstanceFixture
         _ = record.Should().BeNull();
     }
 
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    public void Find_NullOrEmpty_ReturnsNull(string? input)
+    [Fact]
+    public void Find_Null_ThrowsArgumentNullException()
     {
         Iso6392Data iso6392 = Iso6392Data.Create();
-        Iso6392Record? record = iso6392.Find(input, false);
+        _ = Assert.Throws<ArgumentNullException>(() => iso6392.Find(null!, false));
+    }
+
+    [Fact]
+    public void Find_Empty_ReturnsNull()
+    {
+        Iso6392Data iso6392 = Iso6392Data.Create();
+        Iso6392Record? record = iso6392.Find(string.Empty, false);
         _ = record.Should().BeNull();
     }
 }

@@ -14,19 +14,11 @@ public sealed partial class Iso6392Data
     /// Loads ISO 639-2 data from a file asynchronously.
     /// </summary>
     /// <param name="fileName">The path to the data file.</param>
+    /// <param name="options">The options used to configure logging. If null, uses default logging configuration.</param>
     /// <returns>The loaded <see cref="Iso6392Data"/>.</returns>
+    /// <exception cref="IOException">Thrown when the file cannot be read.</exception>
     /// <exception cref="InvalidDataException">Thrown when the file contains invalid data.</exception>
-    public static Task<Iso6392Data> LoadDataAsync(string fileName) =>
-        LoadDataAsync(fileName, LogOptions.CreateLogger<Iso6392Data>());
-
-    /// <summary>
-    /// Loads ISO 639-2 data from a file asynchronously using the specified options.
-    /// </summary>
-    /// <param name="fileName">The path to the data file.</param>
-    /// <param name="options">The options used to configure logging.</param>
-    /// <returns>The loaded <see cref="Iso6392Data"/>.</returns>
-    /// <exception cref="InvalidDataException">Thrown when the file contains invalid data.</exception>
-    public static Task<Iso6392Data> LoadDataAsync(string fileName, Options? options) =>
+    public static Task<Iso6392Data> LoadDataAsync(string fileName, Options? options = null) =>
         LoadDataAsync(fileName, LogOptions.CreateLogger<Iso6392Data>(options));
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -107,25 +99,12 @@ public sealed partial class Iso6392Data
     /// Loads ISO 639-2 data from a JSON file asynchronously.
     /// </summary>
     /// <param name="fileName">The path to the JSON file.</param>
-    /// <returns>
-    /// The loaded <see cref="Iso6392Data"/>, or null when deserialization yields no data.
-    /// </returns>
+    /// <param name="options">The options used to configure logging. If null, uses default logging configuration.</param>
+    /// <returns>The loaded <see cref="Iso6392Data"/>.</returns>
+    /// <exception cref="InvalidDataException">Thrown when the file contains invalid data.</exception>
     /// <exception cref="IOException">Thrown when the file cannot be read.</exception>
     /// <exception cref="JsonException">Thrown when the JSON is invalid.</exception>
-    public static Task<Iso6392Data?> LoadJsonAsync(string fileName) =>
-        LoadJsonAsync(fileName, LogOptions.CreateLogger<Iso6392Data>());
-
-    /// <summary>
-    /// Loads ISO 639-2 data from a JSON file asynchronously using the specified options.
-    /// </summary>
-    /// <param name="fileName">The path to the JSON file.</param>
-    /// <param name="options">The options used to configure logging.</param>
-    /// <returns>
-    /// The loaded <see cref="Iso6392Data"/>, or null when deserialization yields no data.
-    /// </returns>
-    /// <exception cref="IOException">Thrown when the file cannot be read.</exception>
-    /// <exception cref="JsonException">Thrown when the JSON is invalid.</exception>
-    public static Task<Iso6392Data?> LoadJsonAsync(string fileName, Options? options) =>
+    public static Task<Iso6392Data> LoadJsonAsync(string fileName, Options? options = null) =>
         LoadJsonAsync(fileName, LogOptions.CreateLogger<Iso6392Data>(options));
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage(
@@ -133,7 +112,7 @@ public sealed partial class Iso6392Data
         "CA2007:Consider calling ConfigureAwait on the awaited task",
         Justification = "https://github.com/dotnet/roslyn-analyzers/issues/7185"
     )]
-    private static async Task<Iso6392Data?> LoadJsonAsync(string fileName, ILogger logger)
+    private static async Task<Iso6392Data> LoadJsonAsync(string fileName, ILogger logger)
     {
         try
         {
@@ -151,12 +130,10 @@ public sealed partial class Iso6392Data
             if (data == null)
             {
                 logger.LogDataLoadEmpty(nameof(Iso6392Data), fileName);
-            }
-            else
-            {
-                logger.LogDataLoaded(nameof(Iso6392Data), fileName, data.RecordList.Length);
+                throw new InvalidDataException($"No data found in ISO 639-2 file: {fileName}");
             }
 
+            logger.LogDataLoaded(nameof(Iso6392Data), fileName, data.RecordList.Length);
             return data;
         }
         catch (Exception exception)
@@ -270,23 +247,14 @@ public sealed partial class Iso6392Data
     /// <param name="languageTag">The language code or description to search for.</param>
     /// <param name="includeDescription">If true, searches in the reference name field; otherwise, only searches language codes.</param>
     /// <returns>The first matching <see cref="Iso6392Record"/>, or null when no match is found.</returns>
-    public Iso6392Record? Find(string? languageTag, bool includeDescription) =>
-        Find(languageTag, includeDescription, LogOptions.CreateLogger<Iso6392Data>());
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="languageTag"/> is null.</exception>
+    public Iso6392Record? Find(string languageTag, bool includeDescription)
+    {
+        ArgumentNullException.ThrowIfNull(languageTag);
+        return Find(languageTag, includeDescription, LogOptions.CreateLogger<Iso6392Data>());
+    }
 
-    /// <summary>
-    /// Finds an ISO 639-2 language record by language code or description using the specified options.
-    /// </summary>
-    /// <remarks>
-    /// Matching is case-insensitive and checks Part 2/B, Part 2/T, Part 1, then (optionally) reference name.
-    /// </remarks>
-    /// <param name="languageTag">The language code or description to search for.</param>
-    /// <param name="includeDescription">If true, searches in the reference name field; otherwise, only searches language codes.</param>
-    /// <param name="options">The options used to configure logging.</param>
-    /// <returns>The first matching <see cref="Iso6392Record"/>, or null when no match is found.</returns>
-    public Iso6392Record? Find(string? languageTag, bool includeDescription, Options? options) =>
-        Find(languageTag, includeDescription, LogOptions.CreateLogger<Iso6392Data>(options));
-
-    private Iso6392Record? Find(string? languageTag, bool includeDescription, ILogger logger)
+    private Iso6392Record? Find(string languageTag, bool includeDescription, ILogger logger)
     {
         if (string.IsNullOrEmpty(languageTag))
         {

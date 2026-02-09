@@ -232,6 +232,7 @@
     },
     {
       "Part2B": "bih",
+      "Part1": "bh",
       "RefName": "Bihari languages"
     },
     {
@@ -475,7 +476,7 @@
     },
     {
       "Part2B": "dgr",
-      "RefName": "Tlicho; Dogrib"
+      "RefName": "Dogrib"
     },
     {
       "Part2B": "din",
@@ -724,7 +725,7 @@
       "Part2B": "gre",
       "Part2T": "ell",
       "Part1": "el",
-      "RefName": "Modern Greek (1453-)"
+      "RefName": "Greek, Modern (1453-)"
     },
     {
       "Part2B": "grn",
@@ -1341,12 +1342,12 @@
     {
       "Part2B": "nbl",
       "Part1": "nr",
-      "RefName": "South Ndebele"
+      "RefName": "Ndebele, South; South Ndebele"
     },
     {
       "Part2B": "nde",
       "Part1": "nd",
-      "RefName": "North Ndebele"
+      "RefName": "Ndebele, North; North Ndebele"
     },
     {
       "Part2B": "ndo",
@@ -1364,7 +1365,7 @@
     },
     {
       "Part2B": "new",
-      "RefName": "Nepal Bhasa; Newar; Newari"
+      "RefName": "Nepal Bhasa; Newari"
     },
     {
       "Part2B": "nia",
@@ -1381,12 +1382,12 @@
     {
       "Part2B": "nno",
       "Part1": "nn",
-      "RefName": "Norwegian Nynorsk"
+      "RefName": "Norwegian Nynorsk; Nynorsk, Norwegian"
     },
     {
       "Part2B": "nob",
       "Part1": "nb",
-      "RefName": "Norwegian Bokm\u00E5l"
+      "RefName": "Bokm\u00E5l, Norwegian; Norwegian Bokm\u00E5l"
     },
     {
       "Part2B": "nog",

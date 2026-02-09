@@ -50,7 +50,7 @@ bem|||Bemba|bemba
 ben||bn|Bengali|bengali
 ber|||Berber languages|berbères, langues
 bho|||Bhojpuri|bhojpuri
-bih|||Bihari languages|langues biharis
+bih||bh|Bihari languages|langues biharis
 bik|||Bikol|bikol
 bin|||Bini; Edo|bini; edo
 bis||bi|Bislama|bichlamar
@@ -106,7 +106,7 @@ dar|||Dargwa|dargwa
 day|||Land Dayak languages|dayak, langues
 del|||Delaware|delaware
 den|||Slave (Athapascan)|esclave (athapascan)
-dgr|||Tlicho; Dogrib|tlicho; dogrib
+dgr|||Dogrib|dogrib
 din|||Dinka|dinka
 div||dv|Divehi; Dhivehi; Maldivian|maldivien
 doi|||Dogri|dogri
@@ -162,7 +162,7 @@ gor|||Gorontalo|gorontalo
 got|||Gothic|gothique
 grb|||Grebo|grebo
 grc|||Greek, Ancient (to 1453)|grec ancien (jusqu'à 1453)
-gre|ell|el|Modern Greek (1453-)|grec moderne (1453-)
+gre|ell|el|Greek, Modern (1453-)|grec moderne (après 1453)
 grn||gn|Guarani|guarani
 gsw|||Swiss German; Alemannic; Alsatian|suisse alémanique; alémanique; alsacien
 guj||gu|Gujarati|goudjrati
@@ -301,17 +301,17 @@ nai|||North American Indian languages|nord-amérindiennes, langues
 nap|||Neapolitan|napolitain
 nau||na|Nauru|nauruan
 nav||nv|Navajo; Navaho|navaho
-nbl||nr|South Ndebele|ndébélé du Sud
-nde||nd|North Ndebele|ndébélé du Nord
+nbl||nr|Ndebele, South; South Ndebele|ndébélé du Sud
+nde||nd|Ndebele, North; North Ndebele|ndébélé du Nord
 ndo||ng|Ndonga|ndonga
 nds|||Low German; Low Saxon; German, Low; Saxon, Low|bas allemand; bas saxon; allemand, bas; saxon, bas
 nep||ne|Nepali|népalais
-new|||Nepal Bhasa; Newar; Newari|nepal bhasa; néwar; newari
+new|||Nepal Bhasa; Newari|nepal bhasa; newari
 nia|||Nias|nias
 nic|||Niger-Kordofanian languages|nigéro-kordofaniennes, langues
 niu|||Niuean|niué
-nno||nn|Norwegian Nynorsk|norvégien nynorsk
-nob||nb|Norwegian Bokmål|norvégien bokmål
+nno||nn|Norwegian Nynorsk; Nynorsk, Norwegian|norvégien nynorsk; nynorsk, norvégien
+nob||nb|Bokmål, Norwegian; Norwegian Bokmål|norvégien bokmål
 nog|||Nogai|nogaï; nogay
 non|||Norse, Old|norrois, vieux
 nor||no|Norwegian|norvégien

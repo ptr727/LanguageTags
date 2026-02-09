@@ -383,7 +383,7 @@ public sealed partial class Iso6392Data
                 {
                     Part2B = "bih",
                     Part2T = null,
-                    Part1 = null,
+                    Part1 = "bh",
                     RefName = "Bihari languages",
                 },
                 new()
@@ -777,7 +777,7 @@ public sealed partial class Iso6392Data
                     Part2B = "dgr",
                     Part2T = null,
                     Part1 = null,
-                    RefName = "Tlicho; Dogrib",
+                    RefName = "Dogrib",
                 },
                 new()
                 {
@@ -1169,7 +1169,7 @@ public sealed partial class Iso6392Data
                     Part2B = "gre",
                     Part2T = "ell",
                     Part1 = "el",
-                    RefName = "Modern Greek (1453-)",
+                    RefName = "Greek, Modern (1453-)",
                 },
                 new()
                 {
@@ -2142,14 +2142,14 @@ public sealed partial class Iso6392Data
                     Part2B = "nbl",
                     Part2T = null,
                     Part1 = "nr",
-                    RefName = "South Ndebele",
+                    RefName = "Ndebele, South; South Ndebele",
                 },
                 new()
                 {
                     Part2B = "nde",
                     Part2T = null,
                     Part1 = "nd",
-                    RefName = "North Ndebele",
+                    RefName = "Ndebele, North; North Ndebele",
                 },
                 new()
                 {
@@ -2177,7 +2177,7 @@ public sealed partial class Iso6392Data
                     Part2B = "new",
                     Part2T = null,
                     Part1 = null,
-                    RefName = "Nepal Bhasa; Newar; Newari",
+                    RefName = "Nepal Bhasa; Newari",
                 },
                 new()
                 {
@@ -2205,14 +2205,14 @@ public sealed partial class Iso6392Data
                     Part2B = "nno",
                     Part2T = null,
                     Part1 = "nn",
-                    RefName = "Norwegian Nynorsk",
+                    RefName = "Norwegian Nynorsk; Nynorsk, Norwegian",
                 },
                 new()
                 {
                     Part2B = "nob",
                     Part2T = null,
                     Part1 = "nb",
-                    RefName = "Norwegian Bokmål",
+                    RefName = "Bokmål, Norwegian; Norwegian Bokmål",
                 },
                 new()
                 {

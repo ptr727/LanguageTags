@@ -1,8 +1,5 @@
 name: Run codegen and pull request task
 
-env:
-  PROJECT_FILE: ./LanguageTagsCreate/LanguageTagsCreate.csproj
-
 on:
   workflow_call:
 
@@ -23,7 +20,9 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Run codegen step
-        run: dotnet run --project ${{ env.PROJECT_FILE }} -- --codepath .
+        run: >-
+          dotnet run --project ./LanguageTagsCreate/LanguageTagsCreate.csproj --
+            --codepath .
 
       - name: Format code step
         run: |

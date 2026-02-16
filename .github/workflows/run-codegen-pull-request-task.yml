@@ -20,8 +20,8 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Run codegen step
-        run: >-
-          dotnet run --project ./LanguageTagsCreate/LanguageTagsCreate.csproj --
+        run: |
+          dotnet run --project ./LanguageTagsCreate/LanguageTagsCreate.csproj -- \
             --codepath .
 
       - name: Format code step

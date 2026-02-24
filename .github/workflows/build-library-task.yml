@@ -43,22 +43,22 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Build library project step
-        run: >-
-          dotnet build ${{ env.PROJECT_FILE }}
-          --output ${{ runner.temp }}/publish
-          --configuration ${{ env.IS_MAIN_BRANCH == 'true' && 'Release' || 'Debug' }}
-          -property:Version=${{ needs.get-version.outputs.AssemblyVersion }}
-          -property:FileVersion=${{ needs.get-version.outputs.AssemblyFileVersion }}
-          -property:AssemblyVersion=${{ needs.get-version.outputs.AssemblyVersion }}
-          -property:InformationalVersion=${{ needs.get-version.outputs.AssemblyInformationalVersion }}
-          -property:PackageVersion=${{ needs.get-version.outputs.SemVer2 }}
+        run: |
+          dotnet build ${{ env.PROJECT_FILE }} \
+            --output ${{ runner.temp }}/publish \
+            --configuration ${{ env.IS_MAIN_BRANCH == 'true' && 'Release' || 'Debug' }} \
+            -property:Version=${{ needs.get-version.outputs.AssemblyVersion }} \
+            -property:FileVersion=${{ needs.get-version.outputs.AssemblyFileVersion }} \
+            -property:AssemblyVersion=${{ needs.get-version.outputs.AssemblyVersion }} \
+            -property:InformationalVersion=${{ needs.get-version.outputs.AssemblyInformationalVersion }} \
+            -property:PackageVersion=${{ needs.get-version.outputs.SemVer2 }}
 
       - name: Publish to NuGet.org step
         if: ${{ inputs.push }}
-        run: >-
-            dotnet nuget push ${{ runner.temp }}/publish/*.nupkg
-            --source https://api.nuget.org/v3/index.json
-            --api-key ${{ secrets.NUGET_API_KEY }}
+        run: |
+          dotnet nuget push ${{ runner.temp }}/publish/*.nupkg \
+            --source https://api.nuget.org/v3/index.json \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
             --skip-duplicate
 
       - name: Zip output step

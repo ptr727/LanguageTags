@@ -99,7 +99,7 @@
             "command": "dotnet",
             "args": [
                 "outdated",
-                "--upgrade:Prompt"
+                "--upgrade:prompt"
             ],
             "problemMatcher": [
                 "$msCompile"
@@ -109,5 +109,5 @@
                 "clear": false
             }
         }
-   ]
+    ]
 }

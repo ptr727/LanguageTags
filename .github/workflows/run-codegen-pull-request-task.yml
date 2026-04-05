@@ -47,3 +47,4 @@ jobs:
           commit-message: 'Update codegen files'
           delete-branch: true
           sign-commits: true
+          labels: automated-codegen

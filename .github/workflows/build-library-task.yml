@@ -45,7 +45,8 @@ jobs:
       - name: Build library project step
         run: |
           dotnet build ${{ env.PROJECT_FILE }} \
-            --output ${{ runner.temp }}/publish \
+            -property:OutputPath=${{ runner.temp }}/publish/ \
+            -property:PackageOutputPath=${{ runner.temp }}/publish/ \
             --configuration ${{ env.IS_MAIN_BRANCH == 'true' && 'Release' || 'Debug' }} \
             -property:Version=${{ needs.get-version.outputs.AssemblyVersion }} \
             -property:FileVersion=${{ needs.get-version.outputs.AssemblyFileVersion }} \

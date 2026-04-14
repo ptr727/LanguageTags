@@ -1,5 +1,5 @@
 {
-  "FileDate": "2025-08-25",
+  "FileDate": "2026-04-09",
   "RecordList": [
     {
       "Type": "Language",
@@ -1501,9 +1501,9 @@
       "Type": "Language",
       "SubTag": "ny",
       "Description": [
-        "Nyanja",
+        "Chichewa",
         "Chewa",
-        "Chichewa"
+        "Nyanja"
       ],
       "Added": "2005-10-16",
       "SuppressScript": "Latn",
@@ -1562,6 +1562,9 @@
       "Type": "Language",
       "SubTag": "os",
       "Description": [
+        "Iron Ossetic",
+        "Iron",
+        "Iron Ossetian",
         "Ossetian",
         "Ossetic"
       ],
@@ -12003,7 +12006,7 @@
       "Type": "Language",
       "SubTag": "boe",
       "Description": [
-        "Mundabli"
+        "Mundabli-Mufu"
       ],
       "Added": "2009-07-29",
       "Scope": "None",
@@ -22438,6 +22441,17 @@
         "Djimini Senoufo"
       ],
       "Added": "2009-07-29",
+      "Scope": "None",
+      "Comments": [],
+      "Prefix": []
+    },
+    {
+      "Type": "Language",
+      "SubTag": "dyl",
+      "Description": [
+        "Bhutanese Sign Language"
+      ],
+      "Added": "2026-04-09",
       "Scope": "None",
       "Comments": [],
       "Prefix": []
@@ -42928,6 +42942,17 @@
     },
     {
       "Type": "Language",
+      "SubTag": "lfb",
+      "Description": [
+        "Buu (Cameroon)"
+      ],
+      "Added": "2026-04-09",
+      "Scope": "None",
+      "Comments": [],
+      "Prefix": []
+    },
+    {
+      "Type": "Language",
       "SubTag": "lfn",
       "Description": [
         "Lingua Franca Nova"
@@ -45292,7 +45317,7 @@
       "Type": "Language",
       "SubTag": "lui",
       "Description": [
-        "Luiseno"
+        "Luise\u00F1o"
       ],
       "Added": "2005-10-16",
       "Scope": "None",
@@ -59229,6 +59254,17 @@
     },
     {
       "Type": "Language",
+      "SubTag": "olb",
+      "Description": [
+        "Oli-Bodiman"
+      ],
+      "Added": "2026-04-09",
+      "Scope": "None",
+      "Comments": [],
+      "Prefix": []
+    },
+    {
+      "Type": "Language",
       "SubTag": "old",
       "Description": [
         "Mochi"
@@ -60021,6 +60057,19 @@
         "Oscan"
       ],
       "Added": "2009-07-29",
+      "Scope": "None",
+      "Comments": [],
+      "Prefix": []
+    },
+    {
+      "Type": "Language",
+      "SubTag": "osd",
+      "Description": [
+        "Digor Ossetic",
+        "Digor",
+        "Digor Ossetian"
+      ],
+      "Added": "2026-04-09",
       "Scope": "None",
       "Comments": [],
       "Prefix": []
@@ -67814,6 +67863,17 @@
         "Sicel"
       ],
       "Added": "2009-07-29",
+      "Scope": "None",
+      "Comments": [],
+      "Prefix": []
+    },
+    {
+      "Type": "Language",
+      "SubTag": "scz",
+      "Description": [
+        "Shaetlan"
+      ],
+      "Added": "2026-04-09",
       "Scope": "None",
       "Comments": [],
       "Prefix": []
@@ -89280,8 +89340,10 @@
       ],
       "Added": "2009-07-29",
       "Scope": "None",
+      "Deprecated": "2026-04-09",
       "Comments": [],
-      "Prefix": []
+      "Prefix": [],
+      "PreferredValue": "enm"
     },
     {
       "Type": "Language",
@@ -93505,6 +93567,20 @@
         "ms"
       ],
       "PreferredValue": "dup"
+    },
+    {
+      "Type": "ExtLanguage",
+      "SubTag": "dyl",
+      "Description": [
+        "Bhutanese Sign Language"
+      ],
+      "Added": "2026-04-09",
+      "Scope": "None",
+      "Comments": [],
+      "Prefix": [
+        "sgn"
+      ],
+      "PreferredValue": "dyl"
     },
     {
       "Type": "ExtLanguage",
@@ -103686,6 +103762,21 @@
     },
     {
       "Type": "Variant",
+      "SubTag": "slepe",
+      "Description": [
+        "Sorbian dialect of Schleife"
+      ],
+      "Added": "2026-04-09",
+      "Scope": "None",
+      "Comments": [
+        "Spoken in the Free State of Saxony in Germany"
+      ],
+      "Prefix": [
+        "dsb"
+      ]
+    },
+    {
+      "Type": "Variant",
       "SubTag": "solba",
       "Description": [
         "The Stolvizza dialect of Resian",
@@ -103729,6 +103820,21 @@
       "Prefix": [
         "en",
         "es"
+      ]
+    },
+    {
+      "Type": "Variant",
+      "SubTag": "stadi",
+      "Description": [
+        "The \u0022Stadin slangi\u0022 dialect of Finnish"
+      ],
+      "Added": "2026-04-09",
+      "Scope": "None",
+      "Comments": [
+        "\u0022Stadi\u0022 means the city of Helsinki in the dialect."
+      ],
+      "Prefix": [
+        "fi"
       ]
     },
     {
@@ -103788,6 +103894,23 @@
       "Comments": [],
       "Prefix": [
         "da"
+      ]
+    },
+    {
+      "Type": "Variant",
+      "SubTag": "taglish",
+      "Description": [
+        "Tagalog-English code-switching"
+      ],
+      "Added": "2026-04-09",
+      "Scope": "None",
+      "Comments": [
+        "This subtag represents Taglish, wherever it is different from straight Tagalog or straight English."
+      ],
+      "Prefix": [
+        "en",
+        "tl",
+        "fil"
       ]
     },
     {

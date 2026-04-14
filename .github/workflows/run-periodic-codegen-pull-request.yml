@@ -7,7 +7,8 @@ on:
     - cron: '0 2 * * MON'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # Workflow always checks out and targets main/codegen
+  group: codegen-main
   cancel-in-progress: true
 
 jobs:

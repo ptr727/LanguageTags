@@ -1,5 +1,3 @@
-using System.Threading;
-
 namespace ptr727.LanguageTags;
 
 /// <summary>

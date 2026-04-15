@@ -26,10 +26,13 @@ jobs:
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
 
-      # Skip major version NuGet updates as they may contain breaking changes.
-      # All other ecosystems (e.g. github-actions) allow major updates (e.g. v2->v3).
+      # Merge if either condition is true:
+      #   Non-NuGet ecosystems (e.g. github-actions) allow all updates including major (e.g. v2->v3)
+      #   NuGet allows only minor and patch updates, skipping major as they may contain breaking changes
       - name: Merge pull request step
-        if: (steps.metadata.outputs.package-ecosystem != 'nuget') || (steps.metadata.outputs.update-type != 'version-update:semver-major')
+        if: >-
+          (steps.metadata.outputs.package-ecosystem != 'nuget') ||
+          (steps.metadata.outputs.update-type != 'version-update:semver-major')
         run: gh pr merge --auto --squash "$PR_URL"
         env:
           PR_URL: ${{github.event.pull_request.html_url}}

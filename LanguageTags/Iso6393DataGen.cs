@@ -16886,7 +16886,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "M",
                     LanguageType = "L",
-                    RefName = "Slave (Athapascan)",
+                    RefName = "Slavey",
                     Comment = null,
                 },
                 new()
@@ -28821,7 +28821,7 @@ public sealed partial class Iso6393Data
                     Part1 = "ia",
                     Scope = "I",
                     LanguageType = "C",
-                    RefName = "Interlingua (International Auxiliary Language Association)",
+                    RefName = "Interlingua (IALA)",
                     Comment = null,
                 },
                 new()
@@ -29316,7 +29316,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Isu (Menchum Division)",
+                    RefName = "Isu",
                     Comment = null,
                 },
                 new()
@@ -33804,7 +33804,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Harijan Kinnauri",
+                    RefName = "Kinnauri Pahari",
                     Comment = null,
                 },
                 new()
@@ -36873,7 +36873,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Kutenai",
+                    RefName = "Ktunaxa",
                     Comment = null,
                 },
                 new()
@@ -42967,7 +42967,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Male (Papua New Guinea)",
+                    RefName = "Soq",
                     Comment = null,
                 },
                 new()
@@ -43198,7 +43198,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Male (Ethiopia)",
+                    RefName = "Male",
                     Comment = null,
                 },
                 new()
@@ -66760,7 +66760,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Sarsi",
+                    RefName = "Tsuut'ina",
                     Comment = null,
                 },
                 new()
@@ -68333,7 +68333,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Isu (Fako Division)",
+                    RefName = "Isubu",
                     Comment = null,
                 },
                 new()
@@ -73266,6 +73266,17 @@ public sealed partial class Iso6393Data
                 },
                 new()
                 {
+                    Id = "tvg",
+                    Part2B = null,
+                    Part2T = null,
+                    Part1 = null,
+                    Scope = "I",
+                    LanguageType = "E",
+                    RefName = "Tugunese",
+                    Comment = null,
+                },
+                new()
+                {
                     Id = "tvi",
                     Part2B = null,
                     Part2T = null,
@@ -76627,7 +76638,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Wab",
+                    RefName = "Yote",
                     Comment = null,
                 },
                 new()
@@ -83700,7 +83711,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Yasa",
+                    RefName = "Iyasa",
                     Comment = null,
                 },
                 new()
@@ -85747,6 +85758,17 @@ public sealed partial class Iso6393Data
                     Scope = "I",
                     LanguageType = "L",
                     RefName = "Zhire",
+                    Comment = null,
+                },
+                new()
+                {
+                    Id = "zhk",
+                    Part2B = null,
+                    Part2T = null,
+                    Part1 = null,
+                    Scope = "I",
+                    LanguageType = "L",
+                    RefName = "Kurdish Sign Language",
                     Comment = null,
                 },
                 new()

@@ -1,5 +1,5 @@
 {
-  "FileDate": "2026-04-09",
+  "FileDate": "2026-04-21",
   "RecordList": [
     {
       "Type": "Language",
@@ -103354,6 +103354,19 @@
     },
     {
       "Type": "Variant",
+      "SubTag": "moderat",
+      "Description": [
+        "The moderate (conservative, i.e. Danish-like) spelling variant of Bokm\u00E5l"
+      ],
+      "Added": "2026-04-21",
+      "Scope": "None",
+      "Comments": [],
+      "Prefix": [
+        "nb"
+      ]
+    },
+    {
+      "Type": "Variant",
       "SubTag": "monoton",
       "Description": [
         "Monotonic Greek"
@@ -103647,6 +103660,19 @@
       ],
       "Prefix": [
         "rm"
+      ]
+    },
+    {
+      "Type": "Variant",
+      "SubTag": "radikalt",
+      "Description": [
+        "Radical (i.e. Nynorsk-like) spelling variant of Bokm\u00E5l"
+      ],
+      "Added": "2026-04-21",
+      "Scope": "None",
+      "Comments": [],
+      "Prefix": [
+        "nb"
       ]
     },
     {

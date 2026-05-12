@@ -2,7 +2,7 @@
 
 **LanguageTags** is a C# .NET library for handling ISO 639-2, ISO 639-3, and RFC 5646 / BCP 47 language tags. The library ships as the NuGet package `ptr727.LanguageTags` and is consumed directly from `main`. The repo also contains a CLI codegen tool (`LanguageTagsCreate/`) that refreshes embedded language data from upstream registries, and an xUnit test project (`LanguageTagsTests/`).
 
-This file is the single source of truth for cross-cutting rules. Code-style conventions live in [`CODESTYLE.md`](./CODESTYLE.md) and [`.github/copilot-instructions.md`](./.github/copilot-instructions.md); treat this file as authoritative for everything else and don't restate its rules elsewhere.
+This file is the canonical reference for cross-cutting AI-agent and workflow rules. C# code-style conventions live in [`CODESTYLE.md`](./CODESTYLE.md). Copilot review *mechanics* are owned by [`.github/copilot-instructions.md`](./.github/copilot-instructions.md) — this file delegates them there explicitly (see "PR Review Etiquette" below). High-level summaries in other docs (e.g. README's Contributing section) are allowed when they link back here; don't duplicate the rules themselves.
 
 ## Git and Commit Rules
 

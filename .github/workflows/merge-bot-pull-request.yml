@@ -33,8 +33,19 @@ name: Merge bot pull request action
 #   on a Dependabot PR runs with Dependabot's restricted secrets
 #   regardless of actor, so plain `GITHUB_TOKEN` would be read-only.
 
+# `pull_request_target` rather than `pull_request`: this workflow holds
+# the App private key in env (`GH_TOKEN`) and runs actions
+# (`create-github-app-token`, `fetch-metadata`) that consume it. Under
+# `pull_request` the workflow definition AND the action SHAs come from
+# the PR head — meaning a Dependabot bump of `actions/create-github-app-token`
+# (or any other action used here) would execute the new, unreviewed SHA
+# with full access to the App key. `pull_request_target` runs from the
+# base-branch workflow definition, so action-SHA changes only take effect
+# *after* they're merged. Safe because this workflow never checks out PR
+# code — it only calls `gh pr merge` against the PR by URL, so the usual
+# `pull_request_target` warning about untrusted PR code doesn't apply.
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, reopened, synchronize]
 
 # `cancel-in-progress: false` is load-bearing. The three-job model

@@ -9398,7 +9398,7 @@
       "Part2T": "den",
       "Scope": "M",
       "LanguageType": "L",
-      "RefName": "Slave (Athapascan)"
+      "RefName": "Slavey"
     },
     {
       "Id": "dep",
@@ -16111,7 +16111,7 @@
       "Part1": "ia",
       "Scope": "I",
       "LanguageType": "C",
-      "RefName": "Interlingua (International Auxiliary Language Association)"
+      "RefName": "Interlingua (IALA)"
     },
     {
       "Id": "inb",
@@ -16392,7 +16392,7 @@
       "Id": "isu",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Isu (Menchum Division)"
+      "RefName": "Isu"
     },
     {
       "Id": "isv",
@@ -18901,7 +18901,7 @@
       "Id": "kjo",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Harijan Kinnauri"
+      "RefName": "Kinnauri Pahari"
     },
     {
       "Id": "kjp",
@@ -20608,7 +20608,7 @@
       "Part2T": "kut",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Kutenai"
+      "RefName": "Ktunaxa"
     },
     {
       "Id": "kuu",
@@ -24002,7 +24002,7 @@
       "Id": "mdc",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Male (Papua New Guinea)"
+      "RefName": "Soq"
     },
     {
       "Id": "mdd",
@@ -24132,7 +24132,7 @@
       "Id": "mdy",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Male (Ethiopia)"
+      "RefName": "Male"
     },
     {
       "Id": "mdz",
@@ -37254,7 +37254,7 @@
       "Id": "srs",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Sarsi"
+      "RefName": "Tsuut\u0027ina"
     },
     {
       "Id": "srt",
@@ -38134,7 +38134,7 @@
       "Id": "szv",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Isu (Fako Division)"
+      "RefName": "Isubu"
     },
     {
       "Id": "szw",
@@ -40890,6 +40890,12 @@
       "RefName": "Te\u0027un"
     },
     {
+      "Id": "tvg",
+      "Scope": "I",
+      "LanguageType": "E",
+      "RefName": "Tugunese"
+    },
+    {
       "Id": "tvi",
       "Scope": "I",
       "LanguageType": "L",
@@ -42763,7 +42769,7 @@
       "Id": "wab",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Wab"
+      "RefName": "Yote"
     },
     {
       "Id": "wac",
@@ -46645,7 +46651,7 @@
       "Id": "yko",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Yasa"
+      "RefName": "Iyasa"
     },
     {
       "Id": "ykr",
@@ -47776,6 +47782,12 @@
       "Scope": "I",
       "LanguageType": "L",
       "RefName": "Zhire"
+    },
+    {
+      "Id": "zhk",
+      "Scope": "I",
+      "LanguageType": "L",
+      "RefName": "Kurdish Sign Language"
     },
     {
       "Id": "zhn",

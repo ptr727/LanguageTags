@@ -1,5 +1,5 @@
 {
-  "FileDate": "2026-04-09",
+  "FileDate": "2026-05-05",
   "RecordList": [
     {
       "Type": "Language",
@@ -765,6 +765,7 @@
       "Type": "Language",
       "SubTag": "ia",
       "Description": [
+        "Interlingua (IALA)",
         "Interlingua (International Auxiliary Language Association)"
       ],
       "Added": "2005-10-16",
@@ -19865,7 +19866,7 @@
       "Type": "Language",
       "SubTag": "den",
       "Description": [
-        "Slave (Athapascan)"
+        "Slavey"
       ],
       "Added": "2005-10-16",
       "Scope": "MacroLanguage",
@@ -32659,6 +32660,7 @@
       "Type": "Language",
       "SubTag": "isu",
       "Description": [
+        "Isu",
         "Isu (Menchum Division)"
       ],
       "Added": "2009-07-29",
@@ -37218,7 +37220,7 @@
       "Type": "Language",
       "SubTag": "kjo",
       "Description": [
-        "Harijan Kinnauri"
+        "Kinnauri Pahari"
       ],
       "Added": "2009-07-29",
       "Scope": "None",
@@ -40339,6 +40341,8 @@
       "Type": "Language",
       "SubTag": "kut",
       "Description": [
+        "Ktunaxa",
+        "Ksanka",
         "Kutenai"
       ],
       "Added": "2005-10-16",
@@ -46593,6 +46597,7 @@
       "Type": "Language",
       "SubTag": "mdc",
       "Description": [
+        "Soq",
         "Male (Papua New Guinea)"
       ],
       "Added": "2009-07-29",
@@ -46824,6 +46829,7 @@
       "Type": "Language",
       "SubTag": "mdy",
       "Description": [
+        "Male",
         "Male (Ethiopia)"
       ],
       "Added": "2009-07-29",
@@ -49709,7 +49715,8 @@
       "Type": "Language",
       "SubTag": "moh",
       "Description": [
-        "Mohawk"
+        "Mohawk",
+        "Kanien\u0027k\u00E9ha"
       ],
       "Added": "2005-10-16",
       "Scope": "None",
@@ -56502,7 +56509,8 @@
       "Type": "Language",
       "SubTag": "nok",
       "Description": [
-        "Nooksack"
+        "Nooksack",
+        "Lh\u00E9chelesem"
       ],
       "Added": "2009-07-29",
       "Scope": "None",
@@ -71286,6 +71294,7 @@
       "Type": "Language",
       "SubTag": "srs",
       "Description": [
+        "Tsuut\u0027ina",
         "Sarsi"
       ],
       "Added": "2009-07-29",
@@ -72900,6 +72909,7 @@
       "Type": "Language",
       "SubTag": "szv",
       "Description": [
+        "Isubu",
         "Isu (Fako Division)"
       ],
       "Added": "2009-07-29",
@@ -78013,6 +78023,19 @@
     },
     {
       "Type": "Language",
+      "SubTag": "tvg",
+      "Description": [
+        "Tugunese",
+        "Batavian Portuguese Creole",
+        "Mardijker Creole"
+      ],
+      "Added": "2026-05-05",
+      "Scope": "None",
+      "Comments": [],
+      "Prefix": []
+    },
+    {
+      "Type": "Language",
       "SubTag": "tvi",
       "Description": [
         "Tulai"
@@ -81377,6 +81400,7 @@
       "Type": "Language",
       "SubTag": "wab",
       "Description": [
+        "Yote",
         "Wab"
       ],
       "Added": "2009-07-29",
@@ -88735,6 +88759,7 @@
       "Type": "Language",
       "SubTag": "yko",
       "Description": [
+        "Iyasa",
         "Yasa"
       ],
       "Added": "2009-07-29",
@@ -90898,6 +90923,17 @@
         "Zhire"
       ],
       "Added": "2009-07-29",
+      "Scope": "None",
+      "Comments": [],
+      "Prefix": []
+    },
+    {
+      "Type": "Language",
+      "SubTag": "zhk",
+      "Description": [
+        "Kurdish Sign Language"
+      ],
+      "Added": "2026-05-05",
       "Scope": "None",
       "Comments": [],
       "Prefix": []
@@ -96144,6 +96180,20 @@
         "zh"
       ],
       "PreferredValue": "yue"
+    },
+    {
+      "Type": "ExtLanguage",
+      "SubTag": "zhk",
+      "Description": [
+        "Kurdish Sign Language"
+      ],
+      "Added": "2026-05-05",
+      "Scope": "None",
+      "Comments": [],
+      "Prefix": [
+        "sgn"
+      ],
+      "PreferredValue": "zhk"
     },
     {
       "Type": "ExtLanguage",
@@ -103354,6 +103404,19 @@
     },
     {
       "Type": "Variant",
+      "SubTag": "moderat",
+      "Description": [
+        "The moderate (conservative, i.e. Danish-like) spelling variant of Bokm\u00E5l"
+      ],
+      "Added": "2026-04-21",
+      "Scope": "None",
+      "Comments": [],
+      "Prefix": [
+        "nb"
+      ]
+    },
+    {
+      "Type": "Variant",
       "SubTag": "monoton",
       "Description": [
         "Monotonic Greek"
@@ -103647,6 +103710,19 @@
       ],
       "Prefix": [
         "rm"
+      ]
+    },
+    {
+      "Type": "Variant",
+      "SubTag": "radikalt",
+      "Description": [
+        "Radical (i.e. Nynorsk-like) spelling variant of Bokm\u00E5l"
+      ],
+      "Added": "2026-04-21",
+      "Scope": "None",
+      "Comments": [],
+      "Prefix": [
+        "nb"
       ]
     },
     {

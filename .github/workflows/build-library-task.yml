@@ -47,7 +47,7 @@ jobs:
           dotnet build ${{ env.PROJECT_FILE }} \
             -property:OutputPath=${{ runner.temp }}/publish/ \
             -property:PackageOutputPath=${{ runner.temp }}/publish/ \
-            --configuration ${{ github.ref_name == 'main' && 'Release' || 'Debug' }} \
+            --configuration ${{ inputs.push && 'Release' || 'Debug' }} \
             -property:Version=${{ needs.get-version.outputs.AssemblyVersion }} \
             -property:FileVersion=${{ needs.get-version.outputs.AssemblyFileVersion }} \
             -property:AssemblyVersion=${{ needs.get-version.outputs.AssemblyVersion }} \

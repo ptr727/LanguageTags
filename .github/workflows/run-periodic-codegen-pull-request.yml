@@ -1,4 +1,4 @@
-name: Run weekly CodeGen and Pull Request action
+name: Run weekly codegen and pull request action
 
 on:
   workflow_dispatch:
@@ -7,8 +7,7 @@ on:
     - cron: '0 2 * * MON'
 
 concurrency:
-  # Workflow always checks out and targets main/codegen
-  group: codegen-main
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

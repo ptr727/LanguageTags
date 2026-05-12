@@ -2,7 +2,7 @@ name: Test pull request action
 
 on:
   pull_request:
-    branches: [ main, develop, codegen ]
+    branches: [ main, develop, codegen-main, codegen-develop ]
   workflow_dispatch:
 
 concurrency:
@@ -25,8 +25,9 @@ jobs:
       [ test-release ]
     if: always()
     steps:
-      - name: Check workflow results
+      - name: Check workflow results step
         run: |
+          set -euo pipefail
           exit_on_result() {
             if [[ "$2" == "failure" || "$2" == "cancelled" ]]; then
               echo "Job '$1' failed or was cancelled."

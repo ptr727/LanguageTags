@@ -434,7 +434,7 @@ See [`AGENTS.md`](./AGENTS.md) for the complete branching, PR, and workflow conv
 
 CI/CD relies on these secrets being configured on the repo:
 
-- `CODEGEN_APP_ID` and `CODEGEN_APP_PRIVATE_KEY` — GitHub App credentials used by the codegen and merge-bot workflows. Must be present in **both** the Actions secret store **and** the Dependabot secret store (the merge-bot runs under Dependabot's restricted secret context on Dependabot PRs).
+- `CODEGEN_APP_CLIENT_ID` and `CODEGEN_APP_PRIVATE_KEY` — GitHub App credentials used by the codegen and merge-bot workflows. Must be present in **both** the Actions secret store **and** the Dependabot secret store (the merge-bot runs under Dependabot's restricted secret context on Dependabot PRs). The `_CLIENT_ID` half holds the GitHub App's Client ID (e.g. `Iv23li…`); `actions/create-github-app-token` accepts either a numeric App ID or a Client ID at its `app-id` input.
 - `NUGET_API_KEY` — NuGet.org API key for package publishing. Actions store only.
 
 Branch protection is split across two rulesets:

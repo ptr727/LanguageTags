@@ -2,7 +2,11 @@ name: Test pull request action
 
 on:
   pull_request:
-    branches: [ main, develop, codegen-main, codegen-develop ]
+    # The `branches:` filter under `pull_request` matches the PR's BASE
+    # branch. `codegen-main` and `codegen-develop` are head-only branches
+    # (the codegen workflow opens PRs *from* them into `main` / `develop`)
+    # so they're never bases — only the protected base branches go here.
+    branches: [ main, develop ]
   workflow_dispatch:
 
 concurrency:

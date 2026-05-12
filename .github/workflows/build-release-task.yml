@@ -1,8 +1,5 @@
 name: Build project release task
 
-env:
-  IS_MAIN_BRANCH: ${{ endsWith(github.ref, 'refs/heads/main') }}
-
 on:
   workflow_call:
     inputs:
@@ -41,20 +38,27 @@ jobs:
     steps:
 
       - name: Checkout code step
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Download library build artifacts job
-        uses: actions/download-artifact@v8
+      - name: Download library build artifacts step
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           artifact-ids: ${{ needs.build-library.outputs.artifact-id }}
           path: ./Publish
 
-      - name: Create GitHub release job
-        uses: softprops/action-gh-release@v3
+      # `target_commitish` MUST be set explicitly: softprops doesn't pass a
+      # default through, and GitHub's REST API then defaults the new tag to
+      # the repository's default branch (main). On `push: develop` runs the
+      # tag would land on main's tip instead of the develop commit that
+      # built the artifact, leaving "Browse files" and `git checkout <tag>`
+      # pointing at unrelated code.
+      - name: Create GitHub release step
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
         with:
           generate_release_notes: true
           tag_name: ${{ needs.get-version.outputs.SemVer2 }}
-          prerelease: ${{ env.IS_MAIN_BRANCH != 'true' }}
+          target_commitish: ${{ github.sha }}
+          prerelease: ${{ github.ref_name != 'main' }}
           files: |
             LICENSE
             README.md

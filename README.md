@@ -92,6 +92,7 @@ See [Usage](#usage) for detailed usage instructions.
   - [Installation](#installation)
   - [Questions or Issues](#questions-or-issues)
   - [Build Artifacts](#build-artifacts)
+  - [Contributing](#contributing)
   - [Tag Theory](#tag-theory)
     - [Terminology](#terminology)
     - [Format](#format)
@@ -416,6 +417,32 @@ LogOptions.SetFactory(loggerFactory);
   - ISO 639-3: [Source](https://iso639-3.sil.org/sites/iso639-3/files/downloads/iso-639-3.tab), [Data](./LanguageData/iso6393), [JSON](./LanguageData/iso6393.json), [Code](./LanguageTags/Iso6393DataGen.cs)
   - RFC 5646 : [Source](https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry), [Data](./LanguageData/rfc5646), [JSON](./LanguageData/rfc5646.json), [Code](./LanguageTags/Rfc5646DataGen.cs)
 - A weekly [GitHub Actions](./.github/workflows/run-periodic-codegen-pull-request.yml) job keeps the data files up to date and automatically publishes new releases.
+
+## Contributing
+
+**Branching workflow**:
+
+The repo uses a two-branch model with strict ruleset-enforced merge methods:
+
+- Feature branch → `develop` via **squash merge** (develop is kept linear).
+- `develop` → `main` via **merge commit** (preserves develop's commit list on main as the second parent of each release commit).
+- `develop` is **forward-only** — there are no `main → develop` back-merges. Dependabot and the weekly codegen workflow both target `main` and `develop` in parallel via separate PRs.
+
+See [`AGENTS.md`](./AGENTS.md) for the complete branching, PR, and workflow conventions and [`CODESTYLE.md`](./CODESTYLE.md) for C# code style rules.
+
+**Repository setup**:
+
+CI/CD relies on these secrets being configured on the repo:
+
+- `CODEGEN_APP_ID` and `CODEGEN_APP_PRIVATE_KEY` — GitHub App credentials used by the codegen and merge-bot workflows. Must be present in **both** the Actions secret store **and** the Dependabot secret store (the merge-bot runs under Dependabot's restricted secret context on Dependabot PRs).
+- `NUGET_API_KEY` — NuGet.org API key for package publishing. Actions store only.
+
+Branch protection is split across two rulesets:
+
+- **Develop** ruleset: squash-only, linear history, "branches up to date" check on, signed commits required.
+- **Main** ruleset: merge-commit only, linear history off, "branches up to date" check off (forward-only develop makes this check incompatible with the merge-commit release shape), signed commits required.
+
+Both rulesets require the `Check pull request workflow status` status check and request Copilot review on every push.
 
 ## Tag Theory
 

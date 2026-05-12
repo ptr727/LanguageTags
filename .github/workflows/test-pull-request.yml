@@ -2,7 +2,11 @@ name: Test pull request action
 
 on:
   pull_request:
-    branches: [ main, develop, codegen ]
+    # The `branches:` filter under `pull_request` matches the PR's BASE
+    # branch. `codegen-main` and `codegen-develop` are head-only branches
+    # (the codegen workflow opens PRs *from* them into `main` / `develop`)
+    # so they're never bases — only the protected base branches go here.
+    branches: [ main, develop ]
   workflow_dispatch:
 
 concurrency:
@@ -25,8 +29,9 @@ jobs:
       [ test-release ]
     if: always()
     steps:
-      - name: Check workflow results
+      - name: Check workflow results step
         run: |
+          set -euo pipefail
           exit_on_result() {
             if [[ "$2" == "failure" || "$2" == "cancelled" ]]; then
               echo "Job '$1' failed or was cancelled."

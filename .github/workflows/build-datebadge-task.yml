@@ -1,8 +1,5 @@
 name: Build BYOB date badge task
 
-env:
-  IS_MAIN_BRANCH: ${{ endsWith(github.ref, 'refs/heads/main') }}
-
 on:
   workflow_call:
 
@@ -17,11 +14,12 @@ jobs:
       - name: Get current date step
         id: date
         run: |
+          set -euo pipefail
           echo "date=$(date)" >> $GITHUB_OUTPUT
 
       - name: Build BYOB date badge step
-        if: ${{ env.IS_MAIN_BRANCH == 'true' }}
-        uses: RubbaBoy/BYOB@v1
+        if: ${{ github.ref_name == 'main' }}
+        uses: RubbaBoy/BYOB@a4919104bc0ec7cfd7f113e42c405cc45246f2a4 # v1
         with:
           name: lastbuild
           label: "Last Build"

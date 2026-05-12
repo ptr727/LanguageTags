@@ -7,7 +7,14 @@ on:
     - cron: '0 2 * * MON'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # Constant (workflow-name only, no ref) rather than the standard
+  # ${{ github.workflow }}-${{ github.ref }} pattern: the reusable
+  # task this calls always writes to the fixed external branches
+  # `codegen-main` and `codegen-develop` regardless of triggering ref,
+  # so a workflow_dispatch from any non-default ref must NOT run
+  # concurrently with the scheduled (default-branch) run — both would
+  # race updating the same codegen branches and PRs.
+  group: ${{ github.workflow }}
   cancel-in-progress: true
 
 jobs:

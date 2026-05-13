@@ -18,8 +18,7 @@ C# .NET library for ISO 639-2, ISO 639-3, RFC 5646 / BCP 47 language tags.
 
 [![GitHub Release][releaseversion-shield]][releases-link]\
 [![GitHub Pre-Release][prereleaseversion-shield]][releases-link]\
-[![NuGet Release][nugetreleaseversion-shield]][nuget-link]\
-[![NuGet Pre-Release][nugetprereleaseversion-shield]][nuget-link]
+[![NuGet Release][nugetreleaseversion-shield]][nuget-link]
 
 ### Release Notes
 
@@ -585,12 +584,11 @@ Licensed under the [MIT License][license-link]\
 [lastcommit-shield]: https://img.shields.io/github/last-commit/ptr727/LanguageTags?logo=github&label=Last%20Commit
 
 [releaseversion-shield]: https://img.shields.io/github/v/release/ptr727/LanguageTags?logo=github&label=GitHub%20Release
-[prereleaseversion-shield]: https://img.shields.io/github/v/release/ptr727/LanguageTags?include_prereleases&label=GitHub%20Pre-Release&logo=github
+[prereleaseversion-shield]: https://img.shields.io/github/v/release/ptr727/LanguageTags?include_prereleases&filter=*-g*&label=GitHub%20Pre-Release&logo=github
 [releasebuildstatus-shield]: https://img.shields.io/github/actions/workflow/status/ptr727/LanguageTags/publish-release.yml?logo=github&label=Releases%20Build
 
 [nuget-link]: https://www.nuget.org/packages/ptr727.LanguageTags/
 [nugetreleaseversion-shield]: https://img.shields.io/nuget/v/ptr727.LanguageTags?logo=nuget&label=NuGet%20Release
-[nugetprereleaseversion-shield]: https://img.shields.io/nuget/vpre/ptr727.LanguageTags?logo=nuget&&label=NuGet%20Pre-Release&color=orange
 
 <!-- 3rd Party tool links -->
 

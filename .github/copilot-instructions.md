@@ -141,13 +141,14 @@ After the final push, sweep-resolve stale older threads for removed code paths.
 - **LanguageData/**
   - Contains downloaded language data files
   - JSON converted data files
-  - Updated weekly via GitHub Actions
+  - Refreshed by daily codegen PRs; published with the weekly release
 
 - **.github/workflows/**
-  - `run-periodic-codegen-pull-request.yml`: Weekly scheduled job to update language data
-  - `publish-release.yml`: Release and NuGet publishing workflow
+  - `run-periodic-codegen-pull-request.yml`: Daily scheduled job that opens codegen PRs to update language data
+  - `publish-release.yml`: Sole publisher — weekly scheduled (Mon 02:00 UTC) + manual dispatch full build/publish of both branches; pushes only publish when `PUBLISH_ON_MERGE` is set (two-phase model)
+  - `test-pull-request.yml`: PR smoke test — unit tests + a reduced, never-published library build gated by `dorny/paths-filter`
   - `merge-bot-pull-request.yml`: Automated PR merge workflow
-  - `build-release-task.yml`, `build-library-task.yml`: Build tasks
+  - `build-release-task.yml`, `build-nugetlibrary-task.yml`: Build tasks
   - `get-version-task.yml`, `build-datebadge-task.yml`: Version and badge generation
 
 ### Project Configuration
@@ -335,7 +336,7 @@ Examples:
 
 ### Data Updates
 
-- Language data is updated weekly via GitHub Actions workflow
+- Language data is refreshed by daily codegen PRs and shipped with the weekly release (GitHub Actions)
 - The `LanguageTagsCreate` tool downloads data from:
   - ISO 639-2: Library of Congress
   - ISO 639-3: SIL International

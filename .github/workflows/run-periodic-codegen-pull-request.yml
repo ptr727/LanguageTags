@@ -1,10 +1,15 @@
-name: Run weekly codegen and pull request action
+name: Run daily codegen and pull request action
 
 on:
   workflow_dispatch:
   schedule:
-    # Run weekly on Mondays at 02:00 UTC
-    - cron: '0 2 * * MON'
+    # Run daily at 04:00 UTC. Staggered two hours after the weekly publish
+    # (`publish-release.yml`, Mondays 02:00) so the two don't start together
+    # on Mondays. Codegen merges are cheap in the default two-phase model
+    # (they only smoke-test, the weekly publish batches the actual release),
+    # so running daily keeps both branches' generated content fresh without
+    # triggering a build per merge.
+    - cron: '0 4 * * *'
 
 concurrency:
   # Constant (workflow-name only, no ref) rather than the standard

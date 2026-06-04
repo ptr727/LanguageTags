@@ -2,6 +2,14 @@ name: Build BYOB date badge task
 
 on:
   workflow_call:
+    inputs:
+      # Logical branch this badge run is for. The badge only updates on
+      # `main`; the publisher passes the branch explicitly so a scheduled
+      # run building `develop` doesn't try to write the main badge. Required
+      # (no `github.ref_name` fallback) so the gate can't silently misfire.
+      branch:
+        required: true
+        type: string
 
 jobs:
 
@@ -18,7 +26,7 @@ jobs:
           echo "date=$(date)" >> $GITHUB_OUTPUT
 
       - name: Build BYOB date badge step
-        if: ${{ github.ref_name == 'main' }}
+        if: ${{ inputs.branch == 'main' }}
         uses: RubbaBoy/BYOB@a4919104bc0ec7cfd7f113e42c405cc45246f2a4 # v1
         with:
           name: lastbuild

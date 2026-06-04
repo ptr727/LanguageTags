@@ -415,7 +415,7 @@ LogOptions.SetFactory(loggerFactory);
   - ISO 639-2: [Source](https://www.loc.gov/standards/iso639-2/ISO-639-2_utf-8.txt), [Data](./LanguageData/iso6392), [JSON](./LanguageData/iso6392.json), [Code](./LanguageTags/Iso6392DataGen.cs)
   - ISO 639-3: [Source](https://iso639-3.sil.org/sites/iso639-3/files/downloads/iso-639-3.tab), [Data](./LanguageData/iso6393), [JSON](./LanguageData/iso6393.json), [Code](./LanguageTags/Iso6393DataGen.cs)
   - RFC 5646 : [Source](https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry), [Data](./LanguageData/rfc5646), [JSON](./LanguageData/rfc5646.json), [Code](./LanguageTags/Rfc5646DataGen.cs)
-- A weekly [GitHub Actions](./.github/workflows/run-periodic-codegen-pull-request.yml) job keeps the data files up to date and automatically publishes new releases.
+- A daily [GitHub Actions](./.github/workflows/run-periodic-codegen-pull-request.yml) job opens PRs to keep the data files up to date; a [weekly scheduled job](./.github/workflows/publish-release.yml) publishes new releases. Routine merges (Dependabot, codegen) only smoke-test — the actual build/publish is batched into the weekly run (two-phase model).
 
 ## Contributing
 
@@ -425,7 +425,7 @@ The repo uses a two-branch model with strict ruleset-enforced merge methods:
 
 - Feature branch → `develop` via **squash merge** (develop is kept linear).
 - `develop` → `main` via **merge commit** (preserves develop's commit list on main as the second parent of each release commit).
-- `develop` is **forward-only** — there are no `main → develop` back-merges. Dependabot and the weekly codegen workflow both target `main` and `develop` in parallel via separate PRs.
+- `develop` is **forward-only** — there are no `main → develop` back-merges. Dependabot and the daily codegen workflow both target `main` and `develop` in parallel via separate PRs.
 
 See [`AGENTS.md`](./AGENTS.md) for the complete branching, PR, and workflow conventions and [`CODESTYLE.md`](./CODESTYLE.md) for C# code style rules.
 
@@ -438,7 +438,7 @@ CI/CD relies on these secrets being configured on the repo:
 
 Branch protection is split across two rulesets:
 
-- **Develop** ruleset: squash-only, linear history, "branches up to date" check on, signed commits required.
+- **Develop** ruleset: squash-only, linear history, "branches up to date" check off (the strict check blocks auto-merge when two same-batch bot PRs race — see AGENTS.md), signed commits required.
 - **Main** ruleset: merge-commit only, linear history off, "branches up to date" check off (forward-only develop makes this check incompatible with the merge-commit release shape), signed commits required.
 
 Both rulesets require the `Check pull request workflow status` status check and request Copilot review on every push.
@@ -585,7 +585,7 @@ Licensed under the [MIT License][license-link]\
 
 [releaseversion-shield]: https://img.shields.io/github/v/release/ptr727/LanguageTags?logo=github&label=GitHub%20Release
 [prereleaseversion-shield]: https://img.shields.io/github/v/release/ptr727/LanguageTags?include_prereleases&filter=*-g*&label=GitHub%20Pre-Release&logo=github
-[releasebuildstatus-shield]: https://img.shields.io/github/actions/workflow/status/ptr727/LanguageTags/publish-release.yml?logo=github&label=Releases%20Build
+[releasebuildstatus-shield]: https://img.shields.io/github/actions/workflow/status/ptr727/LanguageTags/publish-release.yml?logo=github&label=Releases%20Build&event=schedule
 
 [nuget-link]: https://www.nuget.org/packages/ptr727.LanguageTags/
 [nugetreleaseversion-shield]: https://img.shields.io/nuget/v/ptr727.LanguageTags?logo=nuget&label=NuGet%20Release

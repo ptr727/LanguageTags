@@ -172,6 +172,7 @@ After the final push, sweep-resolve stale older threads for removed code paths.
 The main public API for working with language tags:
 
 **Static Factory Methods:**
+
 - `Parse(string tag)`: Parse a language tag string, returns null on failure
 - `TryParse(string tag, out LanguageTag? result)`: Safe parsing with out parameter
 - `ParseOrDefault(string tag, LanguageTag? defaultTag = null)`: Parse with fallback to "und"
@@ -182,6 +183,7 @@ The main public API for working with language tags:
 - `FromLanguageScriptRegion(string language, string script, string region)`: Factory for full tags
 
 **Properties:**
+
 - `Language`: Primary language subtag (internal set)
 - `ExtendedLanguage`: Extended language subtag (internal set)
 - `Script`: Script subtag (internal set)
@@ -192,6 +194,7 @@ The main public API for working with language tags:
 - `IsValid`: Property to check if tag is valid
 
 **Instance Methods:**
+
 - `Validate()`: Verify structural correctness
 - `Normalize()`: Return normalized copy of tag (does not validate)
 - `ToString()`: String representation
@@ -200,6 +203,7 @@ The main public API for working with language tags:
 - Operators: `==`, `!=`
 
 **Design Characteristics:**
+
 - Implements `IEquatable<LanguageTag>`
 - Constructors are internal, use factory methods or builder
 - Properties use internal setters to maintain immutability for public API
@@ -210,6 +214,7 @@ The main public API for working with language tags:
 Fluent builder for constructing language tags:
 
 **Methods:**
+
 - `Language(string value)`: Set primary language
 - `ExtendedLanguage(string value)`: Set extended language
 - `Script(string value)`: Set script
@@ -242,10 +247,12 @@ Fluent builder for constructing language tags:
 Provides language code conversion and matching:
 
 **Properties:**
+
 - `Undetermined`: Constant for "und" (undetermined language)
 - `Overrides`: User-defined (IETF, ISO) mapping pairs
 
 **Methods:**
+
 - `GetIetfFromIso(string languageTag)`: Convert ISO to IETF format
 - `GetIsoFromIetf(string languageTag)`: Convert IETF to ISO format
 - `IsMatch(string prefix, string languageTag)`: Prefix matching for content selection
@@ -255,17 +262,21 @@ Provides language code conversion and matching:
 Static class for configuring global logging for the entire library:
 
 **Properties:**
+
 - `LoggerFactory`: Gets or sets the global logger factory for creating category loggers
 
 **Methods:**
+
 - `SetFactory(ILoggerFactory loggerFactory)`: Configure the library to use a logger factory
 - `TrySetFactory(ILoggerFactory loggerFactory)`: Set factory only if none is configured
 
 **Logger Resolution Priority:**
+
 1. `LoggerFactory` property (when not `NullLoggerFactory`)
 2. `NullLogger.Instance` (default fallback)
 
 **Important Notes:**
+
 - Loggers are created and cached at time of use by each class instance
 - Changes to `LoggerFactory` after a logger is created do not affect existing cached loggers
 - Only new logger requests use updated configuration
@@ -273,6 +284,7 @@ Static class for configuring global logging for the entire library:
 ### Data Models
 
 #### Iso6392Data.cs
+
 - ISO 639-2 language codes (3-letter bibliographic/terminologic codes)
 - **Public Methods:**
   - `Create()`: Load embedded data
@@ -283,6 +295,7 @@ Static class for configuring global logging for the entire library:
 - **Record Properties:** `Part2B`, `Part2T`, `Part1`, `RefName`
 
 #### Iso6393Data.cs
+
 - ISO 639-3 language codes (comprehensive language codes)
 - **Public Methods:**
   - `Create()`: Load embedded data
@@ -293,6 +306,7 @@ Static class for configuring global logging for the entire library:
 - **Record Properties:** `Id`, `Part2B`, `Part2T`, `Part1`, `Scope`, `LanguageType`, `RefName`, `Comment`
 
 #### Rfc5646Data.cs
+
 - RFC 5646 / BCP 47 language subtag registry
 - **Public Methods:**
   - `Create()`: Load embedded data
@@ -309,6 +323,7 @@ Static class for configuring global logging for the entire library:
 #### Supporting Classes
 
 **ExtensionTag (sealed record):**
+
 - `Prefix`: Single-character extension prefix (char)
 - `Tags`: ImmutableArray of extension values
 - `ToString()`: Format as "prefix-tag1-tag2"
@@ -316,6 +331,7 @@ Static class for configuring global logging for the entire library:
 - `Equals()`: Case-insensitive equality comparison
 
 **PrivateUseTag (sealed record):**
+
 - `Prefix`: Constant 'x'
 - `Tags`: ImmutableArray of private use values
 - `ToString()`: Format as "x-tag1-tag2"
@@ -325,11 +341,13 @@ Static class for configuring global logging for the entire library:
 ### Language Tag Structure
 
 Per RFC 5646, language tags follow this format:
-```
+
+```text
 [Language]-[Extended language]-[Script]-[Region]-[Variant]-[Extension]-[Private Use]
 ```
 
 Examples:
+
 - `zh`: Simple language tag
 - `zh-yue-hk`: Language with extended language and region
 - `en-latn-gb-boont-r-extended-sequence-x-private`: Full tag with all components
@@ -347,7 +365,9 @@ Examples:
 ## API Design Patterns
 
 ### Factory Pattern
+
 Use static factory methods instead of public constructors:
+
 ```csharp
 // Good
 LanguageTag tag = LanguageTag.Parse("en-US");
@@ -358,7 +378,9 @@ LanguageTag tag = LanguageTag.FromLanguage("en");
 ```
 
 ### Builder Pattern
+
 Use fluent builder for complex tag construction:
+
 ```csharp
 LanguageTag tag = LanguageTag.CreateBuilder()
     .Language("en")
@@ -367,12 +389,15 @@ LanguageTag tag = LanguageTag.CreateBuilder()
 ```
 
 ### Immutability Pattern
+
 - All properties are immutable after construction
 - Use `Normalize()` to get modified copies
 - Collections are exposed as `ImmutableArray<T>`
 
 ### Safe Parsing
+
 Always use safe parsing patterns:
+
 ```csharp
 // TryParse pattern
 if (LanguageTag.TryParse(input, out LanguageTag? tag))
@@ -407,6 +432,7 @@ LanguageTag tag = LanguageTag.ParseOrDefault(input); // Falls back to "und"
 ## Recent API Changes
 
 ### Changed (Breaking)
+
 - `LanguageTagParser` is now internal (use `LanguageTag.Parse()` instead)
 - Properties changed from `IList<string>` to `ImmutableArray<string>`:
   - `VariantList` → `Variants`
@@ -417,6 +443,7 @@ LanguageTag tag = LanguageTag.ParseOrDefault(input); // Falls back to "und"
 - Tag construction requires use of factory methods or builder (constructors are internal)
 
 ### Added (Non-Breaking)
+
 - `LanguageTag.ParseOrDefault()`: Safe parsing with fallback
 - `LanguageTag.ParseAndNormalize()`: Combined parse and normalize
 - `LanguageTag.IsValid`: Property for validation
@@ -429,6 +456,7 @@ LanguageTag tag = LanguageTag.ParseOrDefault(input); // Falls back to "und"
 ## Future Improvements
 
 Consider these areas for enhancement:
+
 - Use a BNF parser or parser generator (ANTLR4, Eto.Parse, etc.) instead of hand-parsing
 - Implement comprehensive subtag content validation against registry data
 - Add more language lookup and validation features
@@ -443,6 +471,7 @@ Consider these areas for enhancement:
 ## Common Patterns
 
 ### Creating Tags
+
 ```csharp
 // Simple parsing
 LanguageTag? tag = LanguageTag.Parse("en-US");
@@ -468,6 +497,7 @@ LanguageTag tag = LanguageTag.CreateBuilder()
 ```
 
 ### Normalizing Tags
+
 ```csharp
 // Parse and normalize separately
 LanguageTag? tag = LanguageTag.Parse("en-latn-us");
@@ -478,6 +508,7 @@ LanguageTag? tag = LanguageTag.ParseAndNormalize("en-latn-us"); // "en-US"
 ```
 
 ### Accessing Tag Components
+
 ```csharp
 LanguageTag tag = LanguageTag.Parse("en-latn-gb-boont-r-extended-x-private")!;
 
@@ -490,6 +521,7 @@ PrivateUseTag privateUse = tag.PrivateUse; // { Tags=["private"] }
 ```
 
 ### Comparing Tags
+
 ```csharp
 LanguageTag? tag1 = LanguageTag.Parse("en-US");
 LanguageTag? tag2 = LanguageTag.Parse("en-us");

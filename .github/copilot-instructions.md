@@ -103,6 +103,10 @@ After the final push, sweep-resolve stale older threads for removed code paths.
 
 ---
 
+## Versioning
+
+`develop` leads `main` by a minor. After a `develop -> main` release lands and main's publish completes, bump the minor in [version.json](../version.json) on `develop` via an isolated `bump-version-X.Y` PR, so develop's NBGV prereleases sort above main's last stable. A `develop -> main` promotion that carries only maintenance (dependency/codegen bumps, CI/doc fixes, template re-syncs) holds main's version instead — `git checkout main -- version.json` on the promotion branch. See [AGENTS.md "Release Model"](../AGENTS.md#release-model).
+
 ## Project Overview
 
 **LanguageTags** is a C# .NET library for handling ISO 639-2, ISO 639-3, and RFC 5646 / BCP 47 language tags. The project serves two primary purposes:

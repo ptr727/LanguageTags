@@ -1,6 +1,6 @@
 # GitHub Copilot Instructions for LanguageTags
 
-The **canonical guide is [AGENTS.md](../AGENTS.md)** at the repo root — read it first. It covers branching, PR review etiquette, workflow YAML conventions, and the release pipeline.
+The **canonical guide is [AGENTS.md](../AGENTS.md)** at the repo root - read it first. It covers branching, PR review etiquette, workflow YAML conventions, and the release pipeline.
 
 This file is intentionally focused: the GitHub Copilot Review Runbook (provider-specific mechanics behind the review-loop contract defined in AGENTS.md), followed by the LanguageTags-specific code conventions and public-API contract notes that VS Code's AI generators pick up directly from this path.
 
@@ -12,7 +12,7 @@ Use this section for provider-specific mechanics. The expected review loop *cont
 
 ### Triggering and Polling
 
-Auto-review on push is configured (via the branch ruleset's `copilot_code_review` rule with `review_on_push: true`) but fires inconsistently in practice — treat it as best-effort, not guaranteed. Request review explicitly through the GitHub PR UI (request `Copilot` as a reviewer) after every push.
+Auto-review on push is configured (via the branch ruleset's `copilot_code_review` rule with `review_on_push: true`) but fires inconsistently in practice - treat it as best-effort, not guaranteed. Request review explicitly through the GitHub PR UI (request `Copilot` as a reviewer) after every push.
 
 **Do NOT post `@Copilot review` as a PR comment.** That comment triggers the Copilot *coding agent* (`copilot-swe-agent[bot]`), which makes code changes rather than posting a review.
 
@@ -24,22 +24,22 @@ Known non-working request paths (don't rely on them):
 
 ### Verify Review Covered Current Head
 
-Before merging, confirm Copilot reviewed the current PR head SHA. Copilot may respond as either a formal review (carries an exact commit SHA) or an issue comment (no SHA — use the most recent Copilot comment for manual confirmation). Check both.
+Before merging, confirm Copilot reviewed the current PR head SHA. Copilot may respond as either a formal review (carries an exact commit SHA) or an issue comment (no SHA - use the most recent Copilot comment for manual confirmation). Check both.
 
 ```sh
 PR_HEAD=$(gh pr view <N> --json headRefOid --jq '.headRefOid')
 
-# 1. Formal review — exact SHA match.
+# 1. Formal review - exact SHA match.
 gh pr view <N> --json reviews --jq \
   '.reviews[] | select(.author.login=="copilot-pull-request-reviewer") | .commit.oid' \
   | grep -q "$PR_HEAD" && echo "covered via formal review"
 
-# 2. Issue comment — show the most recent Copilot comment for manual confirmation.
+# 2. Issue comment - show the most recent Copilot comment for manual confirmation.
 gh api repos/ptr727/LanguageTags/issues/<N>/comments --jq \
   '[.[] | select(.user.login=="copilot-pull-request-reviewer")] | last | {created_at, body: .body[:200]}'
 ```
 
-Coverage is confirmed when (1) exits 0. For issue comments (path 2), body content is the only reliable signal — `created_at` is not: `git log -1 --format=%cI` is the **commit** timestamp, not the push timestamp, so amended or rebased commits can have an earlier timestamp and an older Copilot comment could satisfy a time check even though Copilot never saw the current head. Treat path (2) as confirmed only when the comment body explicitly refers to the current changes.
+Coverage is confirmed when (1) exits 0. For issue comments (path 2), body content is the only reliable signal - `created_at` is not: `git log -1 --format=%cI` is the **commit** timestamp, not the push timestamp, so amended or rebased commits can have an earlier timestamp and an older Copilot comment could satisfy a time check even though Copilot never saw the current head. Treat path (2) as confirmed only when the comment body explicitly refers to the current changes.
 
 ### Bounded Retry Workflow
 
@@ -91,7 +91,7 @@ mutation($threadId: ID!) {
 }' -F threadId="PRRT_..."
 ```
 
-Issue-level Copilot comments (those in `issues/<N>/comments`) have no resolution action — GitHub provides no API or UI to resolve them. Reply if the finding warrants it; no resolution step is needed or possible.
+Issue-level Copilot comments (those in `issues/<N>/comments`) have no resolution action - GitHub provides no API or UI to resolve them. Reply if the finding warrants it; no resolution step is needed or possible.
 
 Reply-body conventions:
 
@@ -102,6 +102,10 @@ Reply-body conventions:
 After the final push, sweep-resolve stale older threads for removed code paths.
 
 ---
+
+## Versioning
+
+`develop` leads `main` by a minor. After a `develop -> main` release lands and main's publish completes, bump the minor in [version.json](../version.json) on `develop` via an isolated `bump-version-X.Y` PR, so develop's NBGV prereleases sort above main's last stable. A `develop -> main` promotion that carries only maintenance (dependency/codegen bumps, CI/doc fixes, template re-syncs) holds main's version instead - `git checkout main -- version.json` on the promotion branch. See [AGENTS.md "Release Model"](../AGENTS.md#release-model).
 
 ## Project Overview
 
@@ -145,8 +149,8 @@ After the final push, sweep-resolve stale older threads for removed code paths.
 
 - **.github/workflows/**
   - `run-periodic-codegen-pull-request.yml`: Daily scheduled job that opens codegen PRs to update language data
-  - `publish-release.yml`: Sole publisher — weekly scheduled (Mon 02:00 UTC) + manual dispatch full build/publish of both branches; pushes only publish when `PUBLISH_ON_MERGE` is set (two-phase model)
-  - `test-pull-request.yml`: PR smoke test — unit tests + a reduced, never-published library build gated by `dorny/paths-filter`
+  - `publish-release.yml`: Sole publisher - weekly scheduled (Mon 02:00 UTC) + manual dispatch full build/publish of both branches; pushes only publish when `PUBLISH_ON_MERGE` is set (two-phase model)
+  - `test-pull-request.yml`: PR smoke test - unit tests + a reduced, never-published library build gated by `dorny/paths-filter`
   - `merge-bot-pull-request.yml`: Automated PR merge workflow
   - `build-release-task.yml`, `build-nugetlibrary-task.yml`: Build tasks
   - `get-version-task.yml`, `build-datebadge-task.yml`: Version and badge generation

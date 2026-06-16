@@ -1,5 +1,5 @@
 {
-  "FileDate": "2026-05-05",
+  "FileDate": "2026-06-14",
   "RecordList": [
     {
       "Type": "Language",
@@ -182,8 +182,10 @@
       ],
       "Added": "2005-10-16",
       "Scope": "Collection",
+      "Deprecated": "2026-06-14",
       "Comments": [],
-      "Prefix": []
+      "Prefix": [],
+      "PreferredValue": "bih"
     },
     {
       "Type": "Language",
@@ -10381,6 +10383,17 @@
       ],
       "Added": "2009-07-29",
       "Scope": "None",
+      "Comments": [],
+      "Prefix": []
+    },
+    {
+      "Type": "Language",
+      "SubTag": "bih",
+      "Description": [
+        "Bihari languages"
+      ],
+      "Added": "2026-06-14",
+      "Scope": "Collection",
       "Comments": [],
       "Prefix": []
     },

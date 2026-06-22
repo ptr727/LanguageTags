@@ -5,7 +5,7 @@
             "name": "LanguageTagsCreate",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": ".Net Build",
+            "preLaunchTask": ".NET Build",
             "program": "${workspaceFolder}/.artifacts/bin/LanguageTagsCreate/debug/LanguageTagsCreate.dll",
             "args": [
                 "--codepath",

@@ -22,6 +22,12 @@ on:
       branch:
         required: true
         type: string
+      # Smoke mode: build for validation only and skip the artifact zip/upload. A PR smoke run has no consumer for
+      # the artifact (the github-release job is gated `!smoke`), so uploading it just burns artifact storage.
+      smoke:
+        required: false
+        type: boolean
+        default: false
     outputs:
       # Output of the uploaded artifact id
       artifact-id:
@@ -78,13 +84,16 @@ jobs:
             --skip-duplicate
 
       - name: Zip output step
+        if: ${{ !inputs.smoke }}
         run: |
           set -euo pipefail
           7z a -t7z ${{ runner.temp }}/${{ env.PROJECT_ARTIFACT }} ${{ runner.temp }}/publish/*
 
       # Branch-suffixed so the publisher's branch matrix can build both
       # branches in one run without colliding on the artifact name.
+      # Skipped on smoke: the github-release job is `!smoke`, so nothing would consume it.
       - name: Upload build artifacts step
+        if: ${{ !inputs.smoke }}
         id: artifact-upload-step
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:

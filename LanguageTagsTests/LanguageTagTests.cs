@@ -249,6 +249,7 @@ public class LanguageTagTests : SingleInstanceFixture
     {
         LanguageTag tag = LanguageTag.Parse("en-US")!;
         _ = tag.Equals(null).Should().BeFalse();
+        // tag is non-null; ! avoids a CS8602 false-positive on the Equals(object?) receiver.
         _ = tag!.Equals((object?)null).Should().BeFalse();
     }
 

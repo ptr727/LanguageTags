@@ -57,8 +57,7 @@ This is the style guide for the **.NET projects** in this repo: [`LanguageTags/`
    - Analyzer severity is `suggestion`, but all warnings must be addressed - see [Analyzer Diagnostics and Suppressions](#analyzer-diagnostics-and-suppressions); do not relax rules to dodge them.
 
 3. **CI lint backstop**
-   - `dotnet csharpier check` and `dotnet format style --verify-no-changes` run on every PR
-   - Husky.Net pre-commit hooks run the same checks locally (see Code Formatting and Tooling below)
+   - [`test-pull-request.yml`](./.github/workflows/test-pull-request.yml) runs `dotnet husky run` on every PR - the same CSharpier + `dotnet format style --verify-no-changes` checks the pre-commit hooks run locally
 
 #### Build Tasks
 

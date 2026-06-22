@@ -18,24 +18,19 @@ on:
         required: false
         type: string
         default: ''
-      # Logical branch driving config / tags / prerelease for every target.
-      # Required (no `github.ref_name` fallback): the publisher builds both
-      # `main` and `develop` from one run whose `github.ref_name` is `main`,
-      # so a silent fallback would mislabel the develop leg. Every caller
-      # passes it explicitly; a missing value should fail loudly.
+      # Logical branch driving config / tags / prerelease for every target. Required (no fallback) because the
+      # publisher builds both `main` and `develop` in one run, so a silent fallback would mislabel the develop leg.
       branch:
         required: true
         type: string
-      # Smoke mode: reduced, never-published build for fast PR feedback.
-      # Forwarded to every target; also hard-disables every push below so a
-      # smoke run can never publish regardless of the publish flags.
+      # Smoke mode: reduced, never-published build for fast PR feedback. Forwarded to every target and hard-disables
+      # every push below, so a smoke run can never publish regardless of the publish flags.
       smoke:
         required: false
         type: boolean
         default: false
-      # Per-target presence gate. Default true (build everything). A PR smoke
-      # run sets this from the paths-filter so the library only builds when it
-      # actually changed.
+      # Per-target presence gate. Default true (build everything); a PR smoke run sets it from the paths-filter
+      # so the library only builds when it changed.
       enable_nuget:
         required: false
         type: boolean
@@ -57,29 +52,23 @@ jobs:
     uses: ./.github/workflows/build-nugetlibrary-task.yml
     secrets: inherit
     with:
-      # Pin to the exact commit get-version resolved (immutable), not the
-      # possibly-moving branch ref: the publisher passes a branch name, and a
-      # commit landing mid-run could otherwise build artifacts from a different
-      # commit than the one the release tag (also GitCommitId) points at.
+      # Pin to the resolved commit so the artifacts match the release tag even if the branch advances mid-run.
       ref: ${{ needs.get-version.outputs.GitCommitId }}
       branch: ${{ inputs.branch }}
-      # Conditional push to NuGet.org — never on a smoke build.
+      # Push to NuGet.org, never on a smoke build.
       push: ${{ inputs.nuget && !inputs.smoke }}
 
   github-release:
     name: Publish GitHub release job
-    # `&& !inputs.smoke` enforces the "smoke never publishes" guarantee at the
-    # job level too (matching the `&& !inputs.smoke` push gate above), so a
-    # smoke caller that also set `github: true` still can't create a release.
+    # `!inputs.smoke` enforces "smoke never publishes" at the job level, so a smoke caller that also set
+    # `github: true` still can't create a release.
     if: ${{ inputs.github && !inputs.smoke }}
     runs-on: ubuntu-latest
     needs: [get-version, build-nugetlibrary]
 
     steps:
 
-      # Check out the exact built commit (NBGV `GitCommitId`), not the
-      # possibly-moving `inputs.ref` branch, so the uploaded release files
-      # match the tag even if the branch advances mid-run.
+      # Check out the exact built commit so the uploaded release files match the tag even if the branch advances mid-run.
       - name: Checkout code step
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -91,12 +80,8 @@ jobs:
           artifact-ids: ${{ needs.build-nugetlibrary.outputs.artifact-id }}
           path: ./Publish
 
-      # The weekly publisher re-runs even when a branch has no new commits, so
-      # NBGV can produce a SemVer2 that was already released. GitHub release
-      # creation has no built-in skip-duplicate (unlike NuGet's
-      # `--skip-duplicate`), and re-publishing an unchanged version is exactly
-      # the churn the two-phase model avoids — so skip the release step when a
-      # release for this tag already exists.
+      # The weekly publisher re-runs even with no new commits, so the version may already be released. Skip the release
+      # step when a release for this tag already exists to avoid a no-op republish.
       - name: Check for existing release step
         id: release-exists
         env:
@@ -115,17 +100,9 @@ jobs:
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
-      # `target_commitish` MUST be set explicitly: softprops doesn't pass a
-      # default through, and GitHub's REST API then defaults the new tag to
-      # the repository's default branch (main). We pin it to NBGV's
-      # `GitCommitId` — the exact commit the version was computed from. This
-      # avoids two bugs: `github.sha` would be wrong (the publisher's branch
-      # matrix builds `develop` from a run whose `github.sha` is main's tip),
-      # and `inputs.branch` would be a moving ref (a commit landing mid-run
-      # could tag the release on a newer commit than the one that was built).
-      # Skip the no-op weekly republish when the tag already exists, but always
-      # allow a manual `workflow_dispatch` through so it can repair/refresh a
-      # partially-created release for the same tag.
+      # `target_commitish` must be set explicitly: otherwise GitHub's REST API tags the release on the default branch.
+      # Pin it to `GitCommitId` so the tag is on the exact built commit, consistent with the SemVer2 tag and artifacts.
+      # Skip when the release already exists, but always let a manual `workflow_dispatch` through to refresh it.
       - name: Create GitHub release step
         if: ${{ steps.release-exists.outputs.exists == 'false' || github.event_name == 'workflow_dispatch' }}
         uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0

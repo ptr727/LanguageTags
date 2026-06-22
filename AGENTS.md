@@ -2,7 +2,7 @@
 
 **LanguageTags** is a C# .NET library for handling ISO 639-2, ISO 639-3, and RFC 5646 / BCP 47 language tags. The library ships as the NuGet package `ptr727.LanguageTags` and is consumed directly from `main`. The repo also contains a CLI codegen tool (`LanguageTagsCreate/`) that refreshes embedded language data from upstream registries, and an xUnit test project (`LanguageTagsTests/`).
 
-This file is the canonical reference for cross-cutting AI-agent and workflow rules. C# code-style conventions live in [`CODESTYLE.md`](./CODESTYLE.md). Copilot review *mechanics* are owned by [`.github/copilot-instructions.md`](./.github/copilot-instructions.md) - this file delegates them there explicitly (see "PR Review Etiquette" below). High-level summaries in other docs (e.g. README's Contributing section) are allowed when they link back here; don't duplicate the rules themselves.
+This file is the canonical reference for cross-cutting AI-agent and workflow rules. C# code-style conventions live in [`CODESTYLE.md`](./CODESTYLE.md). Copilot review *mechanics* are owned by [`.github/copilot-instructions.md`](./.github/copilot-instructions.md) - this file delegates them there explicitly (see "PR Review Etiquette" below). High-level summaries in other docs (e.g. README's Contributing section) are allowed when they link back here; don't duplicate the rules themselves. The library's **project-specific conventions and public-API/behavioral contracts** also live here (the [Library API Conventions](#library-api-conventions) section), **not** in `.github/copilot-instructions.md` - that file targets GitHub Copilot / VS Code specifically, while this file is the agent-agnostic one every coding agent reads, so any rule a reviewer must honor has to live here to be provider-independent.
 
 ## Git and Commit Rules
 
@@ -97,7 +97,7 @@ The repo runs a review loop on every PR: local agent iteration plus remote autom
 
 1. Push changes to the PR branch.
 2. Confirm a review was requested for the **current head SHA** (auto-trigger is unreliable; request explicitly).
-3. Wait for review activity on that head.
+3. Wait for review activity on that head. A completed review that raises **no findings** is a valid terminal outcome for that head - proceed; do not re-trigger it or treat the absence of comments as a missing review.
 4. Triage findings.
 5. Apply fixes or write a rationale for declines.
 6. Reply to each thread and resolve what was addressed.
@@ -137,7 +137,7 @@ Anti-pattern: don't keep flipping the code on the same style point. Flip the rul
 
 This repo is derived from [`ptr727/ProjectTemplate`](https://github.com/ptr727/ProjectTemplate) and re-syncs against it periodically, not just at creation.
 
-- **Verbatim carries.** Pull the current template version of each shared artifact and re-apply it, adapting only this repo's placeholders: [`.github/copilot-instructions.md`](./.github/copilot-instructions.md) (the Copilot review runbook - change only the `<owner>`/`<repo>`/`<N>` values in its API snippets), [`.markdownlint-cli2.jsonc`](./.markdownlint-cli2.jsonc), [`.editorconfig`](./.editorconfig), [`.gitattributes`](./.gitattributes), and this file's [PR Review Etiquette](#pr-review-etiquette) section. The `.editorconfig` EOL/per-extension block is always-verbatim; its `[*.cs]`/ReSharper block is .NET-only and is carried here.
+- **Verbatim carries.** Pull the current template version of each shared artifact and re-apply it, adapting only this repo's placeholders: [`.github/copilot-instructions.md`](./.github/copilot-instructions.md) (the Copilot review runbook - change only the `<owner>`/`<repo>`/`<N>` values in its API snippets), [`.markdownlint-cli2.jsonc`](./.markdownlint-cli2.jsonc), [`.editorconfig`](./.editorconfig), [`.gitattributes`](./.gitattributes), and this file's [PR Review Etiquette](#pr-review-etiquette) section. The `.editorconfig` EOL/per-extension block is always-verbatim; its `[*.cs]`/ReSharper block is .NET-only and is carried here. Keep `copilot-instructions.md` **narrow** (provider mechanics plus the commit/PR-title summary); project-specific conventions and API contracts live in this file (see [Library API Conventions](#library-api-conventions)), not there - non-Copilot agents are not directed to that file.
 - **CODESTYLE.md.** Keep [`CODESTYLE.md`](./CODESTYLE.md) as the full aggregate the template ships and re-sync the whole file, rather than hand-trimming per-language snippets.
 - **Release notes.** Keep a short release-notes summary in [`README.md`](./README.md) and the full history in [`HISTORY.md`](./HISTORY.md); update both when cutting a release.
 - **Report drift upstream.** When a re-sync surfaces a template gap, an outdated instruction, or something that bit this repo and would bite the next derived repo, open an issue in [`ptr727/ProjectTemplate`](https://github.com/ptr727/ProjectTemplate) rather than only patching locally - the template is the single source of truth, and this upstream-issue rule is this repo's only cross-repo obligation. Do not maintain or reference a "known downstream" registry, and do not name sibling repositories in docs, comments, or workflows - that registry and the maintainer fan-out duty live in the template hub only.

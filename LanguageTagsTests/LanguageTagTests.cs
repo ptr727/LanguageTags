@@ -249,9 +249,8 @@ public class LanguageTagTests : SingleInstanceFixture
     {
         LanguageTag tag = LanguageTag.Parse("en-US")!;
         _ = tag.Equals(null).Should().BeFalse();
-#pragma warning disable CS8602
-        _ = tag.Equals((object?)null).Should().BeFalse();
-#pragma warning restore CS8602
+        // tag is non-null; ! avoids a CS8602 false-positive on the Equals(object?) receiver.
+        _ = tag!.Equals((object?)null).Should().BeFalse();
     }
 
     [Fact]
@@ -282,14 +281,17 @@ public class LanguageTagTests : SingleInstanceFixture
     }
 
     [Fact]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "Maintainability",
+        "CA1508:Avoid dead conditional code",
+        Justification = "Test intentionally compares two null tags to exercise operator== with both operands null."
+    )]
     public void OperatorEquals_BothNull_ReturnsTrue()
     {
         LanguageTag? tag1 = null;
         LanguageTag? tag2 = null;
 
-#pragma warning disable CA1508 // Avoid dead conditional code
         _ = (tag1 == tag2).Should().BeTrue();
-#pragma warning restore CA1508
     }
 
     [Fact]

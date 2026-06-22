@@ -48,6 +48,9 @@ end_of_line = lf
 [*.{cmd,bat,ps1}]
 end_of_line = crlf
 
+# --- .NET-only below: C# and ReSharper style. Everything above is the line-ending
+# governance every derived repo carries; a non-.NET repo may drop from here down. ---
+
 # C# files
 [*.cs]
 end_of_line = crlf

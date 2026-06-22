@@ -3,11 +3,8 @@ name: Get version information task
 on:
   workflow_call:
     inputs:
-      # Git ref to check out and version. Empty string falls back to the
-      # caller's default checkout ref (`github.ref`), preserving the original
-      # behavior. The publisher passes an explicit branch so a scheduled run —
-      # which always reports `github.ref` as the default branch — can still
-      # compute NBGV versions for `develop` too.
+      # Git ref to check out and version. Empty falls back to the caller's default checkout ref (`github.ref`); the
+      # publisher passes an explicit branch so a scheduled run can still compute versions for `develop`.
       ref:
         required: false
         type: string
@@ -22,9 +19,7 @@ on:
         value: ${{ jobs.get-version.outputs.AssemblyFileVersion }}
       AssemblyInformationalVersion:
         value: ${{ jobs.get-version.outputs.AssemblyInformationalVersion }}
-      # Full SHA of the commit NBGV computed the version from. Used to pin the
-      # GitHub release tag and the built artifacts to the exact built commit
-      # (immutable), rather than a moving branch ref.
+      # Full SHA of the commit the version was computed from, used to pin the release tag to the exact built commit.
       GitCommitId:
         value: ${{ jobs.get-version.outputs.GitCommitId }}
 
@@ -53,10 +48,8 @@ jobs:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
 
-      # nbgv is intentionally NOT SHA-pinned: the upstream tag stream lags
-      # `master` substantially and Dependabot's tag-tracking would propose
-      # a downgrade. Documented exception to the Workflow YAML Conventions
-      # action-pinning rule in AGENTS.md.
+      # nbgv is floated on @master: its tag stream lags master, so Dependabot tag-tracking would propose a downgrade.
+      # Revisit if dotnet/nbgv resumes regular tagged releases.
       - name: Run Nerdbank.GitVersioning tool step
         id: nbgv
         uses: dotnet/nbgv@master

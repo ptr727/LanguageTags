@@ -7,7 +7,7 @@ env:
 on:
   workflow_call:
     inputs:
-      # Input to control whether to push the NuGet library to NuGet.org
+      # Whether to push the NuGet library to NuGet.org.
       push:
         required: false
         type: boolean
@@ -17,9 +17,8 @@ on:
         required: false
         type: string
         default: ''
-      # Logical branch driving build configuration (`main` => Release, else
-      # Debug). Required (no `github.ref_name` fallback, which would mislabel
-      # the develop leg of the publisher's matrix); the orchestrator passes it.
+      # Logical branch driving build configuration (`main` => Release, else Debug). Required (no fallback) so the
+      # develop leg of the publisher's matrix isn't mislabeled.
       branch:
         required: true
         type: string
@@ -91,3 +90,5 @@ jobs:
         with:
           name: nugetlibrary-build-${{ inputs.branch }}
           path: ${{ runner.temp }}/${{ env.PROJECT_ARTIFACT }}
+          # Intermediate artifact consumed by build-release-task in the same run.
+          retention-days: 1

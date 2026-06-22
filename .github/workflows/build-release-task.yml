@@ -57,6 +57,8 @@ jobs:
       branch: ${{ inputs.branch }}
       # Push to NuGet.org, never on a smoke build.
       push: ${{ inputs.nuget && !inputs.smoke }}
+      # Skip the artifact zip/upload on smoke (nothing consumes it on a PR).
+      smoke: ${{ inputs.smoke }}
 
   github-release:
     name: Publish GitHub release job

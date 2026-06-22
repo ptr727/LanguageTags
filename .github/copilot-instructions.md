@@ -1,26 +1,65 @@
 # GitHub Copilot Instructions for LanguageTags
 
-The **canonical guide is [AGENTS.md](../AGENTS.md)** at the repo root - read it first. It covers branching, PR review etiquette, workflow YAML conventions, and the release pipeline.
+The **canonical guide is [AGENTS.md](../AGENTS.md)** at the repo root - read it first, including the [PR Review Etiquette](../AGENTS.md#pr-review-etiquette) review-loop contract this file's runbook implements. This file is intentionally narrow: commit/PR-title conventions (summarized inline so VS Code's commit-message and PR-title generators have them) plus the GitHub Copilot Review Runbook.
 
-This file is intentionally focused: the GitHub Copilot Review Runbook (provider-specific mechanics behind the review-loop contract defined in AGENTS.md), followed by the LanguageTags-specific code conventions and public-API contract notes that VS Code's AI generators pick up directly from this path.
+For C# style rules, see [`CODESTYLE.md`](../CODESTYLE.md) at the repo root. Do not duplicate those rules here. **Project-specific conventions and API/behavioral contracts also belong in [AGENTS.md](../AGENTS.md), not here** - this file is intentionally limited to the inline commit/PR-title summary and the GitHub Copilot Review Runbook. Non-Copilot agents (Claude Code, Codex, Cursor, ...) are not directed to this file and don't read it by default, so any rule a reviewer must honor has to live in `AGENTS.md` to be provider-independent.
 
-For C# style rules, see [`CODESTYLE.md`](../CODESTYLE.md) at the repo root. Do not duplicate those rules here.
+## Commit Messages and Pull Request Titles
+
+Summarized for VS Code's generators; the full rules, rationale, and examples are in [AGENTS.md "Pull Request Title and Commit Message Conventions"](../AGENTS.md#pull-request-title-and-commit-message-conventions).
+
+- Imperative subject, <= 72 characters, no trailing period; optional blank-line-separated body for the non-obvious *why*.
+- US English, title case with lowercase short bind words; no vague titles, no `Co-Authored-By:` unless asked, no release-bump magnitude (NBGV handles versioning). Dependabot's `Bump X from Y to Z` titles are fine.
+- develop PRs squash-merge (`gh pr merge --squash`), main PRs merge-commit (`--merge`); a mismatched flag is rejected by branch protection.
 
 ## GitHub Copilot Review Runbook
 
-Use this section for provider-specific mechanics. The expected review loop *contract* (request review on every push, verify head-SHA coverage, triage findings, reply + resolve, escalate when stuck) is defined in [AGENTS.md → PR Review Etiquette](../AGENTS.md#pr-review-etiquette). This section only describes how to make GitHub Copilot reliably execute it.
+> This runbook implements the [AGENTS.md "PR Review Etiquette"](../AGENTS.md#pr-review-etiquette) review-loop contract for GitHub Copilot. Without it in-repo, an agent has no pointer to the reliable Copilot mechanics and falls back to known-broken paths (the no-op `POST /requested_reviewers`, the wrong bot-login filter). In the API snippets below, `<N>` is the PR number.
+
+Use this section for provider-specific mechanics. The expected review loop *contract* (request review on every push, verify head-SHA coverage, triage findings, reply + resolve, escalate when stuck) is defined in [AGENTS.md -> PR Review Etiquette](../AGENTS.md#pr-review-etiquette). This section only describes how to make GitHub Copilot reliably execute it.
 
 ### Triggering and Polling
 
-Auto-review on push is configured (via the branch ruleset's `copilot_code_review` rule with `review_on_push: true`) but fires inconsistently in practice - treat it as best-effort, not guaranteed. Request review explicitly through the GitHub PR UI (request `Copilot` as a reviewer) after every push.
+Auto-review on push is configured (via the branch ruleset's `copilot_code_review` rule with `review_on_push: true`) but fires inconsistently in practice - treat it as best-effort, not guaranteed. After every push, **re-request a review programmatically** via the GraphQL `requestReviews` mutation, passing the Copilot reviewer's bot node id in `botIds`. This drives the loop end-to-end without a UI hand-off.
+
+**A review with no inline comments is still a completed review - not a failure, and not a reason to ask the maintainer to re-trigger.** Copilot very often posts a single formal review (GraphQL `state: COMMENTED`) whose body ends with "...reviewed N of N changed files ... and generated no comments" and adds **zero** inline threads. That review carries the head `commit.oid` and fully satisfies the loop - it is the clean-pass success case. Never read "no inline comments" as "the review didn't run," and never re-request or escalate to the maintainer because comments are absent.
+
+**Round 1 is normally auto-seeded - poll for it before trying to self-trigger.** Auto-review-on-open supplies the first review with no `botIds` call needed, but it can lag one to three minutes. After opening a PR (or the first push), **poll** for a Copilot review on the head SHA (see [Verify Review Covered Current Head](#verify-review-covered-current-head)) before concluding none ran. The `requestReviews` mutation below is for **re-requesting on later pushes** (a new head SHA); by then a prior review exists, so its bot node id is readable. A missing bot node id on round 1 therefore means "the auto-review has not landed yet - wait and poll," **not** "ask the maintainer to kick it off."
+
+> **The reviewer login differs by API.** In **GraphQL** (`gh api graphql` and `gh pr view --json reviews`, which is GraphQL-backed) the `Bot.login` is `copilot-pull-request-reviewer` - **no `[bot]` suffix**. In the **REST** API (`gh api repos/.../issues|pulls/...`) the same account's `user.login` is `copilot-pull-request-reviewer[bot]` - **with** the suffix. Each query below uses the correct form for its API; match the API, not a single spelling, when adapting them.
+
+```sh
+# 1. PR node id + the Copilot reviewer's bot node id (read from any existing
+#    Copilot review; the reviewer login is `copilot-pull-request-reviewer`).
+PR_NODE=$(gh pr view <N> --json id --jq '.id')
+BOT_ID=$(gh api graphql -f query='
+{
+  repository(owner: "ptr727", name: "LanguageTags") {
+    pullRequest(number: <N>) {
+      reviews(first: 50) { nodes { author { __typename login ... on Bot { id } } } }
+    }
+  }
+}' --jq '[.data.repository.pullRequest.reviews.nodes[]
+          | select(.author.login == "copilot-pull-request-reviewer")
+          | .author.id] | first')
+
+# 2. Re-request a Copilot review on the current head.
+gh api graphql -f query='
+mutation($pr: ID!, $bot: ID!) {
+  requestReviews(input: { pullRequestId: $pr, botIds: [$bot], union: true }) {
+    pullRequest { id }
+  }
+}' -F pr="$PR_NODE" -F bot="$BOT_ID"
+```
+
+The bot node id is read from an existing Copilot **formal** review (`pullRequest.reviews`), so step 1 needs at least one prior formal review on the PR - the auto-review-on-open normally supplies the first one (it may have **no inline comments**; that still counts, and its bot node id is still readable). Poll for it (give auto-review-on-open a few minutes) before deciding it is missing. If Copilot posted **only an issue comment** and no formal review, the head is covered but `reviews` yields no bot node id - read the id from the Copilot issue comment's author by querying the PR's issue comments in GraphQL (`pullRequest.comments` -> author `... on Bot { id }`), or request `Copilot` once through the GitHub PR UI to produce a formal review. Manual UI seeding is the fallback specifically when no formal review exists to read the id from; then use the mutation for every subsequent re-request.
 
 **Do NOT post `@Copilot review` as a PR comment.** That comment triggers the Copilot *coding agent* (`copilot-swe-agent[bot]`), which makes code changes rather than posting a review.
 
-Known non-working request paths (don't rely on them):
+Known non-working request paths (don't rely on them - use the `requestReviews` mutation above instead):
 
 - `POST /requested_reviewers` with `reviewers=[Copilot]` can return 200 but no-op.
 - `copilot-pull-request-reviewer` as a requested reviewer slug returns 422.
-- GraphQL `requestReviews` rejects Copilot's bot node.
 
 ### Verify Review Covered Current Head
 
@@ -34,19 +73,22 @@ gh pr view <N> --json reviews --jq \
   '.reviews[] | select(.author.login=="copilot-pull-request-reviewer") | .commit.oid' \
   | grep -q "$PR_HEAD" && echo "covered via formal review"
 
-# 2. Issue comment - show the most recent Copilot comment for manual confirmation.
+# 2. Issue comment - show the most recent Copilot comment for manual
+#    confirmation. This is the REST API, so the login carries the `[bot]` suffix.
 gh api repos/ptr727/LanguageTags/issues/<N>/comments --jq \
-  '[.[] | select(.user.login=="copilot-pull-request-reviewer")] | last | {created_at, body: .body[:200]}'
+  '[.[] | select(.user.login=="copilot-pull-request-reviewer[bot]")] | last | {created_at, body: .body[:200]}'
 ```
 
-Coverage is confirmed when (1) exits 0. For issue comments (path 2), body content is the only reliable signal - `created_at` is not: `git log -1 --format=%cI` is the **commit** timestamp, not the push timestamp, so amended or rebased commits can have an earlier timestamp and an older Copilot comment could satisfy a time check even though Copilot never saw the current head. Treat path (2) as confirmed only when the comment body explicitly refers to the current changes.
+Coverage is confirmed when (1) exits 0 - **a formal review with no inline comments still satisfies path (1)**, because coverage is about the head SHA, not the comment count. For issue comments (path 2), body content is the only reliable signal - `created_at` is not: `git log -1 --format=%cI` is the **commit** timestamp, not the push timestamp, so amended or rebased commits can have an earlier timestamp and an older Copilot comment could satisfy a time check even though Copilot never saw the current head. Treat path (2) as confirmed only when the comment body explicitly refers to the current changes.
 
 ### Bounded Retry Workflow
+
+This path is only for a **genuinely missing** review - no Copilot review (formal *or* issue comment) covers the current head SHA after polling. A review that covered the head but produced no comments is a clean pass, not a missing review; do not enter this retry path for it.
 
 If a review did not run on the current head, retry:
 
 1. Wait briefly and check head-SHA coverage (see above).
-1. Request review again via the GitHub PR UI.
+1. Re-request the review via the `requestReviews` mutation (see "Triggering and Polling"); fall back to the GitHub PR UI only if the mutation no-ops.
 1. Retry up to two more times (three total).
 1. If still missing, mark review as blocked and escalate to the user/maintainer with what was attempted.
 
@@ -101,435 +143,6 @@ Reply-body conventions:
 
 After the final push, sweep-resolve stale older threads for removed code paths.
 
----
+## When in Doubt
 
-## Versioning
-
-`develop` leads `main` by a minor. After a `develop -> main` release lands and main's publish completes, bump the minor in [version.json](../version.json) on `develop` via an isolated `bump-version-X.Y` PR, so develop's NBGV prereleases sort above main's last stable. A `develop -> main` promotion that carries only maintenance (dependency/codegen bumps, CI/doc fixes, template re-syncs) holds main's version instead - `git checkout main -- version.json` on the promotion branch. See [AGENTS.md "Release Model"](../AGENTS.md#release-model).
-
-## Project Overview
-
-**LanguageTags** is a C# .NET library for handling ISO 639-2, ISO 639-3, and RFC 5646 / BCP 47 language tags. The project serves two primary purposes:
-
-1. **Data Publishing**: Provides ISO 639-2, ISO 639-3, and RFC 5646 language tag records in JSON and C# formats
-2. **Tag Processing**: Implements IETF BCP 47 language tag construction and parsing per RFC 5646 semantic rules
-
-**Current Version**: 1.2 (supports .NET 10.0, AOT compatible)
-
-**Important Note**: The implemented language tag parsing and normalization logic may be incomplete or inaccurate per RFC 5646. Always verify results for your specific use case
-
-## Solution Structure
-
-### Projects
-
-- **LanguageTags** (`LanguageTags/LanguageTags.csproj`)
-  - Core library project
-  - NuGet package: `ptr727.LanguageTags`
-  - Contains language tag data models, parser, builder, and lookup functionality
-  - Target framework: .NET 10.0
-  - C# language version: 14.0
-
-- **LanguageTagsCreate** (`LanguageTagsCreate/LanguageTagsCreate.csproj`)
-  - CLI utility for downloading and generating language data
-  - Downloads data from official sources (Library of Congress, SIL, IANA)
-  - Converts to JSON and generates C# code files
-  - Target framework: .NET 10.0
-
-- **LanguageTagsTests** (`LanguageTagsTests/LanguageTagsTests.csproj`)
-  - xUnit test suite with comprehensive coverage
-  - Uses AwesomeAssertions for test assertions
-  - Target framework: .NET 10.0
-
-### Key Directories
-
-- **LanguageData/**
-  - Contains downloaded language data files
-  - JSON converted data files
-  - Refreshed by daily codegen PRs; published with the weekly release
-
-- **.github/workflows/**
-  - `run-periodic-codegen-pull-request.yml`: Daily scheduled job that opens codegen PRs to update language data
-  - `publish-release.yml`: Sole publisher - weekly scheduled (Mon 02:00 UTC) + manual dispatch full build/publish of both branches; pushes only publish when `PUBLISH_ON_MERGE` is set (two-phase model)
-  - `test-pull-request.yml`: PR smoke test - unit tests + a reduced, never-published library build gated by `dorny/paths-filter`
-  - `merge-bot-pull-request.yml`: Automated PR merge workflow
-  - `build-release-task.yml`, `build-nugetlibrary-task.yml`: Build tasks
-  - `get-version-task.yml`, `build-datebadge-task.yml`: Version and badge generation
-
-### Project Configuration
-
-- **Directory.Build.props**: Common MSBuild properties shared across all projects
-  (`TargetFramework`, `Nullable`, `ImplicitUsings`, `AnalysisLevel`, `AnalysisMode`,
-  `EnableNETAnalyzers`, `ArtifactsPath`, `IsPackable`, `ManagePackageVersionsCentrally`)
-  live here at the solution root. Only add a property to a `.csproj` when it is
-  specific to that project or requires an explicit override of the shared default.
-
-- **Directory.Packages.props**: All NuGet package versions are centralised here via
-  `PackageVersion` items. Individual `.csproj` files use `PackageReference Include="..."`
-  with no `Version` attribute. Asset metadata (`PrivateAssets`, `IncludeAssets`) stays
-  in the `.csproj` `PackageReference` element. Use `VersionOverride` only when a project
-  genuinely requires a different version from the central default.
-
-## Core Components
-
-### LanguageTag Class (LanguageTag.cs)
-
-The main public API for working with language tags:
-
-**Static Factory Methods:**
-
-- `Parse(string tag)`: Parse a language tag string, returns null on failure
-- `TryParse(string tag, out LanguageTag? result)`: Safe parsing with out parameter
-- `ParseOrDefault(string tag, LanguageTag? defaultTag = null)`: Parse with fallback to "und"
-- `ParseAndNormalize(string tag)`: Parse and normalize in one step
-- `CreateBuilder()`: Create a fluent builder instance
-- `FromLanguage(string language)`: Factory for simple language tags
-- `FromLanguageRegion(string language, string region)`: Factory for language+region tags
-- `FromLanguageScriptRegion(string language, string script, string region)`: Factory for full tags
-
-**Properties:**
-
-- `Language`: Primary language subtag (internal set)
-- `ExtendedLanguage`: Extended language subtag (internal set)
-- `Script`: Script subtag (internal set)
-- `Region`: Region subtag (internal set)
-- `Variants`: ImmutableArray of variant subtags
-- `Extensions`: ImmutableArray of ExtensionTag objects
-- `PrivateUse`: PrivateUseTag object
-- `IsValid`: Property to check if tag is valid
-
-**Instance Methods:**
-
-- `Validate()`: Verify structural correctness
-- `Normalize()`: Return normalized copy of tag (does not validate)
-- `ToString()`: String representation
-- `Equals()`: Equality comparison (case-insensitive)
-- `GetHashCode()`: Hash code for collections
-- Operators: `==`, `!=`
-
-**Design Characteristics:**
-
-- Implements `IEquatable<LanguageTag>`
-- Constructors are internal, use factory methods or builder
-- Properties use internal setters to maintain immutability for public API
-- Collections exposed as ImmutableArray for thread safety
-
-### LanguageTagBuilder Class (LanguageTagBuilder.cs)
-
-Fluent builder for constructing language tags:
-
-**Methods:**
-
-- `Language(string value)`: Set primary language
-- `ExtendedLanguage(string value)`: Set extended language
-- `Script(string value)`: Set script
-- `Region(string value)`: Set region
-- `VariantAdd(string value)`: Add a variant
-- `VariantAddRange(IEnumerable<string> values)`: Add multiple variants
-- `ExtensionAdd(char prefix, IEnumerable<string> values)`: Add extension with prefix and values
-- `PrivateUseAdd(string value)`: Add private use tag
-- `PrivateUseAddRange(IEnumerable<string> values)`: Add multiple private use tags
-- `Build()`: Return constructed tag (no validation)
-- `Normalize()`: Return normalized tag (no validation)
-
-### LanguageTagParser Class (LanguageTagParser.cs)
-
-**Internal implementation** - Not exposed in public API. Use `LanguageTag.Parse()` instead.
-
-- Parses language tags according to RFC 5646 Section 2.1
-- Handles grandfathered tags and converts them to current forms
-- Normalizes tag casing according to RFC conventions:
-  - Language: lowercase
-  - Extended language: lowercase
-  - Script: Title case
-  - Region: UPPERCASE
-  - Variants: lowercase
-  - Extensions: lowercase
-  - Private use: lowercase
-
-### LanguageLookup Class (LanguageLookup.cs)
-
-Provides language code conversion and matching:
-
-**Properties:**
-
-- `Undetermined`: Constant for "und" (undetermined language)
-- `Overrides`: User-defined (IETF, ISO) mapping pairs
-
-**Methods:**
-
-- `GetIetfFromIso(string languageTag)`: Convert ISO to IETF format
-- `GetIsoFromIetf(string languageTag)`: Convert IETF to ISO format
-- `IsMatch(string prefix, string languageTag)`: Prefix matching for content selection
-
-### LogOptions Class (LogOptions.cs)
-
-Static class for configuring global logging for the entire library:
-
-**Properties:**
-
-- `LoggerFactory`: Gets or sets the global logger factory for creating category loggers
-
-**Methods:**
-
-- `SetFactory(ILoggerFactory loggerFactory)`: Configure the library to use a logger factory
-- `TrySetFactory(ILoggerFactory loggerFactory)`: Set factory only if none is configured
-
-**Logger Resolution Priority:**
-
-1. `LoggerFactory` property (when not `NullLoggerFactory`)
-2. `NullLogger.Instance` (default fallback)
-
-**Important Notes:**
-
-- Loggers are created and cached at time of use by each class instance
-- Changes to `LoggerFactory` after a logger is created do not affect existing cached loggers
-- Only new logger requests use updated configuration
-
-### Data Models
-
-#### Iso6392Data.cs
-
-- ISO 639-2 language codes (3-letter bibliographic/terminologic codes)
-- **Public Methods:**
-  - `Create()`: Load embedded data
-  - `FromDataAsync(string fileName)`: Load from file
-  - `FromJsonAsync(string fileName)`: Load from JSON
-  - `Find(string? languageTag, bool includeDescription)`: Find record by tag
-- **Internal Methods:** `SaveJsonAsync(string fileName)`, `SaveCodeAsync(string fileName)`
-- **Record Properties:** `Part2B`, `Part2T`, `Part1`, `RefName`
-
-#### Iso6393Data.cs
-
-- ISO 639-3 language codes (comprehensive language codes)
-- **Public Methods:**
-  - `Create()`: Load embedded data
-  - `FromDataAsync(string fileName)`: Load from file
-  - `FromJsonAsync(string fileName)`: Load from JSON
-  - `Find(string? languageTag, bool includeDescription)`: Find record by tag
-- **Internal Methods:** `SaveJsonAsync(string fileName)`, `SaveCodeAsync(string fileName)`
-- **Record Properties:** `Id`, `Part2B`, `Part2T`, `Part1`, `Scope`, `LanguageType`, `RefName`, `Comment`
-
-#### Rfc5646Data.cs
-
-- RFC 5646 / BCP 47 language subtag registry
-- **Public Methods:**
-  - `Create()`: Load embedded data
-  - `FromDataAsync(string fileName)`: Load from file
-  - `FromJsonAsync(string fileName)`: Load from JSON
-  - `Find(string? languageTag, bool includeDescription)`: Find record by tag
-- **Properties:** `FileDate`, `RecordList`
-- **Internal Methods:** `SaveJsonAsync(string fileName)`, `SaveCodeAsync(string fileName)`
-- **Record Properties:** `Type`, `Tag`, `SubTag`, `Description` (ImmutableArray), `Added`, `SuppressScript`, `Scope`, `MacroLanguage`, `Deprecated`, `Comments` (ImmutableArray), `Prefix` (ImmutableArray), `PreferredValue`, `TagValue`
-- **Enums:**
-  - `RecordType`: None, Language, ExtLanguage, Script, Variant, Grandfathered, Region, Redundant
-  - `RecordScope`: None, MacroLanguage, Collection, Special, PrivateUse
-
-#### Supporting Classes
-
-**ExtensionTag (sealed record):**
-
-- `Prefix`: Single-character extension prefix (char)
-- `Tags`: ImmutableArray of extension values
-- `ToString()`: Format as "prefix-tag1-tag2"
-- `Normalize()`: Returns normalized copy with sorted, lowercase tags
-- `Equals()`: Case-insensitive equality comparison
-
-**PrivateUseTag (sealed record):**
-
-- `Prefix`: Constant 'x'
-- `Tags`: ImmutableArray of private use values
-- `ToString()`: Format as "x-tag1-tag2"
-- `Normalize()`: Returns normalized copy with sorted, lowercase tags
-- `Equals()`: Case-insensitive equality comparison
-
-### Language Tag Structure
-
-Per RFC 5646, language tags follow this format:
-
-```text
-[Language]-[Extended language]-[Script]-[Region]-[Variant]-[Extension]-[Private Use]
-```
-
-Examples:
-
-- `zh`: Simple language tag
-- `zh-yue-hk`: Language with extended language and region
-- `en-latn-gb-boont-r-extended-sequence-x-private`: Full tag with all components
-
-### Data Updates
-
-- Language data is refreshed by daily codegen PRs and shipped with the weekly release (GitHub Actions)
-- The `LanguageTagsCreate` tool downloads data from:
-  - ISO 639-2: Library of Congress
-  - ISO 639-3: SIL International
-  - RFC 5646: IANA Language Subtag Registry
-- Generated C# files (`*DataGen.cs`) are committed to the repository
-- Data files are in `LanguageData/` directory
-
-## API Design Patterns
-
-### Factory Pattern
-
-Use static factory methods instead of public constructors:
-
-```csharp
-// Good
-LanguageTag tag = LanguageTag.Parse("en-US");
-LanguageTag tag = LanguageTag.FromLanguage("en");
-
-// Avoid - constructors are internal
-// var tag = new LanguageTag(); // Not accessible
-```
-
-### Builder Pattern
-
-Use fluent builder for complex tag construction:
-
-```csharp
-LanguageTag tag = LanguageTag.CreateBuilder()
-    .Language("en")
-    .Region("US")
-    .Build();
-```
-
-### Immutability Pattern
-
-- All properties are immutable after construction
-- Use `Normalize()` to get modified copies
-- Collections are exposed as `ImmutableArray<T>`
-
-### Safe Parsing
-
-Always use safe parsing patterns:
-
-```csharp
-// TryParse pattern
-if (LanguageTag.TryParse(input, out LanguageTag? tag))
-{
-    // Use tag
-}
-
-// ParseOrDefault pattern
-LanguageTag tag = LanguageTag.ParseOrDefault(input); // Falls back to "und"
-```
-
-## References and Standards
-
-- **RFC 5646**: Tags for Identifying Languages
-- **BCP 47**: Best Current Practice for Language Tags
-- **ISO 639-2**: 3-letter language codes
-- **ISO 639-3**: Comprehensive language codes
-- **ISO 15924**: Script codes
-- **ISO 3166-1**: Country codes
-- **UN M.49**: Geographic region codes
-- **IANA Language Subtag Registry**: Authoritative registry of subtags
-
-## Important Implementation Notes
-
-- The implemented language tag parsing and normalization logic may be incomplete or inaccurate
-- Grandfathered tags are automatically converted to their preferred values during parsing
-- All tag comparisons are case-insensitive per RFC 5646
-- Private use tags start with 'x-' prefix
-- Extensions use single-character prefixes (except 'x' which is reserved for private use)
-- `LanguageTagParser` is internal; all parsing is done through `LanguageTag` static methods
-
-## Recent API Changes
-
-### Changed (Breaking)
-
-- `LanguageTagParser` is now internal (use `LanguageTag.Parse()` instead)
-- Properties changed from `IList<string>` to `ImmutableArray<string>`:
-  - `VariantList` → `Variants`
-  - `ExtensionList` → `Extensions`
-  - `TagList` → `Tags`
-- Data file APIs are async-only and use static creators: `FromDataAsync()`/`FromJsonAsync()`
-- Logging configuration now uses `ILoggerFactory` only; `ILogger` support was removed from `LogOptions`
-- Tag construction requires use of factory methods or builder (constructors are internal)
-
-### Added (Non-Breaking)
-
-- `LanguageTag.ParseOrDefault()`: Safe parsing with fallback
-- `LanguageTag.ParseAndNormalize()`: Combined parse and normalize
-- `LanguageTag.IsValid`: Property for validation
-- `LanguageTag.FromLanguage()`, `FromLanguageRegion()`, `FromLanguageScriptRegion()`: Factory methods
-- `IEquatable<LanguageTag>` implementation with operators
-- `LogOptions` static class for global logging configuration with `ILoggerFactory`
-- `ExtensionTag` and `PrivateUseTag` are now sealed records with `Normalize()` and case-insensitive `Equals()` methods
-- Comprehensive XML documentation for all public APIs
-
-## Future Improvements
-
-Consider these areas for enhancement:
-
-- Use a BNF parser or parser generator (ANTLR4, Eto.Parse, etc.) instead of hand-parsing
-- Implement comprehensive subtag content validation against registry data
-- Add more language lookup and validation features
-- Improve error messages and diagnostics
-
-## Contributing
-
-- Follow the authoritative coding standards and tooling in `CODESTYLE.md` and `.editorconfig`
-- Add tests for new public behavior and keep API documentation complete
-- Use factory methods or builders for tag creation; avoid public constructors
-
-## Common Patterns
-
-### Creating Tags
-
-```csharp
-// Simple parsing
-LanguageTag? tag = LanguageTag.Parse("en-US");
-
-// Safe parsing
-if (LanguageTag.TryParse("en-US", out LanguageTag? tag))
-{
-    Console.WriteLine(tag.ToString());
-}
-
-// Parse with default
-LanguageTag tag = LanguageTag.ParseOrDefault(input); // "und" if invalid
-
-// Factory methods
-LanguageTag tag = LanguageTag.FromLanguage("en");
-LanguageTag tag = LanguageTag.FromLanguageRegion("en", "US");
-
-// Builder
-LanguageTag tag = LanguageTag.CreateBuilder()
-    .Language("en")
-    .Region("US")
-    .Build();
-```
-
-### Normalizing Tags
-
-```csharp
-// Parse and normalize separately
-LanguageTag? tag = LanguageTag.Parse("en-latn-us");
-LanguageTag? normalized = tag?.Normalize(); // "en-US"
-
-// Parse and normalize in one step
-LanguageTag? tag = LanguageTag.ParseAndNormalize("en-latn-us"); // "en-US"
-```
-
-### Accessing Tag Components
-
-```csharp
-LanguageTag tag = LanguageTag.Parse("en-latn-gb-boont-r-extended-x-private")!;
-
-string language = tag.Language; // "en"
-string script = tag.Script; // "latn"
-string region = tag.Region; // "gb"
-ImmutableArray<string> variants = tag.Variants; // ["boont"]
-ImmutableArray<ExtensionTag> extensions = tag.Extensions; // [{ Prefix='r', Tags=["extended"] }]
-PrivateUseTag privateUse = tag.PrivateUse; // { Tags=["private"] }
-```
-
-### Comparing Tags
-
-```csharp
-LanguageTag? tag1 = LanguageTag.Parse("en-US");
-LanguageTag? tag2 = LanguageTag.Parse("en-us");
-
-bool equal = tag1 == tag2; // true (case-insensitive)
-bool equal = tag1.Equals(tag2); // true
-int hash = tag1.GetHashCode(); // Same as tag2.GetHashCode()
+Read [AGENTS.md](../AGENTS.md) for this repo's conventions; [`CODESTYLE.md`](../CODESTYLE.md) is authoritative for C# style. Don't restate any of these files' rules in commit bodies or PR descriptions - keep those focused on the change itself. If you find a discrepancy that should be fixed in the template itself (this file or AGENTS.md is out of date, a rule is missing, something bit this repo and would bite the next derived repo), open an issue upstream in [`ptr727/ProjectTemplate`](https://github.com/ptr727/ProjectTemplate) rather than only fixing it locally - see [AGENTS.md "Staying in Sync with the Template"](../AGENTS.md#staying-in-sync-with-the-template).

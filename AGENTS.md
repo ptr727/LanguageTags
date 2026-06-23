@@ -25,6 +25,7 @@ This file is the canonical reference for cross-cutting AI-agent and workflow rul
 - **Bots (Dependabot and codegen) target both `main` and `develop` in parallel.** [`.github/dependabot.yml`](./.github/dependabot.yml) duplicates every ecosystem entry (one per branch) and [`.github/workflows/run-codegen-pull-request-task.yml`](./.github/workflows/run-codegen-pull-request-task.yml) runs as a matrix over both branches with branch names `codegen-main` and `codegen-develop`. Each branch absorbs its own bot PRs independently, so neither falls behind, and the forward-only rule still holds (nothing is back-merged from main to develop - both branches receive their updates directly). Parallel auto-merge across same-batch bot PRs is race-proof only because both rulesets have the strict "up to date" flag off (see bullet above). The merge-bot ([`.github/workflows/merge-bot-pull-request.yml`](./.github/workflows/merge-bot-pull-request.yml)) dispatches `--squash` or `--merge` from each PR's base ref via a `case` statement so the form matches the ruleset on either base. Dependabot **security** PRs (CVE-driven) always open against the repo default branch (`main`) regardless of `target-branch` - the same `case` statement covers them.
 - **Maintainer-pushed commits on a bot PR auto-disable auto-merge.** The merge-bot's `merge-dependabot` and `merge-codegen` jobs only fire on `opened` / `reopened` events (auto-merge is enabled exactly once per PR). When a maintainer pushes commits to a bot's branch (a `synchronize` event with an actor that isn't the same bot), the merge-bot's `disable-auto-merge-on-maintainer-push` job fires and calls `gh pr merge --disable-auto`. The maintainer's commits stay in the PR but won't auto-merge with the bot's content; re-enable auto-merge manually (`gh pr merge --auto <PR>` or the GitHub UI) when ready.
 - **Why parallel dual-target rather than develop-only with eventual flow-through:** consumers (NuGet.org, GitHub releases) pull from `main` directly. A develop-only model would leave `main` running stale code during long-running develop features. Codegen content here is the embedded ISO 639-2/3 + RFC 5646 language data - production-critical - so both branches need fresh codegen on their own cadence (codegen PRs are opened **daily**; the actual release is **published weekly** - see "Release Model" below).
+- **Codegen regenerates committed files; its output must be deterministic from its inputs, never per-run state.** The codegen workflow refreshes files checked into the repo: it runs a matrix over `main` and `develop`, each leg regenerating against its own checkout and opening its own PR (`codegen-main -> main`, `codegen-develop -> develop`). For the two legs not to conflict on `develop -> main`, the generated output must depend only on its inputs - never on per-invocation state (timestamps, GUIDs, build IDs), which would diverge every run and conflict on every release. [`LanguageTagsCreate/`](./LanguageTagsCreate/) downloads the ISO 639-2/3 + RFC 5646 registries from their official sources and emits the embedded [`LanguageData/`](./LanguageData/) files, so each leg's output is a pure function of those registries and the two branches stay conflict-free.
 
 ## Release Model
 
@@ -91,19 +92,34 @@ Applies to code and workflow (`#`) comments alike.
 
 ## PR Review Etiquette
 
+> **Mandatory in every derived repo.** This entire "PR Review Etiquette" section is the provider-agnostic review-loop *contract* and must be carried **verbatim** into every repo derived from this template, alongside the [`.github/copilot-instructions.md`](./.github/copilot-instructions.md) "GitHub Copilot Review Runbook" that implements it. Without both in-repo, an agent working in the derived repo has no pointer to the reliable Copilot mechanics and falls back to ad-hoc (and known-broken) behavior.
+
 The repo runs a review loop on every PR: local agent iteration plus remote automated review (GitHub Copilot is the configured reviewer). Treat this as a contract regardless of which local agent authored the changes.
+
+### Merge Gate (read this first)
+
+**Do not merge - and do not enable auto-merge - unless ALL of these hold:**
+
+1. Required status checks are green (`mergeStateStatus: CLEAN`), **and**
+2. A Copilot review is confirmed on the **current head SHA** (not an earlier push), **and**
+3. **Every** Copilot finding on that head SHA is closed out - all review threads resolved, **and** any issue-level Copilot comments (which have no resolve action) triaged and replied to - so zero outstanding findings remain, **and**
+4. The maintainer has given **explicit** permission to merge.
+
+`mergeStateStatus: CLEAN` reflects **only** required statuses - it never reflects open bot review comments, so `CLEAN` alone is **never** sufficient to merge. A green/`CLEAN` PR with an unresolved Copilot finding fails this gate; treat it as "not mergeable" no matter what the merge-state field says. The agent never merges on its own (consistent with "default to staging"; merging is maintainer-authorized).
+
+**Merging is not releasing.** A merge to `main` does **not** publish - by default `PUBLISH_ON_MERGE` is off, so the push only smoke-runs the publisher's no-op job. Publishing happens solely on the weekly schedule or a manual `workflow_dispatch` (see [Release Model](#release-model)). Never describe a merge as cutting a release, and never trigger a publish without explicit maintainer instruction.
 
 ### Expected Review Loop
 
 1. Push changes to the PR branch.
-2. Confirm a review was requested for the **current head SHA** (auto-trigger is unreliable; request explicitly).
+2. Re-request a review for the **current head SHA**. Auto-trigger is unreliable, so request it explicitly via the `requestReviews` GraphQL mutation (now reliable end-to-end - see the runbook); the UI is only a fallback.
 3. Wait for review activity on that head. A completed review that raises **no findings** is a valid terminal outcome for that head - proceed; do not re-trigger it or treat the absence of comments as a missing review.
 4. Triage findings.
 5. Apply fixes or write a rationale for declines.
 6. Reply to each thread and resolve what was addressed.
 7. Re-run the loop after every fix push until no actionable findings remain.
 
-`mergeStateStatus: CLEAN` only checks required statuses; it does not block on bot review comments. Merge only after review on the latest head SHA is confirmed and actionable findings are closed.
+Drive the loop to green - review confirmed on the latest head SHA and every actionable finding closed - then stop and apply the **Merge Gate** above: all four preconditions must hold, and `mergeStateStatus: CLEAN` alone never satisfies it.
 
 For provider-specific mechanics (how to request review, query review state, post replies, resolve threads), see the **GitHub Copilot Review Runbook** in [.github/copilot-instructions.md](./.github/copilot-instructions.md). This file owns the contract; that file owns the mechanics.
 
@@ -115,7 +131,7 @@ For each comment, classify before responding:
 - **Style/convention** - the comment cites a rule from this file or a language-specific style guide. Two cases:
   - The cited rule matches what the existing codebase already does -> fix the offending code.
   - The cited rule contradicts what's in the tree, or industry norm -> **update the rule instead of the code**. The rule is wrong, not the code. Bouncing the same code across rounds is the symptom of a wrong rule. Heuristic: three rounds on the same style category means the rule needs adjusting and the user should authorize the rule change.
-- **Architectural opinion** - the comment proposes a different design ("constrain this to disabled-by-default", "move it elsewhere", "add a runtime guardrail"). This is judgement, not a bug. Surface it to the user with a recommendation; don't apply unilaterally.
+- **Architectural opinion** - the comment proposes a different design ("constrain this to disabled-by-default", "move it elsewhere", "add a runtime guardrail"). This is judgment, not a bug. Surface it to the user with a recommendation; don't apply unilaterally.
 
 ### Responding and Resolution Expectations
 

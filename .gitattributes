@@ -17,5 +17,5 @@ Dockerfile text eol=lf
 # Extensionless executables must stay LF - a CRLF shebang breaks execution. The Husky.Net git hook matches no extension rule.
 .husky/pre-commit text eol=lf
 
-# Extensionless source data file; pin LF so it round-trips identically across platforms.
-LanguageData/iso6392 text eol=lf
+# LanguageData/ holds downloaded source data the parser reads byte-for-byte; never normalize it. The `* -text` default
+# above preserves it exactly as downloaded - do NOT add a `text`/`eol=` rule here.

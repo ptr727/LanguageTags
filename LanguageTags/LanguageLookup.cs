@@ -27,7 +27,6 @@ public sealed class LanguageLookup
 
         try
         {
-            // Get a CultureInfo representation
             CultureInfo cultureInfo = CultureInfo.GetCultureInfo(languageTag, true);
 
             // Make sure the culture was not custom created
@@ -173,7 +172,6 @@ public sealed class LanguageLookup
         Iso6393Record? iso6393 = _iso6393.Find(languageTag, false);
         if (iso6393 != null)
         {
-            // Return the Part 2B code
             return iso6393.Part2B!;
         }
 
@@ -181,7 +179,6 @@ public sealed class LanguageLookup
         Iso6392Record? iso6392 = _iso6392.Find(languageTag, false);
         if (iso6392 != null)
         {
-            // Return the Part 2B code
             return iso6392.Part2B!;
         }
 
@@ -197,7 +194,6 @@ public sealed class LanguageLookup
         iso6393 = _iso6393.Find(cultureInfo.ThreeLetterISOLanguageName, false);
         if (iso6393 != null)
         {
-            // Return the Part 2B code
             return iso6393.Part2B!;
         }
 
@@ -232,7 +228,6 @@ public sealed class LanguageLookup
             // The tag matches the prefix exactly
             if (languageTag.Equals(prefix, StringComparison.OrdinalIgnoreCase))
             {
-                // Exact match
                 return true;
             }
 
@@ -242,7 +237,6 @@ public sealed class LanguageLookup
                 && languageTag[prefix.Length..].StartsWith('-')
             )
             {
-                // Prefix match
                 return true;
             }
 
@@ -258,7 +252,6 @@ public sealed class LanguageLookup
                     !string.Equals(languageTag, subtag.TagValue, StringComparison.OrdinalIgnoreCase)
                 )
                 {
-                    // Rematch
                     languageTag = subtag.TagValue;
                     continue;
                 }

@@ -1,6 +1,6 @@
 # Code Style and Formatting Rules
 
-This is the single code-style guide for the repo. The **General** section applies to every language and is always carried. Each **language section** is self-contained and **droppable**: a repo with no .NET side drops the .NET section - the same per-language model as [`.editorconfig`](./.editorconfig), whose `[*.cs]` block a non-.NET repo drops.
+This is the single code-style guide for the repo. The **General** section applies to every language and is always carried. Each **language section** (.NET, Python) is self-contained and **droppable**: a repo with no .NET side drops the .NET section, a repo with no Python side drops the Python section - the same per-language model as [`.editorconfig`](./.editorconfig), whose `[*.cs]` block a non-.NET repo drops.
 
 Cross-cutting *process* rules (PR titles, branching, US English, markdown style, comments philosophy, workflow YAML, PR review etiquette) live in [AGENTS.md](./AGENTS.md) and are not repeated here.
 
@@ -10,7 +10,7 @@ These rules apply to every language in the repo.
 
 ### Tooling Names and Casing
 
-Use each tool's official casing in task labels, docs, and prose - `.NET` (not `.Net`), `CSharpier`, `Husky.Net`. Don't invent personal variants.
+Use each tool's official casing in task labels, docs, and prose - `.NET` (not `.Net`), `CSharpier`, `ruff`, `pyright`, `uv`. Don't invent personal variants.
 
 ### Clean-Compile Verification
 
@@ -18,13 +18,14 @@ Each language defines a **clean-compile** verification - the combination of buil
 
 - **Run it after every code change.** The relevant language's clean-compile must pass before you commit; CI runs the same checks as a backstop.
 - **The named task definition is the canonical spec** - its exact command sequence, arguments, and strictness. You may run it through the VS Code task **or** by invoking the equivalent native commands directly; either is fine **only if the sequence, arguments, and strictness match exactly**. No shortcuts and no more-lenient options (for example, never drop `--verify-no-changes` or loosen a `--severity`).
+- **A local commit/pre-commit gate is the derived repo's choice - the template ships no hook runner only because no single runner fits every language it targets** (a `dotnet`-tool runner like Husky.Net suits .NET but not Python), **not** as a recommendation against commit gates. CI is the authoritative backstop regardless; a local gate is an additive convenience a repo may wire and keep - Husky.Net (and `dotnet husky run` as a style step) for .NET, `pre-commit` for Python. Keeping a working gate is not drift, and "no hooks ship by default" must not be read as "remove your gate to stay aligned".
 
 ### Analyzer Diagnostics and Suppressions
 
 - **A new port is not a license to silence diagnostics.** Brownfield / just-ported status never justifies relaxing analyzer or linter severities or muting newly surfaced warnings - fix them. (The only brownfield allowance in this template is the one-time git-signing / line-ending migration described in [AGENTS.md](./AGENTS.md) and [README.md](./README.md), which has nothing to do with code analysis.)
 - **Suppress only genuine false-positives or deliberate, documented exceptions**, always at the **narrowest scope that fits**, in this order of preference:
   1. An **in-code annotation on the specific symbol**, with a justification - the language's attribute/comment form, never a blanket pragma spanning a region.
-  2. The **owning project's local config** when the exception is project-wide for one project (e.g. a test project's own `.editorconfig`).
+  2. The **owning project's local config** when the exception is project-wide for one project (e.g. a test project's own `.editorconfig` / `pyproject.toml`).
   3. The **root / shared config** only when the suppression is genuinely applicable to **every** project in the repo.
 - **Never blanket-relax a batch of rules project-wide** to get a port to build. The per-language mechanics (which attribute, which config key) are in each language section.
 
@@ -32,12 +33,12 @@ Each language defines a **clean-compile** verification - the combination of buil
 
 These apply repo-wide, in every directory:
 
-1. **Markdown linting**: All `.md` files must be lint-clean (error and warning free) via the VS Code `markdownlint` extension. [`.markdownlint-cli2.jsonc`](./.markdownlint-cli2.jsonc) at the repo root is the single source of truth - the davidanson `markdownlint` extension and a command-line `markdownlint-cli2` run both read it, so the IDE and CLI stay in lock-step. Rules it deliberately disables (e.g. `MD013` line-length, `MD033` inline HTML) are **intentional** - do not "fix" them. This file is carried verbatim by every derived repo (see [AGENTS.md "Staying in Sync with the Template"](./AGENTS.md#staying-in-sync-with-the-template)). Fix violations at the source rather than disabling rules.
+1. **Markdown linting**: All `.md` files must be lint-clean (error and warning free) via the VS Code `markdownlint` extension. [`.markdownlint-cli2.jsonc`](./.markdownlint-cli2.jsonc) at the repo root is the single source of truth - the davidanson `markdownlint` extension and a command-line `markdownlint-cli2` run both read it, so the IDE and CLI stay in lock-step. Rules it deliberately disables (e.g. `MD013` line-length, `MD033` inline HTML) are **intentional** - do not "fix" them. This file is carried verbatim by every derived repo (see the template's [Files and Sections Derived Repos Must Carry Verbatim](https://github.com/ptr727/ProjectTemplate/blob/main/AGENTS.md#files-and-sections-derived-repos-must-carry-verbatim) list). Fix violations at the source rather than disabling rules.
 2. **Spelling**: All spelling must be clean via the CSpell VS Code integration; words must be correctly spelled in **US English** (the repo-wide convention - see [AGENTS.md](./AGENTS.md)). Project-specific terms go in the workspace CSpell config.
 
 ## .NET
 
-*This section applies only to the .NET side. A repo with no .NET projects drops the whole section.*
+*This section applies only to the .NET side. A repo with no .NET projects drops the whole section - see [Adopting Without .NET](#adopting-without-net) at its end.*
 
 This is the style guide for the **.NET projects** in this repo: [`LanguageTags/`](./LanguageTags/) (the published `ptr727.LanguageTags` library), [`LanguageTagsCreate/`](./LanguageTagsCreate/) (the codegen CLI), and [`LanguageTagsTests/`](./LanguageTagsTests/) (the xUnit suite).
 
@@ -57,7 +58,8 @@ This is the style guide for the **.NET projects** in this repo: [`LanguageTags/`
    - Analyzer severity is `suggestion`, but all warnings must be addressed - see [Analyzer Diagnostics and Suppressions](#analyzer-diagnostics-and-suppressions); do not relax rules to dodge them.
 
 3. **CI lint backstop**
-   - [`test-pull-request.yml`](./.github/workflows/test-pull-request.yml) runs `dotnet husky run` on every PR - the same CSharpier + `dotnet format style --verify-no-changes` checks the pre-commit hooks run locally
+   - `dotnet csharpier check` and `dotnet format style --verify-no-changes` run on every PR
+   - No git hooks ship by default - see README "Optional: enable git hooks locally" to opt in
 
 #### Build Tasks
 
@@ -341,3 +343,132 @@ Follow the scope hierarchy in [Analyzer Diagnostics and Suppressions](#analyzer-
 ### Best Practices
 
 1. **Code reviews**: All changes go through pull requests
+
+### Adopting Without .NET
+
+If your derived project has no .NET side, drop this entire `.NET` section and delete the .NET projects and their build/release wiring: the NuGet build/publish jobs, the `[*.cs]` / ReSharper block in `.editorconfig`, the `.NET` task group in `.vscode/tasks.json`, and the `nuget` entries in `.github/dependabot.yml`. See [README.md](./README.md) Template Adoption for the full checklist. The Python side stands alone.
+
+## Python
+
+*This section applies only to the Python side. A repo with no Python projects drops the whole section - see [Adopting Without Python](#adopting-without-python) at its end.*
+
+This is the style guide for the **Python project** in this repo ([`PyPiLibrary/`](./PyPiLibrary/)).
+
+### Toolchain
+
+| Tool | Role | Config |
+|---|---|---|
+| [uv](https://docs.astral.sh/uv/) | env, deps, build, publish | `pyproject.toml` `[dependency-groups]`, `uv.lock` |
+| [hatchling](https://hatch.pypa.io/latest/) | build backend | `pyproject.toml` `[build-system]` |
+| [ruff](https://docs.astral.sh/ruff/) | lint + format + import sort | `pyproject.toml` `[tool.ruff]` |
+| [pyright](https://microsoft.github.io/pyright/) | type checker | `pyproject.toml` `[tool.pyright]` |
+| [pytest](https://docs.pytest.org/) | test runner | `pyproject.toml` `[tool.pytest.ini_options]` |
+
+`pyright` is consumed in two places: as a dev dependency (`uv run pyright` for CI/scripted runs) and via VS Code's **Pylance** extension (which embeds pyright). The standalone `ms-pyright.pyright` extension is in `unwantedRecommendations` because Pylance covers it. `mypy` is **not used** here - don't introduce it.
+
+### Local Development Loop
+
+From inside `PyPiLibrary/`:
+
+```sh
+uv sync                          # creates .venv, installs deps + dev group
+uv run ruff format               # auto-format
+uv run ruff check --fix          # auto-fix lint
+uv run ruff check                # verify lint clean
+uv run ruff format --check       # verify format clean
+uv run pyright                   # verify types
+uv run pytest                    # run tests
+uv build                         # produce wheel + sdist in ./dist
+```
+
+The Python clean-compile (see [Clean-Compile Verification](#clean-compile-verification)) is `uv run ruff format` + `uv run ruff check` + `uv run pyright`; run it (plus `uv run pytest`) before committing. The template ships these as documented commands, not VS Code tasks. CI runs the same commands via [`.github/workflows/build-pypilibrary-task.yml`](./.github/workflows/build-pypilibrary-task.yml). No git hooks ship by default - see the root README's "Optional: enable git hooks locally" section to wire up `pre-commit` for `ruff` and `pyright` if you want pre-commit checks locally.
+
+### Layout
+
+`src` layout - keeps the package out of the repo root and prevents accidental imports of unbuilt code:
+
+```text
+PyPiLibrary/
+    pyproject.toml
+    README.md
+    uv.lock                # committed for reproducible CI
+    src/
+        ptr727_projecttemplate_library/
+            __init__.py
+            _version.py
+            <modules>.py
+    tests/
+        __init__.py
+        test_<module>.py
+```
+
+### Code Style
+
+#### Formatting and Linting
+
+- **`ruff format` is authoritative.** Don't argue with the formatter; if it reformats your code, that's the final form. Configure (line length, target version) in `pyproject.toml` `[tool.ruff]`, not via inline `# fmt:` directives.
+- **Run `ruff check --fix` before committing.** Most ruff lint rules have safe autofixes; let the tool handle them. The configured rule families are listed under `[tool.ruff.lint]` `select`. Add new rule families project-wide rather than scattering inline `# noqa` markers.
+- **`# noqa` is a last resort.** When you must use one, scope it narrowly (`# noqa: E501`, not bare `# noqa`) and add a short comment on the same line explaining why. False-positive patterns that recur across the codebase belong in `[tool.ruff.lint]` `ignore` or per-file `[tool.ruff.lint.per-file-ignores]`, with a comment. Porting an existing codebase is not a license to add `ignore` / `per-file-ignores` blocks to mute newly surfaced lint - fix it (see [Analyzer Diagnostics and Suppressions](#analyzer-diagnostics-and-suppressions)).
+
+#### Comments
+
+- **Inline `#` comments**: keep tight and local. One line is preferred, but multi-line is fine when you need to document a non-obvious implementation constraint, a local trade-off, or coupling that future edits could easily break. Keep that rationale next to the affected block so the reviewer/maintainer sees it at edit-time.
+- **Don't explain *what* the code does** - well-named identifiers handle that. Don't reference the current task ("added for X", "used by Y"); that belongs in the PR description.
+
+#### Docstrings
+
+- Follow [PEP 257](https://peps.python.org/pep-0257/). Focus docstrings primarily on the **behavior contract** (what callers and tests can rely on), public semantics, and edge-case expectations. Implementation-local rationale belongs in inline `#` comments, not docstrings.
+- A short one-liner is fine for trivial functions and tests with self-documenting names.
+- For non-trivial behavior - non-obvious test scenarios, contracts a test pins, edge cases callers must know about, design trade-offs that are load-bearing for future maintainers - write a one-line summary, blank line, then a details paragraph. Multi-paragraph docstrings are fine when the contract earns it.
+- Design notes belong **in the code** (docstrings or inline comments). They do NOT belong in [`HISTORY.md`](./HISTORY.md) - that file is end-user release notes, not a design log.
+
+#### Type Hints
+
+- **All public APIs are typed.** Pyright runs on `src/` in strict mode (`[tool.pyright]` `strict = ["src"]`); tests run in standard mode.
+- **Use modern syntax**: `list[int]` not `List[int]`, `dict[str, X]` not `Dict[str, X]`, `X | None` not `Optional[X]`, `from __future__ import annotations` only when needed for forward references.
+- **Don't add `# type: ignore` to silence pyright errors without a comment** explaining the constraint. If a recurring false positive needs suppression, configure it project-wide in `[tool.pyright]`. A new port doesn't change this - fix freshly surfaced type errors rather than muting them (see [Analyzer Diagnostics and Suppressions](#analyzer-diagnostics-and-suppressions)).
+
+#### Naming
+
+- `snake_case` for functions, methods, variables, modules, package directories.
+- `PascalCase` for classes, type aliases, type vars, enum members.
+- `UPPER_SNAKE_CASE` for module-level constants.
+- Single leading underscore for module-private; double leading underscore for name-mangled (rare - usually means rethink the design).
+
+#### Imports
+
+- **Let ruff sort imports.** `[tool.ruff.lint]` `select` includes the `I` rule family (isort-equivalent). Don't hand-sort.
+- Standard library first, then third-party, then first-party (the project itself), each block separated by a blank line - ruff enforces this automatically.
+- Avoid wildcard imports (`from x import *`) outside `__init__.py` re-exports.
+
+#### Patterns to Avoid
+
+- **Don't add backward-compat shims, `# removed` markers, or rename-to-`_` for unused vars** - just delete. Git history is the audit trail.
+- **Don't add error handling for impossible cases.** Trust internal code; only validate at boundaries (user input, parsed config, external APIs).
+- **Don't use exceptions for expected control flow.** Exceptions are for *unexpected* states.
+- **Don't suppress errors silently** (`except Exception: pass`). Either handle the specific exception and document why it's safe, or let it propagate.
+
+### Tests
+
+- `pytest` with the configuration in `[tool.pytest.ini_options]`. Default invocation: `uv run pytest`.
+- One test file per module under test, named `test_<module>.py`.
+- Test functions named `test_<scenario>_<expected_behavior>` - descriptive, not numbered.
+- Use fixtures (defined in `conftest.py` for shared ones, or per-test for narrowly-scoped) instead of setup/teardown methods.
+- **Avoid mocking when fakes work.** Hand-rolled fakes that implement the protocol you depend on are usually clearer and break less than `unittest.mock` magic.
+- **Test edge cases that the docstring promises**, not implementation details. If the test breaks when you refactor *without changing behavior*, the test is asserting on an implementation detail.
+
+### Versioning
+
+`_version.py` ships with `__version__ = "0.0.0"` as a placeholder. The publish workflow uses `skip-existing: true` so the workflow won't fail, but no new PyPI versions will land until you wire `_version.py` to something that increments. See the **Template Adoption** section of [`README.md`](./PyPiLibrary/README.md) for the three usual options (`hatch-vcs`, version.json bridge, manual bumps).
+
+### Linter Cleanliness
+
+Before pushing or opening a PR:
+
+- VS Code's **Problems** pane should be quiet for the files you touched. The relevant linters are ruff (via the `charliermarsh.ruff` extension) and pyright (via the `ms-python.python` extension's bundled Pylance).
+- The CI gate is `uv run ruff check && uv run ruff format --check && uv run pyright && uv run pytest` - same as the local commands above, run from `PyPiLibrary/`.
+- Markdown in this directory follows the repo-wide [Markdown and Spelling](#markdown-and-spelling) rules.
+
+### Adopting Without Python
+
+If your derived project does not need a Python side, delete the entire `PyPiLibrary/` folder, the `build-pypilibrary` job in `build-release-task.yml`, the `publish-pypi` job in `publish-release.yml`, the `build-pypilibrary-task.yml` workflow, the `uv` block in `.github/dependabot.yml`, the `Python.code-workspace` file, and the `.devcontainer/python/` directory. The .NET side stands alone.

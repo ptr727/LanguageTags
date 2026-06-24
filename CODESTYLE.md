@@ -58,8 +58,8 @@ This is the style guide for the **.NET projects** in this repo.
    - Analyzer severity is `suggestion`, but all warnings must be addressed - see [Analyzer Diagnostics and Suppressions](#analyzer-diagnostics-and-suppressions); do not relax rules to dodge them.
 
 3. **CI lint backstop**
-   - `dotnet csharpier check` and `dotnet format style --verify-no-changes` run on every PR
-   - Husky.Net pre-commit hooks are committed under `.husky/`; register them locally with `dotnet tool restore` then `dotnet husky install`. CI runs the same checks as the backstop
+   - Every PR runs `dotnet husky run`, which executes the committed Husky.Net hooks (the CSharpier check + `dotnet format style --verify-no-changes`)
+   - The hooks are committed under `.husky/`; register them locally with `dotnet tool restore` then `dotnet husky install` to get the same checks pre-commit
 
 #### Build Tasks
 
@@ -336,8 +336,8 @@ Follow the scope hierarchy in [Analyzer Diagnostics and Suppressions](#analyzer-
 
    ```xml
    <ItemGroup>
-     <InternalsVisibleTo Include="YourBenchmarkProject" />
-     <InternalsVisibleTo Include="YourTestProject" />
+     <InternalsVisibleTo Include="LanguageTagsCreate" />
+     <InternalsVisibleTo Include="LanguageTagsTests" />
    </ItemGroup>
    ```
 

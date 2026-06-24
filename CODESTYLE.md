@@ -59,7 +59,7 @@ This is the style guide for the **.NET projects** in this repo.
 
 3. **CI lint backstop**
    - `dotnet csharpier check` and `dotnet format style --verify-no-changes` run on every PR
-   - No git hooks ship by default - see README "Optional: enable git hooks locally" to opt in
+   - Husky.Net pre-commit hooks are committed under `.husky/`; register them locally with `dotnet tool restore` then `dotnet husky install`. CI runs the same checks as the backstop
 
 #### Build Tasks
 
@@ -70,7 +70,7 @@ Available VS Code tasks (run them from VS Code's task runner - **Terminal -> Run
 - `.NET Format`: Run CSharpier and build, then verify formatting and style with `--verify-no-changes` *(clean-compile; the task to run after edits)*
 - `.NET Tool Update`: Update dotnet tools *(convenience)*
 - `.NET Outdated Upgrade`: Upgrade outdated NuGet dependencies, interactive prompt *(convenience)*
-- `.NET Benchmark`: Run BenchmarkDotNet *(project-specific; present only if a Benchmarks project exists)*
+- `Husky.Net Run`: Run the Husky.Net pre-commit hooks manually *(convenience)*
 
 ### Tooling and Editor
 
@@ -84,7 +84,7 @@ Available VS Code tasks (run them from VS Code's task runner - **Terminal -> Run
    - `dotnet-outdated-tool`: Dependency update checks
    - Nerdbank.GitVersioning: Version management
 
-Pre-commit git hooks are not installed by default - CI is the lint backstop. See README "Optional: enable git hooks locally" if you want Husky.Net (or another runner) wired up locally.
+Husky.Net pre-commit hooks are committed under `.husky/`; run `dotnet tool restore` then `dotnet husky install` to register them locally (or run them on demand via the `Husky.Net Run` task). CI runs the same checks as the backstop.
 
 #### Editor Baseline
 

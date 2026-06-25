@@ -86,20 +86,16 @@ jobs:
       github: true
       nuget: true
 
+  # Caller-gated to main: the badge has no per-branch context, so it updates only when main is among the published
+  # branches (a develop-only push skips it). One invocation, not a per-branch matrix leg.
   date-badge:
     name: Create BYOB date badge job
     needs: [setup, publish]
-    if: ${{ needs.setup.outputs.publish == 'true' }}
-    strategy:
-      matrix:
-        branch: ${{ fromJSON(needs.setup.outputs.branches) }}
+    if: ${{ needs.setup.outputs.publish == 'true' && contains(fromJSON(needs.setup.outputs.branches), 'main') }}
     uses: ./.github/workflows/build-datebadge-task.yml
     secrets: inherit
     permissions:
       contents: write
-    with:
-      # The badge task self-gates to `main`; the develop leg is a no-op.
-      branch: ${{ matrix.branch }}
 
   # Delete the run's artifacts (durable copies live on the GitHub release) to keep them off the account storage quota.
   cleanup-artifacts:

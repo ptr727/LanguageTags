@@ -9,12 +9,6 @@ on:
         required: false
         type: string
         default: ''
-      # Logical branch NBGV classifies against. Pins PublicRelease to this branch instead of the runner's GITHUB_REF,
-      # which on a publish dispatched from the default branch is that branch for every matrix leg. Empty keeps GITHUB_REF.
-      branch:
-        required: false
-        type: string
-        default: ''
     outputs:
       SemVer2:
         value: ${{ jobs.get-version.outputs.SemVer2 }}
@@ -59,7 +53,8 @@ jobs:
         id: nbgv
         uses: dotnet/nbgv@master
         env:
-          # NBGV reads the branch from GITHUB_REF; pin it to the leg being versioned so a publish dispatched from the
-          # default branch doesn't classify every leg as the public ref and strip its prerelease suffix.
-          GITHUB_REF: ${{ inputs.branch != '' && format('refs/heads/{0}', inputs.branch) || github.ref }}
-          GITHUB_REF_NAME: ${{ inputs.branch != '' && inputs.branch || github.ref_name }}
+          # NBGV's GitHub Actions cloud-build provider overrides the checked-out branch with GITHUB_REF (the dispatch
+          # ref). On a publish dispatched from the default branch that misclassifies every matrix leg as the public ref
+          # and strips the prerelease suffix. GITHUB_REF is reserved and cannot be reliably overridden, so tell NBGV to
+          # ignore it and version from the actually-checked-out branch (each leg checks out its own branch).
+          IGNORE_GITHUB_REF: true

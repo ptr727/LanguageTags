@@ -37,7 +37,6 @@ jobs:
     secrets: inherit
     with:
       ref: ${{ inputs.ref }}
-      branch: ${{ inputs.branch }}
 
   build-nugetlibrary:
     name: Build NuGet library project job

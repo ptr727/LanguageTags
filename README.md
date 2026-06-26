@@ -217,7 +217,7 @@ match = languageLookup.IsMatch("es-MX", "es-419", true); // false, not the rever
 match = languageLookup.IsMatch("es-419", "es-MX"); // false, containment is opt-in
 ```
 
-Use `ExpandRegion()` to expand a tag region into the tag plus a variant for each containing UN M.49 group.
+Use `ExpandRegion()` to expand a tag region into the tag plus a region substituted tag for each containing UN M.49 group.
 
 ```csharp
 LanguageLookup languageLookup = new();

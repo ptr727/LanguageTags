@@ -321,7 +321,7 @@ public sealed class LanguageLookup
     }
 
     /// <summary>
-    /// Expands the region of a language tag into the tag plus a variant for each containing UN M.49 group.
+    /// Expands the region of a language tag into the tag plus a region substituted tag for each containing UN M.49 group.
     /// </summary>
     /// <remarks>
     /// For example "es-MX" expands to "es-MX", "es-013", "es-419", "es-019", and "es-001". A tag with
@@ -329,7 +329,7 @@ public sealed class LanguageLookup
     /// matched with plain string comparison without enabling region containment in <see cref="IsMatch(string, string, bool)"/>.
     /// </remarks>
     /// <param name="languageTag">The language tag to expand.</param>
-    /// <returns>The original tag followed by a region substituted variant for each containing group.</returns>
+    /// <returns>The original tag followed by a tag with the region replaced by each containing group.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="languageTag"/> is null.</exception>
     public IEnumerable<string> ExpandRegion(string languageTag)
     {

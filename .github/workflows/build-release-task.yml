@@ -166,7 +166,7 @@ jobs:
       # Surgical cleanup at the point of consumption: the release-asset-<branch>-* transfer artifacts now have durable
       # copies on the release, so delete them by exact pattern. Best-effort (the release already published): a hiccup
       # must not red the job; the retention-days: 1 backstop reaps anything missed. Deletes every matching id.
-      # Needs the caller to grant `actions: write` (publish-release's publish job does, see B2).
+      # Needs the caller to grant `actions: write` (publish-release's publish job does).
       - name: Delete consumed release asset artifacts step
         if: ${{ inputs.expect_release_assets }}
         continue-on-error: true

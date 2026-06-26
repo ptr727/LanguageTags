@@ -63,6 +63,56 @@ public sealed class LanguageLookupTests : SingleInstanceFixture
     }
 
     [Theory]
+    [InlineData("es-419", "es-MX", true)] // Mexico is in Latin America
+    [InlineData("es-MX", "es-419", false)] // Directional, not the reverse
+    [InlineData("es-419", "es-ES", false)] // Spain is not in Latin America
+    [InlineData("es-005", "es-AR", true)] // Argentina is in South America
+    [InlineData("es-013", "es-MX", true)] // Mexico is in Central America
+    [InlineData("es-419", "es-013", true)] // Central America is within Latin America
+    [InlineData("es-419", "es-419", true)] // Identity still matches
+    [InlineData("es-419", "fr-MX", false)] // Language must match
+    [InlineData("es-001", "es-MX", true)] // World contains every region
+    [InlineData("en", "en-US", true)] // Plain matching still works
+    [InlineData("es-Latn-419", "es-Latn-MX", true)] // Script is preserved
+    [InlineData("es-419", "es-MX-nedis", true)] // Broad group matches a more specific variant
+    [InlineData("es-419-nedis", "es-MX", false)] // Prefix variant must still match, no false positive
+    public void IsMatch_RegionContainment(string prefix, string tag, bool match)
+    {
+        LanguageLookup languageLookup = new();
+        _ = languageLookup.IsMatch(prefix, tag, true).Should().Be(match);
+    }
+
+    [Theory]
+    [InlineData("es-419", "es-MX")] // Containment is opt-in, plain matching does not expand regions
+    [InlineData("es-005", "es-AR")]
+    public void IsMatch_RegionContainment_Disabled_DoesNotMatch(string prefix, string tag)
+    {
+        LanguageLookup languageLookup = new();
+        _ = languageLookup.IsMatch(prefix, tag).Should().BeFalse();
+        _ = languageLookup.IsMatch(prefix, tag, false).Should().BeFalse();
+    }
+
+    [Fact]
+    public void ExpandRegion_Country_ReturnsContainmentChain()
+    {
+        LanguageLookup languageLookup = new();
+        List<string> expanded = [.. languageLookup.ExpandRegion("es-MX")];
+
+        // The original tag is always first, followed by the containing UN M.49 groups
+        _ = expanded[0].Should().Be("es-MX");
+        _ = expanded.Should().Contain(["es-MX", "es-013", "es-419", "es-019", "es-001"]);
+    }
+
+    [Theory]
+    [InlineData("es")] // No region to expand
+    [InlineData("es-MX-x-foo")] // Region present, private use preserved
+    public void ExpandRegion_AlwaysIncludesOriginal(string tag)
+    {
+        LanguageLookup languageLookup = new();
+        _ = languageLookup.ExpandRegion(tag).Should().Contain(tag);
+    }
+
+    [Theory]
     [InlineData("en-US", "en-us", true)]
     [InlineData("en-US", "EN-US", true)]
     [InlineData("zh-Hans", "zh-hans", true)]

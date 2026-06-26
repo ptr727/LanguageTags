@@ -15,6 +15,7 @@ public sealed class LanguageLookup
     private readonly Iso6392Data _iso6392 = Iso6392Data.Create();
     private readonly Iso6393Data _iso6393 = Iso6393Data.Create();
     private readonly Rfc5646Data _rfc5646 = Rfc5646Data.Create();
+    private readonly UnM49Data _unM49 = UnM49Data.Create();
     private readonly List<(string ietf, string iso)> _overrides = [];
 
     private static CultureInfo? CreateCultureInfo(string languageTag)
@@ -27,6 +28,7 @@ public sealed class LanguageLookup
 
         try
         {
+            // Get a CultureInfo representation
             CultureInfo cultureInfo = CultureInfo.GetCultureInfo(languageTag, true);
 
             // Make sure the culture was not custom created
@@ -172,6 +174,7 @@ public sealed class LanguageLookup
         Iso6393Record? iso6393 = _iso6393.Find(languageTag, false);
         if (iso6393 != null)
         {
+            // Return the Part 2B code
             return iso6393.Part2B!;
         }
 
@@ -179,6 +182,7 @@ public sealed class LanguageLookup
         Iso6392Record? iso6392 = _iso6392.Find(languageTag, false);
         if (iso6392 != null)
         {
+            // Return the Part 2B code
             return iso6392.Part2B!;
         }
 
@@ -194,6 +198,7 @@ public sealed class LanguageLookup
         iso6393 = _iso6393.Find(cultureInfo.ThreeLetterISOLanguageName, false);
         if (iso6393 != null)
         {
+            // Return the Part 2B code
             return iso6393.Part2B!;
         }
 
@@ -208,7 +213,25 @@ public sealed class LanguageLookup
     /// <param name="languageTag">The language tag to test.</param>
     /// <returns>true if the language tag matches or starts with the prefix; otherwise, false.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="prefix"/> or <paramref name="languageTag"/> is null.</exception>
-    public bool IsMatch(string prefix, string languageTag)
+    public bool IsMatch(string prefix, string languageTag) => IsMatch(prefix, languageTag, false);
+
+    /// <summary>
+    /// Determines whether a language tag matches or starts with the specified prefix, optionally
+    /// treating a UN M.49 region group in the prefix as matching any contained region.
+    /// </summary>
+    /// <remarks>
+    /// When <paramref name="regionContainment"/> is true and plain prefix matching fails, a prefix
+    /// with a UN M.49 region group (e.g. "es-419") matches a tag whose region is contained within
+    /// that group (e.g. "es-MX"). Matching is directional, the broad group in the prefix matches the
+    /// specific region in the tag, not the reverse. Note that "001" (World) contains every region, so
+    /// a prefix such as "es-001" matches any "es" tag with a region.
+    /// </remarks>
+    /// <param name="prefix">The prefix to match against.</param>
+    /// <param name="languageTag">The language tag to test.</param>
+    /// <param name="regionContainment">true to also match UN M.49 region containment; otherwise, false.</param>
+    /// <returns>true if the language tag matches the prefix; otherwise, false.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="prefix"/> or <paramref name="languageTag"/> is null.</exception>
+    public bool IsMatch(string prefix, string languageTag, bool regionContainment)
     {
         ArgumentNullException.ThrowIfNull(prefix);
         ArgumentNullException.ThrowIfNull(languageTag);
@@ -228,6 +251,7 @@ public sealed class LanguageLookup
             // The tag matches the prefix exactly
             if (languageTag.Equals(prefix, StringComparison.OrdinalIgnoreCase))
             {
+                // Exact match
                 return true;
             }
 
@@ -237,6 +261,7 @@ public sealed class LanguageLookup
                 && languageTag[prefix.Length..].StartsWith('-')
             )
             {
+                // Prefix match
                 return true;
             }
 
@@ -252,15 +277,81 @@ public sealed class LanguageLookup
                     !string.Equals(languageTag, subtag.TagValue, StringComparison.OrdinalIgnoreCase)
                 )
                 {
+                    // Rematch
                     languageTag = subtag.TagValue;
                     continue;
                 }
+            }
+
+            // Fall back to UN M.49 region containment, e.g. es-419 matches es-MX
+            if (regionContainment && IsRegionContainmentMatch(originalPrefix, originalTag))
+            {
+                return true;
             }
 
             // No match
             Log.LogPrefixMatchFailed(originalPrefix, originalTag);
             return false;
         }
+    }
+
+    private bool IsRegionContainmentMatch(string prefix, string languageTag)
+    {
+        // The candidate must parse and have a region to expand
+        LanguageTag? candidateTag = LanguageTag.Parse(languageTag);
+        if (candidateTag == null || string.IsNullOrEmpty(candidateTag.Region))
+        {
+            return false;
+        }
+
+        // Substitute the candidate region with each containing UN M.49 group and retry a plain match
+        // E.g. es-MX -> es-419, then prefix es-419 matches via the existing prefix rules
+        // Reusing the plain match keeps the variant, extension, and private use semantics intact
+        foreach (string ancestor in _unM49.GetAncestors(candidateTag.Region))
+        {
+            LanguageTag candidateGroup = new(candidateTag) { Region = ancestor };
+            if (IsMatch(prefix, candidateGroup.ToString(), false))
+            {
+                return true;
+            }
+        }
+
+        // No containing group matched
+        return false;
+    }
+
+    /// <summary>
+    /// Expands the region of a language tag into the tag plus a region substituted tag for each containing UN M.49 group.
+    /// </summary>
+    /// <remarks>
+    /// For example "es-MX" expands to "es-MX", "es-013", "es-419", "es-019", and "es-001". A tag with
+    /// no region, or one that cannot be parsed, yields only the original tag. The expanded tags can be
+    /// matched with plain string comparison without enabling region containment in <see cref="IsMatch(string, string, bool)"/>.
+    /// </remarks>
+    /// <param name="languageTag">The language tag to expand.</param>
+    /// <returns>The original tag followed by a tag with the region replaced by each containing group.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="languageTag"/> is null.</exception>
+    public IEnumerable<string> ExpandRegion(string languageTag)
+    {
+        ArgumentNullException.ThrowIfNull(languageTag);
+
+        // Always include the original tag
+        List<string> expanded = [languageTag];
+
+        // Parse and expand the region into its containing UN M.49 groups
+        LanguageTag? parsed = LanguageTag.Parse(languageTag);
+        if (parsed == null || string.IsNullOrEmpty(parsed.Region))
+        {
+            return expanded;
+        }
+
+        // Substitute each ancestor region, e.g. es-MX -> es-013, es-419, es-019, es-001
+        foreach (string ancestor in _unM49.GetAncestors(parsed.Region))
+        {
+            LanguageTag variant = new(parsed) { Region = ancestor };
+            expanded.Add(variant.ToString());
+        }
+        return expanded;
     }
 
     /// <summary>

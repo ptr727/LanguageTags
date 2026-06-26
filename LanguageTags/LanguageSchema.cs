@@ -35,4 +35,5 @@ internal static class LanguageSchema
 [JsonSerializable(typeof(Iso6392Data))]
 [JsonSerializable(typeof(Iso6393Data))]
 [JsonSerializable(typeof(Rfc5646Data))]
+[JsonSerializable(typeof(UnM49Data))]
 internal partial class LanguageJsonContext : JsonSerializerContext;

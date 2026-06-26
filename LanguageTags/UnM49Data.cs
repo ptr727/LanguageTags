@@ -295,6 +295,11 @@ public sealed partial class UnM49Data
     /// <summary>
     /// Finds a UN M.49 containment record by region code.
     /// </summary>
+    /// <remarks>
+    /// A code can appear in more than one source record (CLDR splits canonical and grouping overlays,
+    /// e.g. there are two "001" records), and this returns the first match only. Use <see cref="GetAncestors"/>
+    /// or <see cref="Contains"/> for the complete transitive containment across all records.
+    /// </remarks>
     /// <param name="code">The region code to search for (e.g. "419" or "013").</param>
     /// <returns>The first matching <see cref="UnM49Record"/>, or null when no match is found.</returns>
     public UnM49Record? Find(string code)
@@ -406,7 +411,8 @@ public sealed partial class UnM49Data
 public sealed record UnM49Record
 {
     /// <summary>
-    /// Gets the region code (UN M.49 numeric code, e.g. "419" or "013").
+    /// Gets the region code, usually a UN M.49 numeric code (e.g. "419" or "013"), but the CLDR source
+    /// also includes alphabetic grouping codes (e.g. "EU", "EZ", "UN").
     /// </summary>
     public string Code { get; init; } = string.Empty;
 

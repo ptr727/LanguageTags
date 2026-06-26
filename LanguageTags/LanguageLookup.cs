@@ -297,39 +297,27 @@ public sealed class LanguageLookup
 
     private bool IsRegionContainmentMatch(string prefix, string languageTag)
     {
-        // Both tags must parse
-        LanguageTag? prefixTag = LanguageTag.Parse(prefix);
+        // The candidate must parse and have a region to expand
         LanguageTag? candidateTag = LanguageTag.Parse(languageTag);
-        if (prefixTag == null || candidateTag == null)
+        if (candidateTag == null || string.IsNullOrEmpty(candidateTag.Region))
         {
             return false;
         }
 
-        // The prefix region must be a UN M.49 group (3 digits) and the candidate must have a region
-        if (
-            prefixTag.Region.Length != 3
-            || !prefixTag.Region.All(char.IsAsciiDigit)
-            || string.IsNullOrEmpty(candidateTag.Region)
-        )
+        // Substitute the candidate region with each containing UN M.49 group and retry a plain match
+        // E.g. es-MX -> es-419, then prefix es-419 matches via the existing prefix rules
+        // Reusing the plain match keeps the variant, extension, and private use semantics intact
+        foreach (string ancestor in _unM49.GetAncestors(candidateTag.Region))
         {
-            return false;
+            LanguageTag candidateGroup = new(candidateTag) { Region = ancestor };
+            if (IsMatch(prefix, candidateGroup.ToString(), false))
+            {
+                return true;
+            }
         }
 
-        // The language portion must be the same, only the region differs
-        if (
-            !prefixTag.Language.Equals(candidateTag.Language, StringComparison.OrdinalIgnoreCase)
-            || !prefixTag.ExtendedLanguage.Equals(
-                candidateTag.ExtendedLanguage,
-                StringComparison.OrdinalIgnoreCase
-            )
-            || !prefixTag.Script.Equals(candidateTag.Script, StringComparison.OrdinalIgnoreCase)
-        )
-        {
-            return false;
-        }
-
-        // The candidate region must be contained within the prefix region group
-        return _unM49.Contains(prefixTag.Region, candidateTag.Region);
+        // No containing group matched
+        return false;
     }
 
     /// <summary>

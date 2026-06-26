@@ -73,6 +73,9 @@ public sealed class LanguageLookupTests : SingleInstanceFixture
     [InlineData("es-419", "fr-MX", false)] // Language must match
     [InlineData("es-001", "es-MX", true)] // World contains every region
     [InlineData("en", "en-US", true)] // Plain matching still works
+    [InlineData("es-Latn-419", "es-Latn-MX", true)] // Script is preserved
+    [InlineData("es-419", "es-MX-nedis", true)] // Broad group matches a more specific variant
+    [InlineData("es-419-nedis", "es-MX", false)] // Prefix variant must still match, no false positive
     public void IsMatch_RegionContainment(string prefix, string tag, bool match)
     {
         LanguageLookup languageLookup = new();

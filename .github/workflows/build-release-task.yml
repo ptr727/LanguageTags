@@ -164,11 +164,15 @@ jobs:
             ./Publish/*
 
       # Surgical cleanup at the point of consumption: the release-asset-<branch>-* transfer artifacts now have durable
-      # copies on the release, so delete them by exact pattern. Best-effort (the release already published): a hiccup
-      # must not red the job; the retention-days: 1 backstop reaps anything missed. Deletes every matching id.
-      # Needs the caller to grant `actions: write` (publish-release's publish job does).
+      # copies on the release, so delete them by exact pattern to free the storage quota - scoped to this branch's
+      # assets, leaving diagnostics and any other artifacts. Gated to the same condition as the create step so it only
+      # deletes when a release was actually created/refreshed this run; on a skipped create (existing tag, no new
+      # commits) the fresh artifacts stay for the run, reaped by the retention-days: 1 backstop. Needs the caller to
+      # grant `actions: write` (publish-release's publish job does).
       - name: Delete consumed release asset artifacts step
-        if: ${{ inputs.expect_release_assets }}
+        if: ${{ inputs.expect_release_assets && (steps.release-exists.outputs.exists == 'false' || github.event_name == 'workflow_dispatch') }}
+        # Best-effort: the release is already published, so a listing/delete hiccup must never red the job; the
+        # retention-days: 1 backstop reaps anything missed. Deletes every matching id (a rerun can upload duplicates).
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}

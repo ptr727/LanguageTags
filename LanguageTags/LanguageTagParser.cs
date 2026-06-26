@@ -30,6 +30,7 @@ internal sealed class LanguageTagParser
         // Grandfathered and Redundant Registrations
         // https://www.rfc-editor.org/rfc/rfc5646#section-2.2.8
 
+        // Search tag registry
         // Type = Grandfathered, Tag = i-navajo, PreferredValue = nv
         List<Rfc5646Record> recordList =
         [
@@ -46,21 +47,25 @@ internal sealed class LanguageTagParser
             return recordList[0].PreferredValue!;
         }
 
+        // No match
         return languageTag;
     }
 
     private static void SetCase(LanguageTag languageTag)
     {
+        // Language lowercase
         if (!string.IsNullOrEmpty(languageTag.Language))
         {
             languageTag.Language = languageTag.Language.ToLowerInvariant();
         }
 
+        // Extended language lowercase
         if (!string.IsNullOrEmpty(languageTag.ExtendedLanguage))
         {
             languageTag.ExtendedLanguage = languageTag.ExtendedLanguage.ToLowerInvariant();
         }
 
+        // Script title case
         if (!string.IsNullOrEmpty(languageTag.Script))
         {
             languageTag.Script = CultureInfo.InvariantCulture.TextInfo.ToTitleCase(
@@ -68,28 +73,34 @@ internal sealed class LanguageTagParser
             );
         }
 
+        // Region uppercase
         if (!string.IsNullOrEmpty(languageTag.Region))
         {
             languageTag.Region = languageTag.Region.ToUpperInvariant();
         }
 
+        // Variants lowercase
         for (int i = 0; i < languageTag._variants.Count; i++)
         {
             languageTag._variants[i] = languageTag._variants[i].ToLowerInvariant();
         }
 
+        // Extensions lowercase and normalize
         for (int i = 0; i < languageTag._extensions.Count; i++)
         {
             languageTag._extensions[i] = languageTag._extensions[i].Normalize();
         }
 
+        // Private use lowercase and normalize
         languageTag.PrivateUse = languageTag.PrivateUse.Normalize();
     }
 
     private static void Sort(LanguageTag languageTag)
     {
+        // Sort variants
         languageTag._variants.Sort();
 
+        // Sort extensions by prefix
         languageTag._extensions.Sort((x, y) => x.Prefix.CompareTo(y.Prefix));
 
         // Note: Extension tags and private use tags are already sorted by Normalize()
@@ -125,12 +136,14 @@ internal sealed class LanguageTagParser
         _languageTag.Language = _tagList[0];
         _tagList.RemoveAt(0);
 
+        // Done
         return true;
     }
 
     private static bool ValidateExtendedLanguage(string tag) =>
-        // 3 chars
-        !string.IsNullOrEmpty(tag) && tag.Length == 3;
+        // 3 alpha
+        // A 3 digit value is a UN M.49 region, not an extended language
+        !string.IsNullOrEmpty(tag) && tag.Length == 3 && tag.All(char.IsAsciiLetter);
 
     private bool ParseExtendedLanguage()
     {
@@ -147,12 +160,14 @@ internal sealed class LanguageTagParser
         // Language is 2 or 3 chars
         if (!ValidateExtendedLanguage(_tagList[0]) || _languageTag.Language.Length is < 2 or > 3)
         {
+            // Done
             return true;
         }
 
         _languageTag.ExtendedLanguage = _tagList[0];
         _tagList.RemoveAt(0);
 
+        // Done
         return true;
     }
 
@@ -174,12 +189,14 @@ internal sealed class LanguageTagParser
         // Qaaa - Qabx reserved private use
         if (!ValidateScript(_tagList[0]))
         {
+            // Done
             return true;
         }
 
         _languageTag.Script = _tagList[0];
         _tagList.RemoveAt(0);
 
+        // Done
         return true;
     }
 
@@ -209,12 +226,14 @@ internal sealed class LanguageTagParser
         // 3 digit UN M.49
         if (!ValidateRegion(_tagList[0]))
         {
+            // Done
             return true;
         }
 
         _languageTag.Region = _tagList[0];
         _tagList.RemoveAt(0);
 
+        // Done
         return true;
     }
 
@@ -245,6 +264,7 @@ internal sealed class LanguageTagParser
             // begin with digit 4 = 8 chars
             if (!ValidateVariant(_tagList[0]))
             {
+                // Done
                 return true;
             }
 
@@ -254,10 +274,12 @@ internal sealed class LanguageTagParser
                 return false;
             }
 
+            // Add variant tag
             _languageTag._variants.Add(_tagList[0]);
             _tagList.RemoveAt(0);
         }
 
+        // Done
         return true;
     }
 
@@ -289,6 +311,7 @@ internal sealed class LanguageTagParser
             // 1 char (not x)
             if (!ValidateExtensionPrefix(_tagList[0]))
             {
+                // Done
                 return true;
             }
 
@@ -320,6 +343,7 @@ internal sealed class LanguageTagParser
                     return false;
                 }
 
+                // Add extension tag
                 extensionTags.Add(_tagList[0]);
                 _tagList.RemoveAt(0);
             }
@@ -330,9 +354,11 @@ internal sealed class LanguageTagParser
                 return false;
             }
 
+            // Add extension tag
             _languageTag._extensions.Add(new ExtensionTag(prefix, extensionTags));
         }
 
+        // Done
         return true;
     }
 
@@ -356,6 +382,7 @@ internal sealed class LanguageTagParser
         // x-[private]-[private]
         if (!ValidatePrivateUsePrefix(_tagList[0]))
         {
+            // Done
             return true;
         }
 
@@ -377,6 +404,7 @@ internal sealed class LanguageTagParser
         // Collect all private use tags
         List<string> privateTags = [];
 
+        // Read all tags
         while (_tagList.Count > 0)
         {
             // 1 to 8 chars
@@ -392,6 +420,7 @@ internal sealed class LanguageTagParser
                 return false;
             }
 
+            // Add private use tag
             privateTags.Add(_tagList[0]);
             _tagList.RemoveAt(0);
         }
@@ -402,8 +431,10 @@ internal sealed class LanguageTagParser
             return false;
         }
 
+        // Create private use tag
         _languageTag.PrivateUse = new PrivateUseTag(privateTags);
 
+        // Done
         return true;
     }
 
@@ -426,6 +457,7 @@ internal sealed class LanguageTagParser
                         ["-" privateuse]
         */
 
+        // Init
         _languageTag = new();
         _tagList.Clear();
         string originalTag = languageTag;
@@ -447,6 +479,7 @@ internal sealed class LanguageTagParser
         // Grandfathered
         languageTag = ParseGrandfathered(languageTag);
 
+        // Split by -
         _tagList.AddRange([.. languageTag.Split('-')]);
         if (_tagList.Count == 0)
         {
@@ -712,6 +745,7 @@ internal sealed class LanguageTagParser
             Log.LogNormalizedTag(originalTag, normalizedTag);
         }
 
+        // Done
         return normalizeTag;
     }
 
@@ -794,6 +828,12 @@ internal sealed class LanguageTagParser
         }
 
         // No empty tags
-        return !string.IsNullOrEmpty(languageTag.ToString());
+        if (string.IsNullOrEmpty(languageTag.ToString()))
+        {
+            return false;
+        }
+
+        // Done
+        return true;
     }
 }

@@ -1,0 +1,734 @@
+{
+  "RecordList": [
+    {
+      "Code": "001",
+      "Contains": [
+        "019",
+        "002",
+        "150",
+        "142",
+        "009"
+      ]
+    },
+    {
+      "Code": "001",
+      "Contains": [
+        "EU",
+        "EZ",
+        "UN"
+      ]
+    },
+    {
+      "Code": "011",
+      "Contains": [
+        "BF",
+        "BJ",
+        "CI",
+        "CV",
+        "GH",
+        "GM",
+        "GN",
+        "GW",
+        "LR",
+        "ML",
+        "MR",
+        "NE",
+        "NG",
+        "SH",
+        "SL",
+        "SN",
+        "TG"
+      ]
+    },
+    {
+      "Code": "013",
+      "Contains": [
+        "BZ",
+        "CR",
+        "GT",
+        "HN",
+        "MX",
+        "NI",
+        "PA",
+        "SV"
+      ]
+    },
+    {
+      "Code": "014",
+      "Contains": [
+        "BI",
+        "DJ",
+        "ER",
+        "ET",
+        "IO",
+        "KE",
+        "KM",
+        "MG",
+        "MU",
+        "MW",
+        "MZ",
+        "RE",
+        "RW",
+        "SC",
+        "SO",
+        "SS",
+        "TF",
+        "TZ",
+        "UG",
+        "YT",
+        "ZM",
+        "ZW"
+      ]
+    },
+    {
+      "Code": "142",
+      "Contains": [
+        "145",
+        "143",
+        "030",
+        "034",
+        "035"
+      ]
+    },
+    {
+      "Code": "143",
+      "Contains": [
+        "TM",
+        "TJ",
+        "KG",
+        "KZ",
+        "UZ"
+      ]
+    },
+    {
+      "Code": "145",
+      "Contains": [
+        "AE",
+        "AM",
+        "AZ",
+        "BH",
+        "CY",
+        "GE",
+        "IL",
+        "IQ",
+        "JO",
+        "KW",
+        "LB",
+        "OM",
+        "PS",
+        "QA",
+        "SA",
+        "SY",
+        "TR",
+        "YE"
+      ]
+    },
+    {
+      "Code": "015",
+      "Contains": [
+        "DZ",
+        "EG",
+        "EH",
+        "LY",
+        "MA",
+        "SD",
+        "TN",
+        "EA",
+        "IC"
+      ]
+    },
+    {
+      "Code": "150",
+      "Contains": [
+        "154",
+        "155",
+        "151",
+        "039"
+      ]
+    },
+    {
+      "Code": "151",
+      "Contains": [
+        "BG",
+        "BY",
+        "CZ",
+        "HU",
+        "MD",
+        "PL",
+        "RO",
+        "RU",
+        "SK",
+        "UA"
+      ]
+    },
+    {
+      "Code": "154",
+      "Contains": [
+        "GG",
+        "IM",
+        "JE",
+        "AX",
+        "DK",
+        "EE",
+        "FI",
+        "FO",
+        "GB",
+        "IE",
+        "IS",
+        "LT",
+        "LV",
+        "NO",
+        "SE",
+        "SJ",
+        "CQ"
+      ]
+    },
+    {
+      "Code": "155",
+      "Contains": [
+        "AT",
+        "BE",
+        "CH",
+        "DE",
+        "FR",
+        "LI",
+        "LU",
+        "MC",
+        "NL"
+      ]
+    },
+    {
+      "Code": "017",
+      "Contains": [
+        "AO",
+        "CD",
+        "CF",
+        "CG",
+        "CM",
+        "GA",
+        "GQ",
+        "ST",
+        "TD"
+      ]
+    },
+    {
+      "Code": "018",
+      "Contains": [
+        "BW",
+        "LS",
+        "NA",
+        "SZ",
+        "ZA"
+      ]
+    },
+    {
+      "Code": "019",
+      "Contains": [
+        "021",
+        "013",
+        "029",
+        "005"
+      ]
+    },
+    {
+      "Code": "019",
+      "Contains": [
+        "003",
+        "419"
+      ]
+    },
+    {
+      "Code": "002",
+      "Contains": [
+        "015",
+        "011",
+        "017",
+        "014",
+        "018"
+      ]
+    },
+    {
+      "Code": "002",
+      "Contains": [
+        "202"
+      ]
+    },
+    {
+      "Code": "202",
+      "Contains": [
+        "011",
+        "017",
+        "014",
+        "018"
+      ]
+    },
+    {
+      "Code": "021",
+      "Contains": [
+        "BM",
+        "CA",
+        "GL",
+        "PM",
+        "US"
+      ]
+    },
+    {
+      "Code": "029",
+      "Contains": [
+        "AG",
+        "AI",
+        "AW",
+        "BB",
+        "BL",
+        "BQ",
+        "BS",
+        "CU",
+        "CW",
+        "DM",
+        "DO",
+        "GD",
+        "GP",
+        "HT",
+        "JM",
+        "KN",
+        "KY",
+        "LC",
+        "MF",
+        "MQ",
+        "MS",
+        "PR",
+        "SX",
+        "TC",
+        "TT",
+        "VC",
+        "VG",
+        "VI"
+      ]
+    },
+    {
+      "Code": "003",
+      "Contains": [
+        "021",
+        "013",
+        "029"
+      ]
+    },
+    {
+      "Code": "030",
+      "Contains": [
+        "CN",
+        "HK",
+        "JP",
+        "KP",
+        "KR",
+        "MN",
+        "MO",
+        "TW"
+      ]
+    },
+    {
+      "Code": "035",
+      "Contains": [
+        "BN",
+        "ID",
+        "KH",
+        "LA",
+        "MM",
+        "MY",
+        "PH",
+        "SG",
+        "TH",
+        "TL",
+        "VN"
+      ]
+    },
+    {
+      "Code": "039",
+      "Contains": [
+        "AD",
+        "AL",
+        "BA",
+        "ES",
+        "GI",
+        "GR",
+        "HR",
+        "IT",
+        "ME",
+        "MK",
+        "MT",
+        "RS",
+        "PT",
+        "SI",
+        "SM",
+        "VA",
+        "XK"
+      ]
+    },
+    {
+      "Code": "419",
+      "Contains": [
+        "013",
+        "029",
+        "005"
+      ]
+    },
+    {
+      "Code": "005",
+      "Contains": [
+        "AR",
+        "BO",
+        "BR",
+        "BV",
+        "CL",
+        "CO",
+        "EC",
+        "FK",
+        "GF",
+        "GS",
+        "GY",
+        "PE",
+        "PY",
+        "SR",
+        "UY",
+        "VE"
+      ]
+    },
+    {
+      "Code": "053",
+      "Contains": [
+        "AU",
+        "CC",
+        "CX",
+        "HM",
+        "NF",
+        "NZ"
+      ]
+    },
+    {
+      "Code": "054",
+      "Contains": [
+        "FJ",
+        "NC",
+        "PG",
+        "SB",
+        "VU"
+      ]
+    },
+    {
+      "Code": "057",
+      "Contains": [
+        "FM",
+        "GU",
+        "KI",
+        "MH",
+        "MP",
+        "NR",
+        "PW",
+        "UM"
+      ]
+    },
+    {
+      "Code": "061",
+      "Contains": [
+        "AS",
+        "CK",
+        "NU",
+        "PF",
+        "PN",
+        "TK",
+        "TO",
+        "TV",
+        "WF",
+        "WS"
+      ]
+    },
+    {
+      "Code": "034",
+      "Contains": [
+        "AF",
+        "BD",
+        "BT",
+        "IN",
+        "IR",
+        "LK",
+        "MV",
+        "NP",
+        "PK"
+      ]
+    },
+    {
+      "Code": "009",
+      "Contains": [
+        "053",
+        "054",
+        "057",
+        "061",
+        "QO"
+      ]
+    },
+    {
+      "Code": "QO",
+      "Contains": [
+        "AQ",
+        "AC",
+        "CP",
+        "DG",
+        "TA"
+      ]
+    },
+    {
+      "Code": "EU",
+      "Contains": [
+        "AT",
+        "BE",
+        "CY",
+        "CZ",
+        "DE",
+        "DK",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GR",
+        "HR",
+        "HU",
+        "IE",
+        "IT",
+        "LT",
+        "LU",
+        "LV",
+        "MT",
+        "NL",
+        "PL",
+        "PT",
+        "SE",
+        "SI",
+        "SK",
+        "BG",
+        "RO"
+      ]
+    },
+    {
+      "Code": "EZ",
+      "Contains": [
+        "AT",
+        "BE",
+        "CY",
+        "DE",
+        "EE",
+        "ES",
+        "FI",
+        "FR",
+        "GR",
+        "IE",
+        "IT",
+        "LT",
+        "LU",
+        "LV",
+        "MT",
+        "NL",
+        "PT",
+        "SI",
+        "SK"
+      ]
+    },
+    {
+      "Code": "UN",
+      "Contains": [
+        "AD",
+        "AE",
+        "AF",
+        "AG",
+        "AL",
+        "AM",
+        "AO",
+        "AR",
+        "AT",
+        "AU",
+        "AZ",
+        "BA",
+        "BB",
+        "BD",
+        "BE",
+        "BF",
+        "BG",
+        "BH",
+        "BI",
+        "BJ",
+        "BN",
+        "BO",
+        "BR",
+        "BS",
+        "BT",
+        "BW",
+        "BY",
+        "BZ",
+        "CA",
+        "CD",
+        "CF",
+        "CG",
+        "CH",
+        "CI",
+        "CL",
+        "CM",
+        "CN",
+        "CO",
+        "CR",
+        "CU",
+        "CV",
+        "CY",
+        "CZ",
+        "DE",
+        "DJ",
+        "DK",
+        "DM",
+        "DO",
+        "DZ",
+        "EC",
+        "EE",
+        "EG",
+        "ER",
+        "ES",
+        "ET",
+        "FI",
+        "FJ",
+        "FM",
+        "FR",
+        "GA",
+        "GB",
+        "GD",
+        "GE",
+        "GH",
+        "GM",
+        "GN",
+        "GQ",
+        "GR",
+        "GT",
+        "GW",
+        "GY",
+        "HN",
+        "HR",
+        "HT",
+        "HU",
+        "ID",
+        "IE",
+        "IL",
+        "IN",
+        "IQ",
+        "IR",
+        "IS",
+        "IT",
+        "JM",
+        "JO",
+        "JP",
+        "KE",
+        "KG",
+        "KH",
+        "KI",
+        "KM",
+        "KN",
+        "KP",
+        "KR",
+        "KW",
+        "KZ",
+        "LA",
+        "LB",
+        "LC",
+        "LI",
+        "LK",
+        "LR",
+        "LS",
+        "LT",
+        "LU",
+        "LV",
+        "LY",
+        "MA",
+        "MC",
+        "MD",
+        "ME",
+        "MG",
+        "MH",
+        "MK",
+        "ML",
+        "MM",
+        "MN",
+        "MR",
+        "MT",
+        "MU",
+        "MV",
+        "MX",
+        "MW",
+        "MY",
+        "MZ",
+        "NA",
+        "NE",
+        "NG",
+        "NI",
+        "NL",
+        "NO",
+        "NR",
+        "NP",
+        "NZ",
+        "OM",
+        "PA",
+        "PE",
+        "PG",
+        "PH",
+        "PK",
+        "PL",
+        "PT",
+        "PW",
+        "PY",
+        "QA",
+        "RO",
+        "RS",
+        "RU",
+        "RW",
+        "SA",
+        "SB",
+        "SC",
+        "SD",
+        "SE",
+        "SG",
+        "SI",
+        "SK",
+        "SL",
+        "SM",
+        "SN",
+        "SO",
+        "SR",
+        "SS",
+        "ST",
+        "SV",
+        "SY",
+        "SZ",
+        "TD",
+        "TG",
+        "TH",
+        "TJ",
+        "TL",
+        "TM",
+        "TN",
+        "TO",
+        "TR",
+        "TT",
+        "TV",
+        "TZ",
+        "UA",
+        "UG",
+        "US",
+        "UY",
+        "UZ",
+        "VC",
+        "VE",
+        "VN",
+        "VU",
+        "WS",
+        "YE",
+        "ZA",
+        "ZM",
+        "ZW"
+      ]
+    }
+  ]
+}

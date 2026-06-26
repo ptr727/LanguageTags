@@ -18,6 +18,10 @@ internal sealed class CreateTagData(
     private string? _rfc5646DataFile;
     private string? _rfc5646JsonFile;
     private string? _rfc5646CodeFile;
+    private UnM49Data? _unM49;
+    private string? _unM49DataFile;
+    private string? _unM49JsonFile;
+    private string? _unM49CodeFile;
 
     internal async Task DownloadDataAsync()
     {
@@ -39,6 +43,10 @@ internal sealed class CreateTagData(
         await DownloadFileAsync(new Uri(Rfc5646Data.DataUri), _rfc5646DataFile)
             .ConfigureAwait(false);
 
+        Log.Information("Downloading UN M.49 data ...");
+        _unM49DataFile = Path.Combine(dataDirectory, UnM49Data.DataFileName);
+        await DownloadFileAsync(new Uri(UnM49Data.DataUri), _unM49DataFile).ConfigureAwait(false);
+
         Log.Information("Language tag data files downloaded successfully.");
     }
 
@@ -47,6 +55,7 @@ internal sealed class CreateTagData(
         ArgumentNullException.ThrowIfNull(_iso6392DataFile);
         ArgumentNullException.ThrowIfNull(_iso6393DataFile);
         ArgumentNullException.ThrowIfNull(_rfc5646DataFile);
+        ArgumentNullException.ThrowIfNull(_unM49DataFile);
 
         // Convert data files to JSON
         Log.Information("Converting data files to JSON ...");
@@ -69,6 +78,12 @@ internal sealed class CreateTagData(
         Log.Information("Writing RFC 5646 data to {JsonPath}", _rfc5646JsonFile);
         await _rfc5646.SaveJsonAsync(_rfc5646JsonFile).ConfigureAwait(false);
 
+        Log.Information("Converting UN M.49 data to JSON ...");
+        _unM49 = await UnM49Data.FromDataAsync(_unM49DataFile).ConfigureAwait(false);
+        _unM49JsonFile = Path.Combine(dataDirectory, UnM49Data.DataFileName + ".json");
+        Log.Information("Writing UN M.49 data to {JsonPath}", _unM49JsonFile);
+        await _unM49.SaveJsonAsync(_unM49JsonFile).ConfigureAwait(false);
+
         Log.Information("Data files converted to JSON successfully.");
     }
 
@@ -77,6 +92,7 @@ internal sealed class CreateTagData(
         ArgumentNullException.ThrowIfNull(_iso6392);
         ArgumentNullException.ThrowIfNull(_iso6393);
         ArgumentNullException.ThrowIfNull(_rfc5646);
+        ArgumentNullException.ThrowIfNull(_unM49);
 
         // Generate code files
         Log.Information("Generating code files ...");
@@ -95,6 +111,11 @@ internal sealed class CreateTagData(
         _rfc5646CodeFile = Path.Combine(codeDirectory, nameof(Rfc5646Data) + "Gen.cs");
         Log.Information("Writing RFC 5646 code to {CodePath}", _rfc5646CodeFile);
         await _rfc5646.SaveCodeAsync(_rfc5646CodeFile).ConfigureAwait(false);
+
+        Log.Information("Generating UN M.49 code ...");
+        _unM49CodeFile = Path.Combine(codeDirectory, nameof(UnM49Data) + "Gen.cs");
+        Log.Information("Writing UN M.49 code to {CodePath}", _unM49CodeFile);
+        await _unM49.SaveCodeAsync(_unM49CodeFile).ConfigureAwait(false);
 
         Log.Information("Code files generated successfully.");
     }

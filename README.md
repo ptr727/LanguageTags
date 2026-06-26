@@ -22,17 +22,12 @@ C# .NET library for ISO 639-2, ISO 639-3, RFC 5646 / BCP 47 language tags.
 
 ### Release Notes
 
-**Version: 1.2**:
+**Version: 1.4**:
 
 **Summary**:
 
-- Refactored the project to follow standard patterns used across other projects.
-- Added logging support configured through `LogOptions.SetFactory(ILoggerFactory)`.
-
-> **⚠️ Breaking Changes**:
->
-> - IO API's are async only, e.g. `LoadJson()` -> `async FromJsonAsync()`.
-> - Collection instantiation follows the `From` pattern, e.g. `LoadData()` -> `FromDataAsync()`.
+- Added UN M.49 region containment support sourced from Unicode CLDR.
+- Added opt-in region containment matching, e.g. `es-419` matches `es-MX`, see [Tag Matching](#tag-matching).
 
 See [Release History](./HISTORY.md) for complete release notes and older versions.
 
@@ -185,7 +180,7 @@ Tag matching can be used to select content based on preferred vs. available lang
 
 > **ℹ️ Examples**:
 >
-> - HTTP [`Accept-Language`][acceptlanguage-link] and [`Content-Language`](https://www.rfc-editor.org/rfc/rfc9110.html#name-content-language).
+> - HTTP [`Accept-Language`][acceptlanguage-link] and [`Content-Language`][contentlanguage-link].
 > - Matroska media stream [`LanguageIETF Element`][matroskalanguage-link].
 
 IETF language tags are in the form of:
@@ -208,6 +203,26 @@ match = languageLookup.IsMatch("zh", "zh-cmn-Hant"); // true
 match = languageLookup.IsMatch("sr-Latn", "sr-Latn-RS"); // true
 match = languageLookup.IsMatch("zha", "zh-Hans"); // false
 match = languageLookup.IsMatch("zh-Hant", "zh-Hans"); // false
+```
+
+A [UN M.49][unm49-link] region in a tag is a numeric code for a group of countries, e.g. `419` is Latin America and the Caribbean which contains `MX` Mexico.\
+Set the optional `regionContainment` argument to `true` to match a region group prefix against any contained region.\
+Matching is directional, the broad group in the prefix matches the specific region in the tag, not the reverse.
+
+```csharp
+LanguageLookup languageLookup = new();
+bool match = languageLookup.IsMatch("es-419", "es-MX", true); // true, Mexico is in Latin America
+match = languageLookup.IsMatch("es-419", "es-ES", true); // false, Spain is not in Latin America
+match = languageLookup.IsMatch("es-MX", "es-419", true); // false, not the reverse
+match = languageLookup.IsMatch("es-419", "es-MX"); // false, containment is opt-in
+```
+
+Use `ExpandRegion()` to expand a tag region into the tag plus a variant for each containing UN M.49 group.
+
+```csharp
+LanguageLookup languageLookup = new();
+IEnumerable<string> expanded = languageLookup.ExpandRegion("es-MX");
+// "es-MX", and its containing groups e.g. "es-013", "es-419", "es-019", "es-001"
 ```
 
 ### Tag Builder
@@ -412,9 +427,10 @@ LogOptions.SetFactory(loggerFactory);
   - Converts the tag data into JSON files.
   - Generates C# records of the tags.
 - **[`LanguageData`](./LanguageData/) directory**:
-  - ISO 639-2: [Source](https://www.loc.gov/standards/iso639-2/ISO-639-2_utf-8.txt), [Data](./LanguageData/iso6392), [JSON](./LanguageData/iso6392.json), [Code](./LanguageTags/Iso6392DataGen.cs)
-  - ISO 639-3: [Source](https://iso639-3.sil.org/sites/iso639-3/files/downloads/iso-639-3.tab), [Data](./LanguageData/iso6393), [JSON](./LanguageData/iso6393.json), [Code](./LanguageTags/Iso6393DataGen.cs)
-  - RFC 5646 : [Source](https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry), [Data](./LanguageData/rfc5646), [JSON](./LanguageData/rfc5646.json), [Code](./LanguageTags/Rfc5646DataGen.cs)
+  - ISO 639-2: [Source][iso6392source-link], [Data](./LanguageData/iso6392), [JSON](./LanguageData/iso6392.json), [Code](./LanguageTags/Iso6392DataGen.cs)
+  - ISO 639-3: [Source][iso6393source-link], [Data](./LanguageData/iso6393), [JSON](./LanguageData/iso6393.json), [Code](./LanguageTags/Iso6393DataGen.cs)
+  - RFC 5646 : [Source][rfc5646source-link], [Data](./LanguageData/rfc5646), [JSON](./LanguageData/rfc5646.json), [Code](./LanguageTags/Rfc5646DataGen.cs)
+  - UN M.49 : [Source][unm49source-link], [Data](./LanguageData/unm49), [JSON](./LanguageData/unm49.json), [Code](./LanguageTags/UnM49DataGen.cs)
 - A daily [GitHub Actions](./.github/workflows/run-periodic-codegen-pull-request.yml) job opens PRs to keep the data files up to date; a [weekly scheduled job](./.github/workflows/publish-release.yml) publishes new releases. Routine merges (Dependabot, codegen) only smoke-test — the actual build/publish is batched into the weekly run (two-phase model).
 
 ## Contributing
@@ -532,6 +548,7 @@ Both rulesets require the `Check pull request workflow status` status check and 
 - [RFC : 4647 : Matching of Language Tags][rfc4647-link]
 - [RFC : 5646 : Tags for Identifying Languages][rfc5646-link]
 - [Unicode Consortium : Unicode Common Locale Data Repository (CLDR) Project][cldr-link]
+- [UN Statistics Division : Standard Country or Area Codes (M.49)][unm49-link]
 - [Library of Congress : ISO 639-2 Language Coding Agency][iso6392-link]
 - [SIL International : ISO 639-3 Language Coding Agency][iso6393-link]
 
@@ -568,27 +585,23 @@ Both rulesets require the `Check pull request workflow status` status check and 
 Licensed under the [MIT License][license-link]\
 ![GitHub License][license-shield]
 
-<!--- Shields links --->
+<!-- Shields links -->
 
-[github-link]: https://github.com/ptr727/LanguageTags
 [actions-link]: https://github.com/ptr727/LanguageTags/actions
-[discussions-link]: https://github.com/ptr727/LanguageTags/discussions
 [commits-link]: https://github.com/ptr727/LanguageTags/commits/main
+[discussions-link]: https://github.com/ptr727/LanguageTags/discussions
+[github-link]: https://github.com/ptr727/LanguageTags
 [issues-link]: https://github.com/ptr727/LanguageTags/issues
-[releases-link]: https://github.com/ptr727/LanguageTags/releases
-
-[license-link]: ./LICENSE
-[license-shield]: https://img.shields.io/github/license/ptr727/LanguageTags?label=License
-
 [lastbuild-shield]: https://byob.yarr.is/ptr727/LanguageTags/lastbuild
 [lastcommit-shield]: https://img.shields.io/github/last-commit/ptr727/LanguageTags?logo=github&label=Last%20Commit
-
-[releaseversion-shield]: https://img.shields.io/github/v/release/ptr727/LanguageTags?logo=github&label=GitHub%20Release
-[prereleaseversion-shield]: https://img.shields.io/github/v/release/ptr727/LanguageTags?include_prereleases&filter=*-g*&label=GitHub%20Pre-Release&logo=github
-[releasebuildstatus-shield]: https://img.shields.io/github/actions/workflow/status/ptr727/LanguageTags/publish-release.yml?logo=github&label=Releases%20Build&event=schedule
-
+[license-link]: ./LICENSE
+[license-shield]: https://img.shields.io/github/license/ptr727/LanguageTags?label=License
 [nuget-link]: https://www.nuget.org/packages/ptr727.LanguageTags/
 [nugetreleaseversion-shield]: https://img.shields.io/nuget/v/ptr727.LanguageTags?logo=nuget&label=NuGet%20Release
+[prereleaseversion-shield]: https://img.shields.io/github/v/release/ptr727/LanguageTags?include_prereleases&filter=*-g*&label=GitHub%20Pre-Release&logo=github
+[releasebuildstatus-shield]: https://img.shields.io/github/actions/workflow/status/ptr727/LanguageTags/publish-release.yml?logo=github&label=Releases%20Build&event=schedule
+[releases-link]: https://github.com/ptr727/LanguageTags/releases
+[releaseversion-shield]: https://img.shields.io/github/v/release/ptr727/LanguageTags?logo=github&label=GitHub%20Release
 
 <!-- 3rd Party tool links -->
 
@@ -605,39 +618,47 @@ Licensed under the [MIT License][license-link]\
 [serilog-link]: https://serilog.net/
 [xunit-link]: https://xunit.net/
 
+<!-- Data source links -->
+
+[iso6392source-link]: https://www.loc.gov/standards/iso639-2/ISO-639-2_utf-8.txt
+[iso6393source-link]: https://iso639-3.sil.org/sites/iso639-3/files/downloads/iso-639-3.tab
+[rfc5646source-link]: https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
+[unm49source-link]: https://raw.githubusercontent.com/unicode-org/cldr/main/common/supplemental/supplementalData.xml
+
 <!-- Other links -->
 
+[acceptlanguage-link]: https://www.rfc-editor.org/rfc/rfc9110.html#name-accept-language
+[bcp47-link]: https://www.rfc-editor.org/info/bcp47
+[cldr-link]: https://cldr.unicode.org/
+[contentlanguage-link]: https://www.rfc-editor.org/rfc/rfc9110.html#name-content-language
+[dansmithlanguagetagssharp-link]: https://github.com/DanSmith/languagetags-sharp
+[ianatags-link]: https://www.iana.org/assignments/language-subtags-tags-extensions/language-subtags-tags-extensions.xhtml
+[ietflanguagetag-link]: https://en.wikipedia.org/wiki/IETF_language_tag
+[iso15924-link]: https://unicode.org/iso15924/iso15924-codes.html
+[iso31661-link]: https://en.wikipedia.org/wiki/ISO_3166-1
+[iso6392-link]: https://www.loc.gov/standards/iso639-2/
+[iso6393-link]: https://iso639-3.sil.org/
+[jkporterbcp47-link]: https://github.com/jkporter/bcp47
+[matroskalanguage-link]: https://datatracker.ietf.org/doc/html/draft-ietf-cellar-matroska-07#name-language-codes
+[mattcglanguagesubtagregistry-link]: https://github.com/mattcg/language-subtag-registry
+[oxigraphoxilangtag-link]: https://github.com/oxigraph/oxilangtag
+[pyfischrustlanguagetags-link]: https://github.com/pyfisch/rust-language-tags/
+[r12asubtags-link]: https://r12a.github.io/app-subtags/
+[rfc4647-link]: https://www.rfc-editor.org/info/rfc4647
+[rfc5646-link]: https://www.rfc-editor.org/info/rfc5646
 [rfc5646section21-link]: https://www.rfc-editor.org/rfc/rfc5646#section-2.1
 [rfc5646section221-link]: https://www.rfc-editor.org/rfc/rfc5646#section-2.2.1
 [rfc5646section222-link]: https://www.rfc-editor.org/rfc/rfc5646#section-2.2.2
 [rfc5646section223-link]: https://www.rfc-editor.org/rfc/rfc5646#section-2.2.3
-[iso15924-link]: https://unicode.org/iso15924/iso15924-codes.html
 [rfc5646section224-link]: https://www.rfc-editor.org/rfc/rfc5646#section-2.2.4
-[iso31661-link]: https://en.wikipedia.org/wiki/ISO_3166-1
-[unm49-link]: https://unstats.un.org/unsd/methodology/m49/
 [rfc5646section225-link]: https://www.rfc-editor.org/rfc/rfc5646#section-2.2.5
 [rfc5646section226-link]: https://www.rfc-editor.org/rfc/rfc5646#section-2.2.6
 [rfc5646section227-link]: https://www.rfc-editor.org/rfc/rfc5646#section-2.2.7
 [rfc5646section228-link]: https://www.rfc-editor.org/rfc/rfc5646#section-2.2.8
-[r12asubtags-link]: https://r12a.github.io/app-subtags/
-[wikipediacodes-link]: https://en.wikipedia.org/wiki/Codes_for_constructed_languages
-[ietflanguagetag-link]: https://en.wikipedia.org/wiki/IETF_language_tag
+[rfc5646section229-link]: https://www.rfc-editor.org/rfc/rfc5646#section-2.2.9
+[rfc5646section45-link]: https://www.rfc-editor.org/rfc/rfc5646#section-4.5
+[rspeerlangcodes-link]: https://github.com/rspeer/langcodes
+[unm49-link]: https://unstats.un.org/unsd/methodology/m49/
 [w3cchoosingtag-link]: https://www.w3.org/International/questions/qa-choosing-language-tags
 [w3ctags-link]: https://www.w3.org/International/articles/language-tags/
-[ianatags-link]: https://www.iana.org/assignments/language-subtags-tags-extensions/language-subtags-tags-extensions.xhtml
-[rfc4647-link]: https://www.rfc-editor.org/info/rfc4647
-[rfc5646-link]: https://www.rfc-editor.org/info/rfc5646
-[iso6392-link]: https://www.loc.gov/standards/iso639-2/
-[cldr-link]: https://cldr.unicode.org/
-[iso6393-link]: https://iso639-3.sil.org/
-[bcp47-link]: https://www.rfc-editor.org/info/bcp47
-[rspeerlangcodes-link]: https://github.com/rspeer/langcodes
-[oxigraphoxilangtag-link]: https://github.com/oxigraph/oxilangtag
-[pyfischrustlanguagetags-link]: https://github.com/pyfisch/rust-language-tags/
-[dansmithlanguagetagssharp-link]: https://github.com/DanSmith/languagetags-sharp
-[jkporterbcp47-link]: https://github.com/jkporter/bcp47
-[mattcglanguagesubtagregistry-link]: https://github.com/mattcg/language-subtag-registry
-[rfc5646section229-link]: https://www.rfc-editor.org/rfc/rfc5646#section-2.2.9
-[acceptlanguage-link]: https://www.rfc-editor.org/rfc/rfc9110.html#name-accept-language
-[matroskalanguage-link]: https://datatracker.ietf.org/doc/html/draft-ietf-cellar-matroska-07#name-language-codes
-[rfc5646section45-link]: https://www.rfc-editor.org/rfc/rfc5646#section-4.5
+[wikipediacodes-link]: https://en.wikipedia.org/wiki/Codes_for_constructed_languages

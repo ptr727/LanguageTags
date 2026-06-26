@@ -1,7 +1,8 @@
 name: NBGV ref probe
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [ fix/nbgv-ignore-github-ref ]
 
 permissions:
   contents: read

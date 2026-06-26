@@ -9,6 +9,12 @@ on:
         required: false
         type: string
         default: ''
+      # Logical branch NBGV classifies against. Pins PublicRelease to this branch instead of the runner's GITHUB_REF,
+      # which on a publish dispatched from the default branch is that branch for every matrix leg. Empty keeps GITHUB_REF.
+      branch:
+        required: false
+        type: string
+        default: ''
     outputs:
       SemVer2:
         value: ${{ jobs.get-version.outputs.SemVer2 }}
@@ -52,3 +58,8 @@ jobs:
       - name: Run Nerdbank.GitVersioning tool step
         id: nbgv
         uses: dotnet/nbgv@master
+        env:
+          # NBGV reads the branch from GITHUB_REF; pin it to the leg being versioned so a publish dispatched from the
+          # default branch doesn't classify every leg as the public ref and strip its prerelease suffix.
+          GITHUB_REF: ${{ inputs.branch != '' && format('refs/heads/{0}', inputs.branch) || github.ref }}
+          GITHUB_REF_NAME: ${{ inputs.branch != '' && inputs.branch || github.ref_name }}

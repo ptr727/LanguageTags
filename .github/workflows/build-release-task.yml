@@ -64,8 +64,16 @@ jobs:
         env:
           SEMVER2: ${{ needs.get-version.outputs.SemVer2 }}
           BRANCH: ${{ inputs.branch }}
+          SMOKE: ${{ inputs.smoke }}
         run: |
           set -euo pipefail
+          # This gate guards real publishes. A smoke build checks out the PR head in detached HEAD, so NBGV always
+          # yields a prerelease version; on a main-base PR that would trip the public-release check and fail every
+          # develop->main promotion that carries a build target. Skip the gate for smoke builds (they never publish).
+          if [[ "$SMOKE" == "true" ]]; then
+            echo "Smoke build; skipping release version validation."
+            exit 0
+          fi
           CORE_AND_PRE="${SEMVER2%%+*}"
           if [[ "$BRANCH" == "main" ]]; then
             if [[ "$CORE_AND_PRE" == *-* ]]; then

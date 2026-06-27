@@ -1,0 +1,31 @@
+name: nbgv detached branch probe
+
+on:
+  push:
+    branches: [ fix/nbgv-detached-branch ]
+
+permissions:
+  contents: read
+
+jobs:
+  probe-main:
+    name: Probe main detached
+    uses: ./.github/workflows/build-release-task.yml
+    secrets: inherit
+    with:
+      smoke: true
+      github: false
+      nuget: false
+      ref: main
+      branch: main
+
+  probe-develop:
+    name: Probe develop detached
+    uses: ./.github/workflows/build-release-task.yml
+    secrets: inherit
+    with:
+      smoke: true
+      github: false
+      nuget: false
+      ref: develop
+      branch: develop

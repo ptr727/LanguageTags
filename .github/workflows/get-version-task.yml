@@ -9,6 +9,13 @@ on:
         required: false
         type: string
         default: ''
+      # Logical branch NBGV classifies public-vs-prerelease against. With IGNORE_GITHUB_REF, NBGV reads the
+      # checked-out git branch; callers that check out a pinned commit (detached HEAD - the build jobs) pass this
+      # so a local branch can be created at that commit, giving NBGV the right name. Empty leaves the checkout as-is.
+      branch:
+        required: false
+        type: string
+        default: ''
     outputs:
       SemVer2:
         value: ${{ jobs.get-version.outputs.SemVer2 }}
@@ -46,6 +53,16 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
+
+      # NBGV (with IGNORE_GITHUB_REF) classifies public-vs-prerelease from the checked-out branch. A pinned-SHA
+      # checkout is detached HEAD, where NBGV sees no branch and treats every leg as prerelease (the main leg would
+      # then build a prerelease package mismatching its clean release tag). Force a local branch at HEAD matching the
+      # logical branch so NBGV sees the right name while still versioning the intended commit.
+      - name: Pin logical branch step
+        if: ${{ inputs.branch != '' }}
+        env:
+          BRANCH: ${{ inputs.branch }}
+        run: git checkout -B "$BRANCH"
 
       # nbgv is floated on @master: its tag stream lags master, so Dependabot tag-tracking would propose a downgrade.
       # Revisit if dotnet/nbgv resumes regular tagged releases.

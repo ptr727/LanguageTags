@@ -14,12 +14,12 @@ Each guarantee names the **failure it prevents**, so the reason survives a reimp
 
 ## 0. The model at a glance
 
-A run targets **one branch, the one it was triggered on** (`github.ref_name`). `main` produces a stable
-release, `develop` a prerelease. The version is computed once from that branch and threaded downstream. A
-pull request builds and tests but never publishes. The package **publishes itself** whenever its shipped
-content changes (a data refresh, a runtime-dependency update, or a source change), so releases keep pace
-with the code on their own. A maintainer publishes manually only to force a release. Dependency and data
-updates merge themselves once their tests pass, so the library stays current without hand-holding.
+A run targets **one branch, the one it was triggered on** (`github.ref_name`): `main` builds a stable
+release, `develop` a prerelease. The version is computed once and threaded downstream. A pull request
+builds and tests but never publishes. The package **publishes itself** when a shipped input changes (the
+source, the embedded data, the version floor, or the build configuration), so releases track the code
+without a person cutting them. A maintainer dispatches only to force a release. Dependabot and codegen
+pull requests merge themselves once their checks pass.
 
 ### Glossary
 
@@ -37,17 +37,16 @@ updates merge themselves once their tests pass, so the library stays current wit
   the **base** branch's copy, while a `push`/`workflow_dispatch` event resolves it from the **pushed**
   head. Self-testing (section 3) depends on this.
 - **Shipped input** - a file that changes what the package ships: the library source (`LanguageTags/**`),
-  the embedded data (`LanguageData/**`), the version floor (`version.json`), or build configuration
-  (`Directory.Build.props`). This is an explicit **inclusion list** (the publisher's `on.push.paths`),
-  so a change confined to tests, the codegen tool, dependencies, GitHub Actions, docs, or CI is **not** a
-  shipped input. Dependency version bumps are excluded as a deliberate policy choice to avoid republish
-  churn - a dependency update can change runtime behavior, but the bumps are frequent and not each worth a
-  release - so they ship on the next promotion or a manual dispatch rather than auto-publishing.
+  the embedded data (`LanguageData/**`), the version floor (`version.json`), or the build configuration
+  (`Directory.Build.props`). It is an explicit **inclusion list** (the publisher's `on.push.paths`), so a
+  change confined to tests, the codegen tool, dependencies, GitHub Actions, docs, or CI is **not** a
+  shipped input. Dependency bumps are excluded by policy to avoid republish churn (frequent, and not each
+  worth a release), so they ship on the next promotion or a dispatch.
 - **GitHub App token** - a short-lived installation token from `actions/create-github-app-token`, minted
   from the App credentials (`CODEGEN_APP_CLIENT_ID` / `CODEGEN_APP_PRIVATE_KEY`). Automation that must
-  trigger further workflows or write to bot pull requests uses **this token, not the built-in
-  `GITHUB_TOKEN`**. A commit pushed with the built-in token does not trigger downstream workflows
-  (GitHub's recursion guard), and that token is read-only on Dependabot pull requests.
+  trigger downstream workflows or write to bot pull requests uses **this token, not `GITHUB_TOKEN`**: a
+  commit pushed with the built-in token does not trigger downstream workflows (GitHub's recursion guard),
+  and that token is read-only on Dependabot pull requests.
 
 ## 1. Purpose and how to use this document
 
@@ -122,20 +121,14 @@ version classification disagree.*
 
 NBGV runs in exactly one job per run. Its outputs (`SemVer2`, `GitCommitId`, the assembly versions)
 thread to every consumer through `outputs:`/`needs:`, and no other job re-invokes it. A build job may
-check out a specific commit to **compile** it, but it consumes the threaded version rather than computing
-a new one. *This keeps the package version and the release tag in agreement.*
+check out a specific commit to **compile** it, but it consumes the threaded version. *This keeps the
+package version and the release tag in agreement.*
 
-Where that one NBGV job runs, HEAD is a real branch tip, so NBGV classifies the branch natively:
-
-- On a `push` or `workflow_dispatch` run, `github.ref` is a real branch and `actions/checkout` lands on
-  it. The default branch is the public-release ref (`publicReleaseRefSpec = ^refs/heads/main$`), so it
-  builds a clean `X.Y.Z`. Every other branch builds a prerelease `X.Y.Z-g<sha>`.
-  A smoke build runs on a feature-branch push, so it checks out that branch tip and versions as a
-  prerelease (the branch is not `main`); it never publishes, and the validate gate is skipped on smoke
-  (D2.2). Because every run is a branch push that checks out a real branch tip, the detached-merge-ref
-  case (NBGV seeing no branch and classifying prerelease) does not arise.
-
-`version.json`'s `version` is the major.minor floor. NBGV appends the git height as the patch.
+Every run is a `push`/`workflow_dispatch` on a real branch, so `actions/checkout` lands on a branch tip
+and NBGV classifies natively: the public-release ref (`publicReleaseRefSpec = ^refs/heads/main$`) builds a
+clean `X.Y.Z`, every other branch a prerelease `X.Y.Z-g<sha>`. The detached-merge-ref case (NBGV seeing no
+branch) never arises. `version.json`'s `version` is the major.minor floor, and NBGV appends the git height
+as the patch.
 
 ### Validate at entry
 
@@ -145,88 +138,75 @@ asserts it once and fails fast with `::error::` before any build or publish. Dow
 ### Resource lifecycle
 
 Workflow artifacts are an intra-run handoff. The durable copy lives on the GitHub release / NuGet.org. A
-transfer artifact handed between jobs is deleted by exact name/pattern at the point it is consumed, the
-delete gated to the consumer's condition and best-effort. Every `upload-artifact` sets `retention-days: 1`
-as a backstop, so a run that skips the consume-then-delete step still reclaims its artifact instead of
-leaking it. The run's artifact set is never blanket-deleted (`.artifacts[].id`), which would destroy the
-diagnostic/build-record artifacts needed to debug a failed run. See D5.
+transfer artifact is deleted by exact name at the point it is consumed, the delete gated to the consumer's
+condition and best-effort. Every `upload-artifact` sets `retention-days: 1` as a backstop, so a run that
+skips the delete still reclaims its artifact. The run's artifact set is never blanket-deleted
+(`.artifacts[].id`), which would destroy the diagnostic artifacts needed to debug a failed run. See D5.
 
 ### Fast pull-request feedback
 
-A pull request validates fast and never publishes. Validation is packaged as a reusable `validate-task`
-holding two jobs - `unit-test` (build and test) and `lint` (the editor's checks enforced in CI - see
-below). The pull request runs it as a `validate` job alongside `smoke-build` (build and pack the library
-to prove it ships, uploading and pushing nothing). They run unconditionally, with no paths filter, so a
-change to a reusable workflow is always exercised head-resolved rather than shipped on linter-faith.
-Packaging validation as one reusable task lets the publisher run the identical gate (D4.6). One required
-aggregator gates the merge. See D1.
+A pull request validates fast and never publishes. Validation is a reusable `validate-task` holding two
+jobs, `unit-test` (build and test) and `lint` (the editor's checks, enforced in CI). The pull request runs
+it as a `validate` job alongside `smoke-build` (build and pack the library to prove it ships, uploading and
+pushing nothing). Both run unconditionally, no paths filter, so a reusable-workflow change is always
+exercised head-resolved. Packaging validation as one task lets the publisher run the identical gate (D4.6).
+One required aggregator gates the merge. See D1.
 
 ### Self-testing workflows, and the required-context invariant
 
 A pull request exercises its own workflow files. No change waits to reach `main` first.
 
-- **CI runs on `push` to every branch.** Every commit on any branch is smoke-tested, which is the point
-  of smoke testing, and GitHub head-resolves the reusable `./...` workflows from the pushed head. So a
-  pull request that edits a reusable task tests its own copy. The push run is the **sole producer** of
-  the aggregator's ruleset-bound `context:`, emitting it on the head SHA that branch protection
-  evaluates. CI never publishes.
-- **Single-producer invariant.** Exactly one trigger path emits a given ruleset-bound context name. The
-  push run is the sole producer; there is no `pull_request`-triggered job emitting the same name, which
-  would race two check-runs on one SHA.
-- **Only `main`/`develop` produce releases.** The publisher also runs on `push` to the protected
-  branches, gated on a shipped change (D4.1). On a protected-branch push, CI and the publisher both run,
-  in separate workflows with separate concurrency, so they do not race. CI re-tests the merged tree, the
-  publisher releases only if a shipped input changed.
-- **Publishing uses the dispatched branch's workflows.** A manual publish is dispatched on the target
-  branch and runs that branch's workflows, so a workflow change is usable on the branch that introduces
-  it.
-- **Forks are the documented exception.** A fork cannot push to this repo, so a fork pull request produces
-  no push run and no aggregator check. A maintainer lands the change on an in-repo branch (which pushes,
-  and so validates) before merging. Dependabot is not an exception: its pull requests come from in-repo
-  branches, so the branch push validates them head-resolved like any other. A Dependabot-triggered run
-  carries a restricted read-only token and the Dependabot secret store, which is enough for the read-only
-  validation the gate performs. See D6.
+- **CI runs on `push` to every branch.** GitHub head-resolves the reusable `./...` workflows from the
+  pushed head, so a pull request that edits a reusable task tests its own copy. The push run is the **sole
+  producer** of the aggregator's ruleset-bound `context:`, on the head SHA branch protection evaluates. CI
+  never publishes.
+- **Single-producer invariant.** Exactly one trigger path emits a given ruleset-bound context name. No
+  `pull_request`-triggered job emits it, which would race two check-runs on one SHA.
+- **Only `main`/`develop` produce releases.** The publisher also runs on `push` to the protected branches,
+  gated on a shipped change (D4.1). CI and the publisher then run in separate workflows with separate
+  concurrency, so they do not race: CI re-tests the merged tree, the publisher releases only on a shipped
+  change.
+- **A dispatched publish uses that branch's workflows**, so a workflow change is usable on the branch that
+  introduces it.
+- **Forks are the documented exception.** A fork cannot push here, so its pull request produces no run and
+  no aggregator check, and a maintainer lands the change on an in-repo branch (which pushes, and so
+  validates) before merging. Dependabot is not an exception: its pull requests are in-repo branches,
+  validated head-resolved by their push (a read-only token and the Dependabot secret store, enough for the
+  gate). See D6.
 
 ### Publishing: self-sufficient and branch-scoped
 
-The package publishes itself whenever its shipped content changes, so the release tracks the code and
-data without a person cutting it. Every publish targets only the branch it ran on (`develop` ->
-prerelease, `main` -> stable). Two things publish:
+The package publishes itself when a shipped input changes, so releases track the code without a person
+cutting them. Every publish targets only the branch it ran on (`develop` -> prerelease, `main` -> stable).
+Two things publish:
 
-- **An automatic release on a shipped change.** The publisher runs on `push` to `main`/`develop` with an
-  `on.push.paths` **inclusion list** - `LanguageTags/**`, `LanguageData/**`, `version.json`,
-  `Directory.Build.props` - so it triggers only when a shipped input changed. The list is inclusion-only
-  and declarative: add a path if a new input starts affecting the shipped package. `Directory.Packages.props`
-  and `.github/**` are deliberately not listed, so a dependency bump or a GitHub Actions bump does not
-  republish (a policy choice to avoid republish churn, not a claim the bump is inert; it ships on the next
-  promotion or a dispatch). The
-  merge-bot merges with the App token, so its merge commits trigger this push-driven publisher.
-- **A manual release on demand.** A `workflow_dispatch` on a branch publishes that branch immediately,
-  whatever changed. The "release now" control.
+- **An automatic release on a shipped change.** The publisher runs on `push` to `main`/`develop` with the
+  `on.push.paths` inclusion list (`LanguageTags/**`, `LanguageData/**`, `version.json`,
+  `Directory.Build.props`), so it triggers only when a shipped input changed. `Directory.Packages.props`
+  and `.github/**` are not listed, so dependency and Actions bumps do not republish. The merge-bot merges
+  with the App token, so its merge commits reach this push trigger.
+- **A manual release on demand.** A `workflow_dispatch` on a branch publishes it immediately, whatever
+  changed - the "release now" control.
 
-There is no scheduled or time-based publish, and no publish-on-every-merge. The package stays current
-because each shipped change releases itself, not because a clock fires. Every publish, automatic or
-manual, runs the same `validate-task` a pull request runs - the identical reusable definition, not a
-copy - as a `validate` job that the publish job `needs:`, so the NuGet push and the release are gated on
-it. A release never ships a tree that would fail the pull-request gate (D4.6). This matters because
-`develop` merges squash and `main` merges create a merge commit, so the published commit is not the
-feature-head commit the pull request smoke-tested. See D4.
+There is no scheduled publish and no publish-on-every-merge. Every publish runs the same `validate-task`
+the pull request runs (the identical definition, not a copy) as a `validate` job the publish job `needs:`,
+so nothing ships that would fail the pull-request gate (D4.6). This matters because `develop` squashes and
+`main` merge-commits, so the published commit is not the feature-head the pull request smoke-tested. See
+D4.
 
 ### Self-sufficiency: automatic updates
 
-- **Dependabot pull requests merge themselves.** Every Dependabot pull request, any ecosystem and any
-  tier including semver-major, auto-merges once the required checks pass, using the App token. The
-  unit-test gate is the safety net: an update that breaks the build or tests fails the check, auto-merge
-  does not complete, and GitHub's check-failure notification reaches the maintainer. There is no
-  version-tier exception. A major bump merges like any other once its tests are green.
+- **Dependabot pull requests merge themselves.** Every Dependabot pull request, any ecosystem and any tier
+  (semver-major included), auto-merges once the required checks pass, using the App token. The checks are
+  the safety net: an update that breaks the build or tests fails them, auto-merge does not complete, and
+  GitHub notifies the maintainer.
 - **Codegen refreshes data the same way.** The codegen workflow regenerates `LanguageData/` from its
-  upstream registries on a daily check, opens a pull request only when the data changed, and that pull
-  request auto-merges on green. Because the data is a shipped input, the publisher then releases it.
+  upstream registries daily, opens a pull request only when the data changed, and auto-merges it on green.
+  The data is a shipped input, so the publisher then releases it.
 
 The library is self-maintaining: data and dependencies stay current on both branches, each shipped change
-becomes a release automatically, and a person steps in only for a breaking change (a red check) or to
-force a release by dispatch. A merged dependency bump updates the code but does not itself publish; it
-ships with the next shipped change or a dispatch. See D8.
+releases automatically, and a person steps in only for a breaking change (a red check) or to force a
+release by dispatch. A merged dependency bump does not itself publish. See D8.
 
 ### Single-target output seam
 
@@ -332,12 +312,11 @@ applicable guarantee is not operational (section 1).
   releases and wasted pushes.*
 - **D4.6 Publish is tested as built.** Input: any publish (dispatch or shipped-change). Output: the
   publisher runs the same reusable `validate-task` (the D1.2/D1.3 `unit-test` + `lint` gate) as a
-  `validate` job, and the publish job `needs:` it, so the NuGet push and the release are gated on its
-  success. It is the identical definition the pull request runs, not a copy, so nothing publishes that
-  would fail the pull-request gate - dispatch, shipped-change, or force-push alike. The trade-off is that
-  a shipped-input push to a protected branch validates twice (once in CI, once in the publisher); this is
-  accepted over polling the cross-workflow status check. *Prevents: an auto-publish shipping a merged tree
-  tested only as the pre-merge PR head; the squash/merge commit (D8.1) differs from what the PR tested.*
+  `validate` job the publish job `needs:`, so the push and release are gated on its success. It is the
+  identical definition the pull request runs, so nothing publishes that would fail the PR gate. The
+  trade-off, accepted over polling a cross-workflow status check, is that a shipped-input push to a
+  protected branch validates twice. *Prevents: an auto-publish shipping a merged tree tested only as the
+  pre-merge PR head, since the squash/merge commit (D8.1) differs from what the PR tested.*
 - **D4.7 Publish authenticates via OIDC trusted publishing.** Output: the publish job grants
   `id-token: write` and obtains a short-lived NuGet key from `NuGet/login@v1` (the action exchanges the
   GitHub OIDC token for a temporary key, using the `NUGET_USERNAME` profile name), and `dotnet nuget push`
@@ -398,14 +377,13 @@ applicable guarantee is not operational (section 1).
   list, D4.1); it ships with the next shipped change or a dispatch. *Prevents: a breaking update merging
   unverified; a safe update stalled waiting for a human; and dependency churn cutting needless releases.*
 - **D8.3 Codegen is deterministic and content-gated.** Output: codegen regenerates `LanguageData/` purely
-  from its upstream sources (no per-run timestamps/GUIDs), opens a pull request only when the data
-  changed, and auto-merges it on green. The merged data change is a shipped input, so the publisher
-  releases it (D4.1). Codegen is **dual-target**, the workflow analog of Dependabot's per-target-branch
-  config: each target branch is regenerated **independently** against its own checkout, into its own
-  `codegen-<branch>` PR, and merged directly, so a data update never depends on a cross-branch merge-back.
-  A matrix (one leg per branch) is the expected form; the no-branch-matrix rule (D0, 5A) is scoped to the
-  build/version/publish path and does not apply here, since codegen neither versions nor publishes. What
-  matters is the per-branch independence and determinism, not the run count.
+  from its upstream sources (no per-run timestamps/GUIDs), opens a pull request only when the data changed,
+  and auto-merges it on green. The merged data is a shipped input, so the publisher releases it (D4.1).
+  Codegen is **dual-target**, the workflow analog of Dependabot's per-target-branch config: each branch is
+  regenerated independently against its own checkout, into its own `codegen-<branch>` PR, so a data update
+  never depends on a cross-branch merge-back. A matrix (one leg per branch) is the expected form; the
+  no-branch-matrix rule (D0) is scoped to the build/version/publish path and does not apply here, since
+  codegen neither versions nor publishes.
 
 ### D9 - Style, static, and dropped workflows (see section 2)
 
@@ -556,11 +534,10 @@ in its own right, not merely discoverable by failure (D10; audit 5D).
   stale configuration to remove.
 
 **NuGet.org trusted-publishing policy.** Publishing is keyless via OIDC (D4.7), so a trusted-publishing
-policy must exist in the NuGet.org account (Trusted Publishing) naming Repository Owner `ptr727`,
-Repository `LanguageTags`, and Workflow File `publish-release.yml` (the entry workflow that initiates the
-run; filename only). This lives on NuGet.org, not GitHub, so `configure.sh` cannot read it; it is a manual
-checklist item. A private-repo policy stays provisional for 7 days until the first successful publish
-locks it to the repo and owner IDs.
+policy must exist in the NuGet.org account naming Repository Owner `ptr727`, Repository `LanguageTags`, and
+Workflow File `publish-release.yml` (filename only). It lives on NuGet.org, not GitHub, so `configure.sh`
+cannot read it - a manual checklist item. A private-repo policy stays provisional for 7 days until the
+first successful publish locks it to the repo and owner IDs.
 
 **Branch rulesets.**
 

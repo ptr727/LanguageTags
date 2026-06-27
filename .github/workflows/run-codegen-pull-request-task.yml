@@ -1,12 +1,14 @@
 name: Run codegen and pull request task
 
-# Runs codegen against `main` and `develop` in parallel via a matrix and opens a PR against each base
-# (codegen-main -> main, codegen-develop -> develop), which the merge-bot auto-merges independently.
-
+# Regenerates the embedded LanguageData and opens a PR per branch when it changed. Dual-target, the
+# workflow analog of Dependabot's per-target-branch config: the matrix runs main and develop
+# independently, each leg checking out its own branch and opening its own PR (codegen-main -> main,
+# codegen-develop -> develop) that the merge-bot auto-merges. Landing the data directly in each branch
+# keeps it conflict-free regardless of feature -> develop -> main flow; do not collapse to one branch and
+# merge back. Output must be deterministic from the upstream registries (no per-run timestamps or GUIDs).
 on:
   workflow_call:
     secrets:
-      # GitHub App credentials to generate an installation token
       CODEGEN_APP_CLIENT_ID:
         required: true
       CODEGEN_APP_PRIVATE_KEY:
@@ -21,7 +23,7 @@ jobs:
       contents: write
       pull-requests: write
     strategy:
-      # Each branch gets its own parallel codegen run + PR; one branch's failure doesn't affect the other.
+      # Each branch is independent: one leg's failure does not affect the other.
       fail-fast: false
       matrix:
         target:
@@ -33,7 +35,7 @@ jobs:
     steps:
 
       - name: Generate GitHub App token step
-        # App token so the PR open fires `pull_request` workflow events (GITHUB_TOKEN opens don't).
+        # App token so the PR open fires pull_request workflow events (a GITHUB_TOKEN open does not).
         id: app-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
@@ -66,10 +68,10 @@ jobs:
           git status
 
       - name: Create pull request step
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        # App token: fires pull_request workflow events and signs commits as the app.
         id: cpr
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
-          # App token: triggers pull_request workflow events and creates verified commits as the app.
           token: ${{ steps.app-token.outputs.token }}
           base: ${{ matrix.target.ref }}
           branch: ${{ matrix.target.branch }}

@@ -1,21 +1,22 @@
 name: Merge bot pull request action
 
-# The merge jobs enable auto-merge once per PR on opened/reopened; the disable job turns it off when a
-# maintainer pushes to a bot branch. Merge method is dispatched by base branch (develop = squash, main = merge).
-# All jobs use an App token so the merge commit fires downstream workflows (GITHUB_TOKEN pushes don't, due to
-# GitHub's recursion guard) and so the disable job has write access on Dependabot PRs, which otherwise run with
-# read-only restricted secrets regardless of who triggered the event.
-
-# `pull_request_target` (not `pull_request`): jobs hold the App private key, so action SHAs must come from the
-# base-branch definition, not the PR head. Safe because this workflow never checks out PR code - it only runs
-# `gh pr merge` against the PR by URL.
+# Enables auto-merge on bot pull requests (Dependabot and codegen) and disables it when a maintainer
+# pushes to a bot branch. Auto-merge completes only once the required checks pass, so a breaking update
+# blocks itself. Merge method follows the base: squash for develop, merge commit for main.
+#
+# Every job mints an App token. The built-in GITHUB_TOKEN will not do: its merge commits do not trigger
+# downstream workflows (GitHub's recursion guard), and on a Dependabot pull request it is read-only.
+#
+# Trigger is pull_request_target, not pull_request, so action SHAs resolve from the base branch while the
+# jobs hold the App key. Safe because this workflow never checks out PR code; it only runs `gh pr merge`
+# against the PR URL.
 on:
   pull_request_target:
     types: [opened, reopened, synchronize]
 
-# Per-PR group: under `pull_request_target` `github.ref` is the base branch, which would serialize every bot PR
-# against that base; key on the PR number so each PR's events queue independently. `cancel-in-progress: false` so a
-# follow-up synchronize doesn't cancel an in-flight `opened` run before it enables auto-merge.
+# Key on the PR number, not github.ref (the base branch under pull_request_target, which would serialize
+# every bot PR). cancel-in-progress: false so a synchronize does not cancel an in-flight opened run before
+# it enables auto-merge.
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: false
@@ -25,7 +26,8 @@ jobs:
   merge-dependabot:
     name: Merge dependabot pull request job
     runs-on: ubuntu-latest
-    # Dependabot PRs from this repo (not forks). Only on opened/reopened so the disable job stays sticky.
+    # In-repo Dependabot PRs only, on opened/reopened so the disable job stays sticky. Every tier
+    # auto-merges, semver-major included: the required checks are the gate, not the version bump.
     if: >-
       (github.event.action == 'opened' || github.event.action == 'reopened') &&
       github.event.pull_request.user.login == 'dependabot[bot]' &&
@@ -43,26 +45,13 @@ jobs:
           client-id: ${{ secrets.CODEGEN_APP_CLIENT_ID }}
           private-key: ${{ secrets.CODEGEN_APP_PRIVATE_KEY }}
 
-      - name: Get dependabot metadata step
-        id: metadata
-        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
-        with:
-          github-token: "${{ secrets.GITHUB_TOKEN }}"
-
-      # Skip semver-major NuGet bumps so they land via human review; other ecosystems' majors auto-merge.
       - name: Merge pull request step
-        if: >-
-          (steps.metadata.outputs.package-ecosystem != 'nuget') ||
-          (steps.metadata.outputs.update-type != 'version-update:semver-major')
         run: |
           set -euo pipefail
           case "${{ github.event.pull_request.base.ref }}" in
             develop) method=--squash ;;
             main) method=--merge ;;
-            *)
-              echo "::error::Unsupported base branch: ${{ github.event.pull_request.base.ref }}"
-              exit 1
-              ;;
+            *) echo "::error::Unsupported base branch: ${{ github.event.pull_request.base.ref }}"; exit 1 ;;
           esac
           gh pr merge --auto "$method" "$PR_URL"
         env:
@@ -72,8 +61,8 @@ jobs:
   merge-codegen:
     name: Merge codegen pull request job
     runs-on: ubuntu-latest
-    # Codegen PRs from this repo. Head/base pairing is enforced strictly (codegen-main->main,
-    # codegen-develop->develop). Only on opened/reopened so the disable job stays sticky.
+    # In-repo codegen PRs, on opened/reopened, with the head/base pairing pinned
+    # (codegen-main -> main, codegen-develop -> develop).
     if: >-
       (github.event.action == 'opened' || github.event.action == 'reopened') &&
       github.event.pull_request.user.login == 'ptr727-codegen[bot]' &&
@@ -101,10 +90,7 @@ jobs:
           case "${{ github.event.pull_request.base.ref }}" in
             develop) method=--squash ;;
             main) method=--merge ;;
-            *)
-              echo "::error::Unsupported base branch: ${{ github.event.pull_request.base.ref }}"
-              exit 1
-              ;;
+            *) echo "::error::Unsupported base branch: ${{ github.event.pull_request.base.ref }}"; exit 1 ;;
           esac
           gh pr merge --auto "$method" "$PR_URL"
         env:
@@ -114,8 +100,8 @@ jobs:
   disable-auto-merge-on-maintainer-push:
     name: Disable auto-merge on maintainer push job
     runs-on: ubuntu-latest
-    # Fires when a maintainer pushes to a bot's branch (synchronize, actor != bot). Disables auto-merge so the
-    # maintainer's commits don't merge with the bot's; they re-enable it manually. The disable call is idempotent.
+    # A maintainer push to a bot branch (synchronize, actor is not the bot) disables auto-merge so the
+    # maintainer's commits do not merge with the bot's. Re-enable manually. The disable call is idempotent.
     if: >-
       github.event.action == 'synchronize' &&
       github.event.pull_request.head.repo.full_name == github.repository &&
@@ -130,7 +116,6 @@ jobs:
     steps:
 
       - name: Generate GitHub App token step
-        # App token because a Dependabot PR's GITHUB_TOKEN is read-only regardless of who triggered the event.
         id: app-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:

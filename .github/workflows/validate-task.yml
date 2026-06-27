@@ -1,0 +1,81 @@
+name: Validate task
+
+# The single validation gate: unit tests plus the full lint set (the editor's checks enforced in CI from
+# the same config files). Reused by test-pull-request (which produces the required status check) and by
+# publish-release (whose publish job needs it), so the PR gate and the publish gate run the identical
+# validation from one definition, and nothing publishes that would fail the PR.
+on:
+  workflow_call:
+
+jobs:
+
+  unit-test:
+    name: Run unit tests job
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Setup .NET SDK step
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
+        with:
+          dotnet-version: 10.x
+
+      - name: Checkout code step
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      # Builds with TreatWarningsAsErrors, so analyzer and code-style warnings fail here.
+      - name: Run unit tests step
+        run: dotnet test
+
+  # The same checks the editor runs interactively, enforced in CI from the same config files: CSharpier
+  # formatting, dotnet format style (EditorConfig), markdownlint, cspell on the user-facing docs, and
+  # actionlint (which shellchecks every run: block).
+  lint:
+    name: Lint job
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Setup .NET SDK step
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
+        with:
+          dotnet-version: 10.x
+
+      - name: Checkout code step
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Check C# formatting step
+        run: |
+          set -euo pipefail
+          dotnet tool restore
+          dotnet csharpier check .
+
+      - name: Check C# style step
+        run: dotnet format style --verify-no-changes --severity=info --verbosity=detailed
+
+      - name: Lint markdown step
+        uses: DavidAnson/markdownlint-cli2-action@ded1f9488f68a970bc66ea5619e13e9b52e601cd # v23.2.0
+        with:
+          globs: '**/*.md'
+
+      # Spelling on user-facing docs only; the embedded multilingual data makes a whole-tree run noisy.
+      # cspell.json is the single source the editor and this run share: the Code Spell Checker extension
+      # reads cspell.json ahead of the workspace cSpell settings, so GUI-added words land in it, and it
+      # also carries the path exclusions. The action auto-discovers cspell.json at the repo root.
+      - name: Spell check step
+        uses: streetsidesoftware/cspell-action@de2a73e963e7443969755b648a1008f77033c5b2 # v8.4.0
+        with:
+          files: |
+            README.md
+            HISTORY.md
+          incremental_files_only: false
+
+      # Validate the workflow YAML itself, including publish-release which the smoke path never runs.
+      # actionlint also runs shellcheck on every run: block (shellcheck is pre-installed on the runner).
+      - name: Lint workflows step
+        run: |
+          set -euo pipefail
+          version=1.7.12
+          curl -fsSL "https://github.com/rhysd/actionlint/releases/download/v${version}/actionlint_${version}_linux_amd64.tar.gz" \
+            | tar -xz actionlint
+          ./actionlint -color

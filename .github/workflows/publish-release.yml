@@ -1,100 +1,54 @@
 name: Publish project release action
 
+# Branch-scoped self-publisher. A push to main or develop publishes that branch when it changes a shipped
+# input, decided by the on.push.paths inclusion list below: the library source, the embedded data, the
+# version floor, or the build configuration. The list is inclusion-only, so add a path here if a new input
+# starts affecting the shipped package. Dependency bumps (Directory.Packages.props) and GitHub Actions
+# bumps are deliberately not listed, so routine Dependabot churn never republishes; ship a dependency
+# update by promoting develop to main or by dispatching. (A path filter cannot target a single package;
+# the one shipped runtime dependency, Microsoft.Extensions.Logging.Abstractions, is an abstraction that
+# changes rarely, so it rides the next promotion or a dispatch rather than warranting per-package
+# detection.) A manual dispatch force-publishes the branch it ran on. main publishes a stable release,
+# develop a prerelease. The merge-bot merges with an App token, so its merge commits reach this push
+# trigger. The publish job needs the same validate-task the PR gate runs, so nothing publishes that would
+# fail validation - on any path, dispatch or force-push included.
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
+    paths:
+      - 'LanguageTags/**'
+      - 'LanguageData/**'
+      - 'version.json'
+      - 'Directory.Build.props'
   workflow_dispatch:
-  schedule:
-    # Weekly full build/publish of both branches on Mondays at 02:00 UTC. Routine merges only smoke-test;
-    # this scheduled run republishes everything.
-    - cron: '0 2 * * MON'
 
-# Real publishes (schedule, dispatch, or push with PUBLISH_ON_MERGE) share one global group so they serialize: they
-# build and create releases for both branches regardless of the triggering ref, so a ref-scoped group could let two
-# real publishes run concurrently and double-publish. Non-publishing push runs get a unique per-run group so they
-# don't queue behind a real publish; they only run the no-op setup job.
+# Ref-independent group so concurrent publishes serialize, and cancel-in-progress: false so a publish is
+# never cancelled mid-release (a half-created GitHub release or partial NuGet push).
 concurrency:
-  group: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || vars.PUBLISH_ON_MERGE == 'true') && github.workflow || format('{0}-noop-{1}', github.workflow, github.run_id) }}
-  # Queue instead of cancel: cancelling a publish mid-flight can leave a half-created GitHub release or a partially
-  # pushed NuGet package.
+  group: ${{ github.workflow }}
   cancel-in-progress: false
 
 jobs:
 
-  # Decide which branches to publish and whether to publish at all: push -> only the pushed branch, and only when the
-  # PUBLISH_ON_MERGE variable is true (default two-phase model: merges don't publish); schedule/dispatch -> both
-  # branches.
-  setup:
-    name: Resolve publish plan job
-    runs-on: ubuntu-latest
-    outputs:
-      branches: ${{ steps.plan.outputs.branches }}
-      publish: ${{ steps.plan.outputs.publish }}
-    steps:
-      - name: Compute publish plan step
-        id: plan
-        env:
-          # Repository variable; unset reads as empty string, so the default is the two-phase model.
-          PUBLISH_ON_MERGE: ${{ vars.PUBLISH_ON_MERGE }}
-        run: |
-          set -euo pipefail
-          # Schedule/dispatch builds both branches regardless of triggering ref. A dispatch on a non-default ref
-          # mis-versions the main leg (NBGV can't resolve the public main ref), so fail fast: dispatch from default only.
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" \
-                && "${{ github.ref_name }}" != "${{ github.event.repository.default_branch }}" ]]; then
-            echo "::error::Dispatch publish-release from the default branch (${{ github.event.repository.default_branch }}); the matrix builds both branches. Re-dispatch on the default branch."
-            exit 1
-          fi
-          case "${{ github.event_name }}" in
-            push)
-              branches='["${{ github.ref_name }}"]'
-              if [[ "${PUBLISH_ON_MERGE:-}" == "true" ]]; then
-                publish=true
-              else
-                publish=false
-              fi
-              ;;
-            *)
-              # schedule / workflow_dispatch
-              branches='["main","develop"]'
-              publish=true
-              ;;
-          esac
-          echo "Event=${{ github.event_name }} branches=$branches publish=$publish"
-          echo "branches=$branches" >> "$GITHUB_OUTPUT"
-          echo "publish=$publish" >> "$GITHUB_OUTPUT"
+  # The same unit-test + lint gate the PR runs. The publish job needs it, so a failing test or lint blocks
+  # the release.
+  validate:
+    name: Validate job
+    uses: ./.github/workflows/validate-task.yml
 
-  # Full build + publish for each planned branch. The matrix lets one run publish both `main` (Release, non-prerelease)
-  # and `develop` (Debug, prerelease) - each leg checks out and versions its own branch via the threaded ref/branch.
+  # Build, version, test-gated, push, release the triggering branch. Grants the write scopes
+  # build-release-task needs (it declares none, so the smoke caller is not forced to over-grant). push is
+  # already limited to main/develop; the if-guard covers workflow_dispatch, which can target any branch.
   publish:
     name: Publish project release job
-    needs: [setup]
-    if: ${{ needs.setup.outputs.publish == 'true' }}
-    strategy:
-      fail-fast: false
-      matrix:
-        branch: ${{ fromJSON(needs.setup.outputs.branches) }}
+    needs: validate
+    if: ${{ github.event_name == 'push' || github.ref_name == 'main' || github.ref_name == 'develop' }}
     uses: ./.github/workflows/build-release-task.yml
     secrets: inherit
     permissions:
       contents: write
-      # actions:write lets the github-release job delete the release-asset-* artifacts it consumes (surgical cleanup).
+      id-token: write
       actions: write
     with:
-      ref: ${{ matrix.branch }}
-      branch: ${{ matrix.branch }}
+      publish: true
       smoke: false
-      # Push to GitHub and NuGet.
-      github: true
-      nuget: true
-
-  # Caller-gated to main: the badge has no per-branch context, so it updates only when main is among the published
-  # branches (a develop-only push skips it). One invocation, not a per-branch matrix leg.
-  date-badge:
-    name: Create BYOB date badge job
-    needs: [setup, publish]
-    if: ${{ needs.setup.outputs.publish == 'true' && contains(fromJSON(needs.setup.outputs.branches), 'main') }}
-    uses: ./.github/workflows/build-datebadge-task.yml
-    secrets: inherit
-    permissions:
-      contents: write

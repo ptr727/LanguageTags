@@ -50,6 +50,7 @@ jobs:
     secrets: inherit
     with:
       ref: ${{ inputs.ref }}
+      branch: ${{ inputs.branch }}
 
   # Entry gate: validate branch<->version consistency once, before the build jobs, so an NBGV mis-classification fails
   # fast instead of after building and publishing. main must be a public release (no prerelease '-'); every other branch

@@ -12,15 +12,6 @@ configuration it assumes.
 
 Each guarantee names the **failure it prevents**, so the reason survives a reimplementation.
 
-> **Temporary adoption notes (remove once go-live completes).** This file describes the **target** model,
-> and `.github/workflows/` has been rewritten to match it: branch-scoped single-ref runs, NBGV read
-> natively from `github.ref_name` (no `IGNORE_GITHUB_REF`/`git checkout -B`), a reusable `validate-task`
-> shared by the pull-request gate and the publisher, and self-publishing on a shipped-input push (no
-> schedule, no `PUBLISH_ON_MERGE`). `AGENTS.md` now points here as the canonical copy. What remains is
-> go-live: pushing the branch, running `repo-config/configure.sh apply` (the aggregator rename must land in
-> the live ruleset in lockstep), and the first publish. These notes are migration context, not part of the
-> contract, and are deleted once go-live completes.
-
 ## 0. The model at a glance
 
 A run targets **one branch, the one it was triggered on** (`github.ref_name`). `main` produces a stable
@@ -36,16 +27,15 @@ updates merge themselves once their tests pass, so the library stays current wit
   or event starts.
 - **Reusable workflow (task)** - a `workflow_call` workflow invoked from an entry workflow through a
   `uses:` reference. Never triggered directly.
-- **Leaf** - the reusable task that produces the shipped artifact (here, the NuGet package). The
-  per-project-shape variable in section 7.
+- **Leaf** - the reusable task that produces the shipped artifact (here, the NuGet package).
 - **Smoke build** - a pull-request build that compiles and packs the library to prove it still ships,
   publishing and uploading nothing. Linting and testing are the separate `validate` job. Driven by a
   `smoke: true` input.
 - **Transfer artifact** - a workflow artifact that hands a file between jobs of one run (e.g. the built
   package passed to the release job). The durable copy lives on the GitHub release / NuGet.org.
 - **Head-resolved vs base-resolved** - a `pull_request` event resolves a reusable `./...` reference from
-  the **base** branch's copy; a `push`/`workflow_dispatch` event resolves it from the **pushed** head.
-  Self-testing (section 3) depends on this.
+  the **base** branch's copy, while a `push`/`workflow_dispatch` event resolves it from the **pushed**
+  head. Self-testing (section 3) depends on this.
 - **Shipped input** - a file that changes what the package ships: the library source (`LanguageTags/**`),
   the embedded data (`LanguageData/**`), the version floor (`version.json`), or build configuration
   (`Directory.Build.props`). This is an explicit **inclusion list** (the publisher's `on.push.paths`),
@@ -68,10 +58,9 @@ updates merge themselves once their tests pass, so the library stays current wit
   guarantee holds, every applicable section-5B scenario's observed output equals its expected output
   (corroborated by a 5C live probe where a live signal exists), and the section-6 configuration is in
   place. Anything else is **not operational**. Every later use of "operational" means exactly this.
-- **Defect vs N/A - applicability is by *project shape*, not *presence*.** An item is **N/A** only when
-  this project's shape has no such concern (e.g. a Docker-registry scenario in a repo that ships no
-  image, section 7). It is **not** N/A because the workflow that should implement it is missing. A
-  construct required by an applicable guarantee but absent is a **defect** (FAIL).
+- **Defect vs N/A.** An item is **N/A** only when this repo has no such concern (for example a fork-PR
+  scenario, since a fork cannot push here). It is **not** N/A because the workflow that should implement it
+  is missing. A construct required by an applicable guarantee but absent is a **defect** (FAIL).
 - **Guarantees are scored independently.** One line of YAML can satisfy one guarantee and violate
   another. Record each verdict on its own.
 - **Default branch is `main`.** Guarantees say "default branch" portably. This repo writes the literal
@@ -99,11 +88,11 @@ violate section 4.
   required-status-check `context:` is codified in [`repo-config/`](./repo-config/). It follows the suffix
   rule like any job, but changing it means updating those ruleset files and the live ruleset **in
   lockstep**, or required-check enforcement silently breaks.
-- **Concurrency.** Every entry-point workflow declares
-  `concurrency: { group: '${{ github.workflow }}-${{ github.ref }}', cancel-in-progress: true }`. Two
-  document an inline exception. The **publisher** uses a ref-independent group with
-  `cancel-in-progress: false` so publishes serialize and none is cancelled mid-release. The **merge-bot**
-  keys on the PR number with `cancel-in-progress: false` so each PR's events run to completion in order.
+- **Concurrency.** Every entry-point workflow declares a `concurrency` group. The default is
+  `group: '${{ github.workflow }}-${{ github.ref }}'` with `cancel-in-progress: true`. Two workflows
+  override it. The **publisher** uses a ref-independent group with `cancel-in-progress: false` so publishes
+  serialize and none is cancelled mid-release. The **merge-bot** keys on the PR number with
+  `cancel-in-progress: false` so each PR's events run to completion in order.
 - **Shells.** Every multi-line bash `run:` starts with `set -euo pipefail`.
 - **Conditionals.** Multi-line `if:` uses the folded scalar `if: >-`. A literal block `if: |` embeds
   newlines into the boolean and is wrong.
@@ -143,8 +132,8 @@ Where that one NBGV job runs, HEAD is a real branch tip, so NBGV classifies the 
   builds a clean `X.Y.Z`. Every other branch builds a prerelease `X.Y.Z-g<sha>`.
   A smoke build runs on a feature-branch push, so it checks out that branch tip and versions as a
   prerelease (the branch is not `main`); it never publishes, and the validate gate is skipped on smoke
-  (D2.2). The detached-merge-ref case (NBGV sees no branch and classifies prerelease) arises only for the
-  fork `pull_request` fallback, which is also non-publishing.
+  (D2.2). Because every run is a branch push that checks out a real branch tip, the detached-merge-ref
+  case (NBGV seeing no branch and classifying prerelease) does not arise.
 
 `version.json`'s `version` is the major.minor floor. NBGV appends the git height as the patch.
 
@@ -181,9 +170,9 @@ A pull request exercises its own workflow files. No change waits to reach `main`
   pull request that edits a reusable task tests its own copy. The push run is the **sole producer** of
   the aggregator's ruleset-bound `context:`, emitting it on the head SHA that branch protection
   evaluates. CI never publishes.
-- **Single-producer invariant.** Exactly one trigger path emits a given ruleset-bound context name. No
-  second `pull_request`-triggered job emits the same name, since two producers would race two check-runs
-  on one SHA. A fork fallback, if present, uses a distinct context.
+- **Single-producer invariant.** Exactly one trigger path emits a given ruleset-bound context name. The
+  push run is the sole producer; there is no `pull_request`-triggered job emitting the same name, which
+  would race two check-runs on one SHA.
 - **Only `main`/`develop` produce releases.** The publisher also runs on `push` to the protected
   branches, gated on a shipped change (D4.1). On a protected-branch push, CI and the publisher both run,
   in separate workflows with separate concurrency, so they do not race. CI re-tests the merged tree, the
@@ -191,12 +180,12 @@ A pull request exercises its own workflow files. No change waits to reach `main`
 - **Publishing uses the dispatched branch's workflows.** A manual publish is dispatched on the target
   branch and runs that branch's workflows, so a workflow change is usable on the branch that introduces
   it.
-- **Dependabot and fork pull requests are the documented exception.** Dependabot runs with a restricted
-  token whose branch pushes do not reliably produce a head-resolved run, and a fork cannot push to this
-  repo at all. Both are validated through the base-resolved `pull_request` path (or, for forks, by
-  maintainer action). A reusable-workflow edit in such a pull request exercises the base copy, not its
-  own, which is acceptable because Dependabot's edits are confined to dependency/action bumps the base
-  workflow validates. See D6.
+- **Forks are the documented exception.** A fork cannot push to this repo, so a fork pull request produces
+  no push run and no aggregator check. A maintainer lands the change on an in-repo branch (which pushes,
+  and so validates) before merging. Dependabot is not an exception: its pull requests come from in-repo
+  branches, so the branch push validates them head-resolved like any other. A Dependabot-triggered run
+  carries a restricted read-only token and the Dependabot secret store, which is enough for the read-only
+  validation the gate performs. See D6.
 
 ### Publishing: self-sufficient and branch-scoped
 
@@ -245,8 +234,7 @@ The repo produces exactly one shipped artifact, the NuGet package. The leaf push
 symbols are enabled its symbol package, to NuGet.org via OIDC trusted publishing (no long-lived API key,
 D4.7), and attaches the `.nupkg`/`.snupkg` to the GitHub release. There is no generic multi-target
 abstraction: no `enable_<target>` flag selecting among leaves, no `expect_release_assets` toggle, no
-`release-asset-<branch>-*` glob. The single asset is attached directly by plain name. Section 7 maps the
-same contract onto other project shapes.
+`release-asset-<branch>-*` glob. The single asset is attached directly by plain name.
 
 ## 4. Behavioral contract - expected outcomes
 
@@ -378,10 +366,11 @@ applicable guarantee is not operational (section 1).
   the "promote to `main` to test the fix" trap.*
 - **D6.2 Head-resolution, single producer, one exception.** Output: CI runs on `push` to every branch so
   reusable `./...` logic resolves from the head, and the aggregator's ruleset-bound `context:` is produced
-  by that push run on the head SHA as the sole producer of that name. Dependabot and fork pull requests
-  are the documented exception: restricted-token/base-resolved, covered (if at all) by a distinctly-named
-  `pull_request` check or maintainer action, never by a second producer of the gate context. *Prevents: a
-  dual-producer context race; a false self-test claim for restricted PRs.*
+  by that push run on the head SHA as the sole producer of that name. Dependabot pull requests are in-repo
+  branches, so their push validates them the same way (restricted read-only token, enough for the gate). A
+  fork is the one exception: it cannot push, so it has no run and is validated by maintainer action, never
+  by a second producer of the gate context. *Prevents: a dual-producer context race; a false self-test
+  claim for fork PRs.*
 
 ### D7 - Concurrency, permissions, safety
 
@@ -475,9 +464,9 @@ guarantee, each pass/fail/N-A with a `file:line` citation:
   (D4.7); release-create gated `exists == false || workflow_dispatch`.
 - **D5:** each cross-job transfer artifact has a delete gated to its consumer, `continue-on-error: true`,
   looping all ids; every upload sets `retention-days: 1`; no `.artifacts[].id` blanket delete exists.
-- **D6:** PR-validated logic is head-resolved (a `push` trigger on every branch); the ruleset-bound
-  aggregator context has exactly one producer; any Dependabot/fork `pull_request` fallback is
-  base-resolved and distinctly named.
+- **D6:** PR-validated logic is head-resolved (a `push` trigger on every branch), and the ruleset-bound
+  aggregator context has exactly one producer. Dependabot PRs are in-repo and validate via that push, a
+  fork PR has no run and needs maintainer action, and there is no `pull_request`-triggered fallback.
 - **D7:** the publisher group is ref-independent with `cancel-in-progress: false`; the merge-bot keys on
   PR number; other entry workflows use the standard group; reusable jobs declare permissions; boolean
   `if:` uses both forms.
@@ -598,35 +587,3 @@ and repository settings as JSON, applied and audited by an idempotent `gh api` s
 on any drift; that command **is** the 5D audit. `repo-config/configure.sh apply` configures a fresh repo
 to match. Secret values cannot be read back, so the audit asserts the names exist and a GitHub App is
 installed rather than checking contents.
-
-## 7. Project-type generality check
-
-This repo is a single-target NuGet library. The same audit/trace/assess methodology applies to other
-shapes by changing only which leaf produces what and which scenarios are N/A. Walking these is the
-self-check that the contract is shape-portable. **All shapes keep the branch-scoped model (D0): one run,
-one branch; the differences are the leaf and the asset.** A scenario may also **apply with a
-substitution** (noted inline), traced against its substituted output rather than skipped.
-
-- **NuGet library (this repo).** The leaf runs `dotnet nuget push *.nupkg --skip-duplicate` (Release on
-  `main`, Debug on `develop`), pushes the paired `*.snupkg`, and attaches both to the release.
-  `isPrerelease` follows the `-g<sha>` suffix; "Latest" is GitHub's semver computation, not asserted.
-  Test: S4 develop -> prerelease; S5 main -> stable; S7 re-run is a `--skip-duplicate` no-op.
-- **Console / executable application.** The leaf builds a per-runtime `dotnet publish` and attaches an
-  archive to the release. Smoke builds a strict runtime subset and uploads nothing. Per-runtime
-  intermediates are transfer artifacts. The shipped-input set names the source and project files; an
-  embedded-data trigger is N/A unless the app ships regenerated data.
-- **PyPI library.** The leaf builds and uploads a build artifact. A separate publish job does the OIDC
-  Trusted-Publishing upload (`id-token: write` at that one job, an environment gate) with
-  `skip-existing: true`, then consume-then-deletes the build artifact. The version is a PEP 440 form with
-  a `.dev0` suffix off `develop`. N/A: the NuGet/snupkg addenda.
-- **Docker image.** The leaf pushes multi-arch tags to a registry. No release asset, so the release is
-  tag + source/README/LICENSE. The image always re-pushes even on a no-op re-run (base-image refresh), so
-  S7 applies with substitution ("no-op" governs the GitHub release, not the image). N/A: the
-  package-registry scenarios.
-- **Data / asset library.** A single leaf validates -> zips -> attaches one release asset. The `unit-test`
-  job is replaced by a type-appropriate validator with the aggregator and smoke-build re-pointed to it.
-  `version.json` + NBGV are retained. The embedded-data shipped-input trigger is central. Test: S9
-  data-change auto-publish.
-- **Source-only / no build.** No package/image leaf; validation lives in the PR workflow; the release is
-  tag + source zip + README + LICENSE. Applicable: S1-S8, S13 around validation, publish gating, tag-only
-  release, no-op republish, classification. N/A: the build/asset/registry items.

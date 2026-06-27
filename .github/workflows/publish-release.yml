@@ -1,17 +1,16 @@
 name: Publish project release action
 
-# Branch-scoped self-publisher. A push to main or develop publishes that branch when it changes a shipped
-# input, decided by the on.push.paths inclusion list below: the library source, the embedded data, the
-# version floor, or the build configuration. The list is inclusion-only, so add a path here if a new input
-# starts affecting the shipped package. Dependency bumps (Directory.Packages.props) and GitHub Actions
-# bumps are deliberately not listed, so routine Dependabot churn never republishes; ship a dependency
-# update by promoting develop to main or by dispatching. (A path filter cannot target a single package;
-# the one shipped runtime dependency, Microsoft.Extensions.Logging.Abstractions, is an abstraction that
-# changes rarely, so it rides the next promotion or a dispatch rather than warranting per-package
-# detection.) A manual dispatch force-publishes the branch it ran on. main publishes a stable release,
-# develop a prerelease. The merge-bot merges with an App token, so its merge commits reach this push
-# trigger. The publish job needs the same validate-task the PR gate runs, so nothing publishes that would
-# fail validation - on any path, dispatch or force-push included.
+# Branch-scoped self-publisher: a push to main or develop, or a manual dispatch, publishes that branch.
+#
+# - Trigger: a push that changes a shipped input (the on.push.paths inclusion list below - library source,
+#   embedded data, version floor, or build configuration), or a workflow_dispatch on the target branch.
+# - Inclusion-only: add a path above when a new input starts affecting the shipped package. Dependency bumps
+#   (Directory.Packages.props) and GitHub Actions bumps are not listed, so routine Dependabot churn does not
+#   republish. Ship a pending dependency update by promoting develop to main, or by dispatching.
+# - Output: main publishes a stable release, develop a prerelease. A dispatch force-publishes its branch.
+# - Gate: the publish job needs the same validate-task the PR runs, so nothing publishes that would fail
+#   validation, on any path (push, dispatch, or force-push).
+# - The merge-bot merges with an App token, so its merge commits reach this push trigger.
 on:
   push:
     branches: [main, develop]
@@ -36,9 +35,10 @@ jobs:
     name: Validate job
     uses: ./.github/workflows/validate-task.yml
 
-  # Build, version, test-gated, push, release the triggering branch. Grants the write scopes
-  # build-release-task needs (it declares none, so the smoke caller is not forced to over-grant). push is
-  # already limited to main/develop; the if-guard covers workflow_dispatch, which can target any branch.
+  # Build, version, validate, push, and release the triggering branch. Grants the write scopes
+  # build-release-task needs (it declares none, so the read-only smoke caller is not forced to over-grant).
+  # The push trigger is already limited to main/develop, and the if-guard covers a workflow_dispatch, which
+  # can target any branch.
   publish:
     name: Publish project release job
     needs: validate

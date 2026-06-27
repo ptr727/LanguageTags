@@ -59,7 +59,7 @@ jobs:
         uses: dotnet/nbgv@master
 
   # Entry gate: assert branch and version classification agree before any build, so a misclassification
-  # fails fast. main must be a public release (no prerelease '-'); every other branch must carry one.
+  # fails fast. main must be a public release (no prerelease '-'), and every other branch must carry one.
   validate-release:
     name: Validate release version job
     needs: [get-version]
@@ -79,7 +79,7 @@ jobs:
             echo "Smoke build; skipping release version validation."
             exit 0
           fi
-          # Strip +buildmetadata; only a '-' in the core/prerelease segment marks a prerelease.
+          # Strip +buildmetadata. Only a '-' in the core/prerelease segment marks a prerelease.
           CORE_AND_PRE="${SEMVER2%%+*}"
           if [[ "$REF_NAME" == "main" ]]; then
             if [[ "$CORE_AND_PRE" == *-* ]]; then
@@ -104,19 +104,15 @@ jobs:
           dotnet-version: 10.x
 
       # Pin to the versioned commit so the package and the release tag match even if the branch advances
-      # mid-run. This is a compile checkout only; NBGV already ran in get-version.
+      # mid-run. This is a compile checkout only, NBGV already ran in get-version.
       - name: Checkout code step
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: ${{ needs.get-version.outputs.GitCommitId }}
 
-      # Build the library (also the smoke compile check). The project sets GeneratePackageOnBuild, so the
-      # build itself emits the .nupkg, and IncludeSymbols + snupkg produce the paired .snupkg. OutputPath
-      # and PackageOutputPath redirect the assembly and the packages out of the .artifacts layout - running
-      # dotnet pack on top of GeneratePackageOnBuild double-packs and fails to find the assembly, so build
-      # (not pack) is the one-step producer. Testing and lint are the validate-task gate the publish job
-      # needs before this task (D4.6), so this only builds. The packages land in the publish dir for the
-      # push and release-asset steps; the compiled assembly goes to a separate build dir.
+      # GeneratePackageOnBuild emits the .nupkg (and .snupkg) from the build, so build, not pack, is the
+      # one-step producer (dotnet pack on top of it double-packs and fails). OutputPath and PackageOutputPath
+      # redirect the assembly and the packages out of the .artifacts layout into a build and a publish dir.
       - name: Build library step
         run: |
           set -euo pipefail
@@ -130,9 +126,8 @@ jobs:
             -property:InformationalVersion=${{ needs.get-version.outputs.AssemblyInformationalVersion }} \
             -property:PackageVersion=${{ needs.get-version.outputs.SemVer2 }}
 
-      # OIDC trusted publishing: exchange the GitHub OIDC token for a short-lived NuGet key, no stored
-      # API key. Requested immediately before the push (1-hour lifetime). Needs id-token: write from the
-      # caller. dotnet nuget push of the .nupkg also pushes the paired .snupkg to nuget.org.
+      # OIDC trusted publishing: trade the GitHub OIDC token for a short-lived (1-hour) NuGet key, so there
+      # is no stored API key. Needs id-token: write from the caller.
       - name: NuGet login step
         if: ${{ inputs.publish && !inputs.smoke }}
         id: nuget-login
@@ -140,6 +135,7 @@ jobs:
         with:
           user: ${{ secrets.NUGET_USERNAME }}
 
+      # Pushing the .nupkg also pushes the co-located .snupkg to nuget.org's symbol server (no --no-symbols).
       - name: Push to NuGet.org step
         if: ${{ inputs.publish && !inputs.smoke }}
         run: |
@@ -167,7 +163,7 @@ jobs:
 
     steps:
 
-      # The built commit, so the release files and tag match it even if the branch advanced mid-run.
+      # Same versioned commit (GitCommitId) the build used, so the release tag and files match it.
       - name: Checkout code step
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -210,10 +206,9 @@ jobs:
             README.md
             ${{ runner.temp }}/publish/*
 
-      # Consume-then-delete: the release now holds durable copies, so reclaim the transfer artifact. Gated
-      # to the create step, so a skipped no-op re-run leaves the fresh artifact for the retention backstop.
-      # Best-effort, so a listing/delete hiccup never reds a successful publish. Needs actions: write from
-      # the caller.
+      # Reclaim the transfer artifact now the release holds durable copies. Same gate as the create step
+      # (exists == false || dispatch), so a no-op re-run keeps its artifact for the retention backstop.
+      # Best-effort: a delete hiccup never fails a successful publish. Needs actions: write from the caller.
       - name: Delete consumed release asset step
         if: ${{ steps.release-exists.outputs.exists == 'false' || github.event_name == 'workflow_dispatch' }}
         continue-on-error: true

@@ -1,9 +1,7 @@
 {
     "version": "2.0.0",
     "tasks": [
-        // .NET language group. A non-.NET repo drops this group and adds its own
-        // language's tasks. The first three tasks are the .NET clean-compile set
-        // (CODESTYLE.md) carried verbatim; the rest are convenience/project-specific.
+        // The first three tasks are the .NET clean-compile set (see CODESTYLE.md). The rest are convenience.
         {
             "label": ".NET Build",
             "type": "process",
@@ -64,7 +62,7 @@
                 "clear": false
             }
         },
-        // Convenience / project-specific tasks (adapt or drop per repo).
+        // Convenience tasks.
         {
             "label": ".NET Tool Update",
             "type": "process",
@@ -113,6 +111,37 @@
                 "showReuseMessage": false,
                 "clear": false
             }
+        },
+        {
+            "label": "Run Codegen",
+            "type": "process",
+            "command": "dotnet",
+            "args": [
+                "run",
+                "--project",
+                "${workspaceFolder}/LanguageTagsCreate/LanguageTagsCreate.csproj",
+                "--",
+                "--codepath",
+                "${workspaceFolder}"
+            ],
+            "problemMatcher": [
+                "$msCompile"
+            ],
+            "presentation": {
+                "showReuseMessage": false,
+                "clear": false
+            }
+        },
+        // Regenerate the embedded data, then CSharpier-format it. Codegen line lengths follow the source
+        // data text, so the generated C# is not always CSharpier-aligned.
+        {
+            "label": "Codegen and Format",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Run Codegen",
+                "CSharpier Format"
+            ],
+            "problemMatcher": []
         }
     ]
 }

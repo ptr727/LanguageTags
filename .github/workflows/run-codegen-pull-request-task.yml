@@ -4,8 +4,8 @@ name: Run codegen and pull request task
 # workflow analog of Dependabot's per-target-branch config: the matrix runs main and develop
 # independently, each leg checking out its own branch and opening its own PR (codegen-main -> main,
 # codegen-develop -> develop) that the merge-bot auto-merges. Landing the data directly in each branch
-# keeps it conflict-free regardless of feature -> develop -> main flow; do not collapse to one branch and
-# merge back. Output must be deterministic from the upstream registries (no per-run timestamps or GUIDs).
+# keeps it conflict-free regardless of the feature -> develop -> main flow. Do not collapse to one branch
+# and merge back. Output must be deterministic from the upstream registries (no per-run timestamps or GUIDs).
 on:
   workflow_call:
     secrets:

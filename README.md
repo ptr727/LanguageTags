@@ -25,7 +25,10 @@ C# .NET library for ISO 639-2, ISO 639-3, RFC 5646 / BCP 47 language tags.
 
 **Summary**:
 
-- Internal CI/CD rework, no library API changes: branch-scoped self-publishing workflows, keyless OIDC NuGet publishing, and hardened repository configuration. See [WORKFLOW.md](./WORKFLOW.md).
+- Internal CI/CD rework, no library API changes.
+  - Branch-scoped self-publishing workflows
+  - Keyless OIDC NuGet publishing.
+  - Hardened repository configuration, see [WORKFLOW.md](./WORKFLOW.md).
 
 See [Release History](./HISTORY.md) for complete release notes and older versions.
 
@@ -429,33 +432,20 @@ LogOptions.SetFactory(loggerFactory);
   - ISO 639-3: [Source][iso6393source-link], [Data](./LanguageData/iso6393), [JSON](./LanguageData/iso6393.json), [Code](./LanguageTags/Iso6393DataGen.cs)
   - RFC 5646 : [Source][rfc5646source-link], [Data](./LanguageData/rfc5646), [JSON](./LanguageData/rfc5646.json), [Code](./LanguageTags/Rfc5646DataGen.cs)
   - UN M.49 : [Source][unm49source-link], [Data](./LanguageData/unm49), [JSON](./LanguageData/unm49.json), [Code](./LanguageTags/UnM49DataGen.cs)
-- A daily [GitHub Actions](./.github/workflows/run-periodic-codegen-pull-request.yml) job opens PRs to keep the data files up to date. [Releases](./.github/workflows/publish-release.yml) are branch-scoped and self-publishing: a push to `main` or `develop` that changes a shipped input (the library source, the embedded data, the version floor, or the build configuration) publishes that branch - `main` a stable release, `develop` a prerelease. Dependency and GitHub Actions bumps are deliberately excluded, so routine Dependabot churn never republishes; ship a pending dependency update by promoting `develop` to `main` or by dispatching the workflow manually.
+- A daily [GitHub Actions](./.github/workflows/run-periodic-codegen-pull-request.yml) job opens PRs to keep the data files up to date.
 
 ## Contributing
 
-**Branching workflow**:
-
-The repo uses a two-branch model with strict ruleset-enforced merge methods:
-
-- Feature branch -> `develop` via **squash merge** (develop is kept linear).
-- `develop` -> `main` via **merge commit** (preserves develop's commit list on main as the second parent of each release commit).
-- `develop` is **forward-only** - there are no `main -> develop` back-merges. Dependabot and the daily codegen workflow both target `main` and `develop` in parallel via separate PRs.
-
-See [`AGENTS.md`](./AGENTS.md) for the complete branching, PR, and workflow conventions and [`CODESTYLE.md`](./CODESTYLE.md) for C# code style rules.
-
-**Repository setup**:
-
-CI/CD relies on these secrets being configured on the repo:
-
-- `CODEGEN_APP_CLIENT_ID` and `CODEGEN_APP_PRIVATE_KEY` - GitHub App credentials used by the codegen and merge-bot workflows. Must be present in **both** the Actions secret store **and** the Dependabot secret store (the merge-bot runs under Dependabot's restricted secret context on Dependabot PRs). The `_CLIENT_ID` half holds the GitHub App's Client ID (e.g. `Iv23li...`); `actions/create-github-app-token` accepts either a numeric App ID or a Client ID at its `app-id` input.
-- `NUGET_USERNAME` - the NuGet.org account (profile) name used for OIDC trusted publishing. Actions store only. There is no long-lived API key: the publish workflow exchanges a GitHub OIDC token for a short-lived NuGet key via [`NuGet/login`](https://github.com/NuGet/login). This requires a matching trusted-publishing policy on NuGet.org (account: `ptr727`, repository: `ptr727/LanguageTags`, workflow: `publish-release.yml`).
-
-Branch protection is split across two rulesets:
-
-- **Develop** ruleset: squash-only, linear history, "branches up to date" check off (the strict check blocks auto-merge when two same-batch bot PRs race - see AGENTS.md), signed commits required.
-- **Main** ruleset: merge-commit only, linear history off, "branches up to date" check off (forward-only develop makes this check incompatible with the merge-commit release shape), signed commits required.
-
-Both rulesets require the `Check pull request workflow status job` status check and request Copilot review on every push.
+- **Branching workflow**:
+  - The repo uses a two-branch model with ruleset-enforced merge methods.
+  - Feature branch -> `develop` via **squash merge** (develop is kept linear).
+  - `develop` -> `main` via **merge commit** (preserves develop's commit list on main as the second parent of each release commit).
+  - Dependabot and the daily codegen workflow both target `main` and `develop` in parallel via separate PRs.
+  - See [`WORKFLOW.md`](./WORKFLOW.md) for complete details.
+- **Code style**:
+  - See [`CODESTYLE.md`](./CODESTYLE.md) and [`.editorconfig`](./.editorconfig) for C# code style rules.
+- **Repository setup**:
+  - See [`repo-config/README.md`](./repo-config/README.md) for repo configuration details.
 
 ## Tag Theory
 

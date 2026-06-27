@@ -58,10 +58,8 @@ jobs:
         with:
           globs: '**/*.md'
 
-      # Spelling on user-facing docs only; the embedded multilingual data makes a whole-tree run noisy.
-      # cspell.json is the single source the editor and this run share: the Code Spell Checker extension
-      # reads cspell.json ahead of the workspace cSpell settings, so GUI-added words land in it, and it
-      # also carries the path exclusions. The action auto-discovers cspell.json at the repo root.
+      # Spell check the user-facing docs. The word list and exclusions live in cspell.json, shared with the
+      # editor's Code Spell Checker.
       - name: Spell check step
         uses: streetsidesoftware/cspell-action@de2a73e963e7443969755b648a1008f77033c5b2 # v8.4.0
         with:
@@ -70,10 +68,9 @@ jobs:
             HISTORY.md
           incremental_files_only: false
 
-      # Validate the workflow YAML itself, including publish-release which the smoke path never runs. The
-      # action vendors actionlint (SHA-pinned like every other action) and runs shellcheck on every run:
-      # block, so there is no hand-rolled download to checksum. The actionlint version is pinned explicitly
-      # for reproducibility; bump it alongside the action.
+      # Lint the workflow YAML, including publish-release which the smoke path never runs. The action
+      # vendors actionlint (SHA-pinned, shellcheck included), so there is no hand-rolled download. The
+      # actionlint version is pinned for reproducibility - bump it alongside the action.
       - name: Lint workflows step
         uses: raven-actions/actionlint@3d39aea434753780c3b3d4a1a31c854b4dbf49d7 # v2.2.0
         with:

@@ -8,7 +8,7 @@ name: Merge bot pull request action
 # downstream workflows (GitHub's recursion guard), and on a Dependabot pull request it is read-only.
 #
 # Trigger is pull_request_target, not pull_request, so action SHAs resolve from the base branch while the
-# jobs hold the App key. Safe because this workflow never checks out PR code; it only runs `gh pr merge`
+# jobs hold the App key. Safe because this workflow never checks out PR code, it only runs `gh pr merge`
 # against the PR URL.
 on:
   pull_request_target:

@@ -76,7 +76,7 @@ Applies to code and workflow (`#`) comments alike.
 - Comment only when the code does not explain itself or the logic is genuinely complex. Self-evident code needs no comment.
 - Judge "obvious" in context, not line by line. A note that reads as redundant on its own line can be essential in the larger flow - a comment marking a workflow step's exit condition, for example, even though the line itself plainly does a `return` or `exit`.
 - Write for the human reading *this* project's code now: state what the code does and only the non-obvious *why*. No cross-project references (do not name other repos), no historic or design narrative, no rule citations - governance lives in this file, not echoed inline.
-- Match the surrounding code's line length (typically ~120), not an 80-column wrap.
+- Match the surrounding code's line length (typically ~120), not an 80-column wrap. For a multi-point comment, prefer short structured lines or `-` bullets over one long prose paragraph.
 - **Do not accumulate comments.** When you change code or a comment, rewrite the whole comment fresh; never bolt a new comment onto an existing one or layer explanations across edits. Comment volume should stay flat or shrink over time, not grow.
 - **Leave human-authored comments and emojis exactly as written** - do not reword, trim, reflow, or "clean" them, even if they seem to bend a rule. Revise only agent-authored comments, and match the surrounding voice when you do.
 
@@ -142,7 +142,7 @@ After the final push on a PR, sweep older threads from earlier rounds whose code
 
 Bring the user in when:
 
-- **Genuine design trade-off** surfaces (fail-open vs fail-closed, narrow vs broad refactor scope, "should we add a guardrail or trust the docstring"). Triage, recommend, ask.
+- **Genuine design trade-off** surfaces (fail-open vs fail-closed, narrow vs broad refactor scope, "should we add a guardrail or trust the doc comment"). Triage, recommend, ask.
 - **Repeated friction** across rounds without convergence - that's the rule-needs-updating signal. Stop, summarize the pattern, and let the user authorize the rule change.
 - **Architectural redesign** is requested rather than a bug fix. Surface with a recommendation; never apply unilaterally.
 

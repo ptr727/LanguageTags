@@ -4,8 +4,11 @@ name: Test pull request action
 # workflow or the build task tests its own copy. validate-task (unit tests + lint) and smoke-build run on
 # every push with no paths filter, so a reusable-workflow change is always exercised. The aggregator below
 # is the ruleset required-status-check, produced here on the head SHA. validate-task is the same gate the
-# publisher runs, so nothing merges or publishes that would fail it. External fork PRs cannot push and
-# need maintainer action (the documented exception).
+# publisher runs, so nothing merges or publishes that would fail it.
+#
+# There is deliberately no pull_request trigger: a fork PR cannot push to this repo, so it produces no run
+# and cannot satisfy the required check. A maintainer lands such a contribution on an in-repo branch (which
+# does push, and so validates) before merging. This is the documented exception (WORKFLOW.md D6).
 on:
   push:
   workflow_dispatch:

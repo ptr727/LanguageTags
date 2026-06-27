@@ -72,8 +72,9 @@ jobs:
           SMOKE: ${{ inputs.smoke }}
         run: |
           set -euo pipefail
-          # A smoke run versions whatever branch it ran on (never main), so it always reads prerelease and
-          # would trip the main arm of a main-base PR. Smoke never publishes, so skip the gate.
+          # Smoke never publishes, so the publish-time branch/version gate does not apply. Smoke also runs
+          # on branches whose classification will not match an eventual publish target (a feature-branch
+          # smoke reads prerelease and would trip the main arm of a main-base PR), so skip it on smoke.
           if [[ "$SMOKE" == "true" ]]; then
             echo "Smoke build; skipping release version validation."
             exit 0

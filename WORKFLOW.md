@@ -50,8 +50,9 @@ updates merge themselves once their tests pass, so the library stays current wit
   the embedded data (`LanguageData/**`), the version floor (`version.json`), or build configuration
   (`Directory.Build.props`). This is an explicit **inclusion list** (the publisher's `on.push.paths`),
   so a change confined to tests, the codegen tool, dependencies, GitHub Actions, docs, or CI is **not** a
-  shipped input. Dependency version bumps are deliberately excluded: they do not change the compiled code,
-  so they ship on the next promotion or a manual dispatch rather than auto-publishing.
+  shipped input. Dependency version bumps are excluded as a deliberate policy choice to avoid republish
+  churn - a dependency update can change runtime behavior, but the bumps are frequent and not each worth a
+  release - so they ship on the next promotion or a manual dispatch rather than auto-publishing.
 - **GitHub App token** - a short-lived installation token from `actions/create-github-app-token`, minted
   from the App credentials (`CODEGEN_APP_CLIENT_ID` / `CODEGEN_APP_PRIVATE_KEY`). Automation that must
   trigger further workflows or write to bot pull requests uses **this token, not the built-in
@@ -208,7 +209,8 @@ prerelease, `main` -> stable). Two things publish:
   `Directory.Build.props` - so it triggers only when a shipped input changed. The list is inclusion-only
   and declarative: add a path if a new input starts affecting the shipped package. `Directory.Packages.props`
   and `.github/**` are deliberately not listed, so a dependency bump or a GitHub Actions bump does not
-  republish (a version bump changes no compiled code; it ships on the next promotion or a dispatch). The
+  republish (a policy choice to avoid republish churn, not a claim the bump is inert; it ships on the next
+  promotion or a dispatch). The
   merge-bot merges with the App token, so its merge commits trigger this push-driven publisher.
 - **A manual release on demand.** A `workflow_dispatch` on a branch publishes that branch immediately,
   whatever changed. The "release now" control.

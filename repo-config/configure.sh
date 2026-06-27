@@ -119,9 +119,11 @@ check_security() {
 }
 
 check_secrets() {
+  # --paginate: the secrets endpoints page at 30, so without it a repo with many secrets could miss a
+  # required name and report a false failure.
   local actions deps
-  actions="$(gh api "repos/$REPO/actions/secrets" --jq '.secrets[].name' 2>/dev/null || true)"
-  deps="$(gh api "repos/$REPO/dependabot/secrets" --jq '.secrets[].name' 2>/dev/null || true)"
+  actions="$(gh api --paginate "repos/$REPO/actions/secrets" --jq '.secrets[].name' 2>/dev/null || true)"
+  deps="$(gh api --paginate "repos/$REPO/dependabot/secrets" --jq '.secrets[].name' 2>/dev/null || true)"
   for s in "${REQUIRED_ACTIONS_SECRETS[@]}"; do
     assert "actions secret $s present" grep -qx "$s" <<<"$actions"
   done

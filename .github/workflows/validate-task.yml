@@ -70,17 +70,11 @@ jobs:
             HISTORY.md
           incremental_files_only: false
 
-      # Validate the workflow YAML itself, including publish-release which the smoke path never runs.
-      # actionlint also runs shellcheck on every run: block (shellcheck is pre-installed on the runner).
-      # The release tarball is verified against its published SHA-256 before it is extracted and executed,
-      # so this download is not an unchecked supply-chain entry point. Bump version and sha256 together.
+      # Validate the workflow YAML itself, including publish-release which the smoke path never runs. The
+      # action vendors actionlint (SHA-pinned like every other action) and runs shellcheck on every run:
+      # block, so there is no hand-rolled download to checksum. The actionlint version is pinned explicitly
+      # for reproducibility; bump it alongside the action.
       - name: Lint workflows step
-        run: |
-          set -euo pipefail
-          version=1.7.12
-          sha256=8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
-          tarball="actionlint_${version}_linux_amd64.tar.gz"
-          curl -fsSL "https://github.com/rhysd/actionlint/releases/download/v${version}/${tarball}" -o "${tarball}"
-          echo "${sha256}  ${tarball}" | sha256sum --check --status
-          tar -xzf "${tarball}" actionlint
-          ./actionlint -color
+        uses: raven-actions/actionlint@3d39aea434753780c3b3d4a1a31c854b4dbf49d7 # v2.2.0
+        with:
+          version: 1.7.12

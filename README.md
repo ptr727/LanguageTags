@@ -437,9 +437,9 @@ LogOptions.SetFactory(loggerFactory);
 
 The repo uses a two-branch model with strict ruleset-enforced merge methods:
 
-- Feature branch → `develop` via **squash merge** (develop is kept linear).
-- `develop` → `main` via **merge commit** (preserves develop's commit list on main as the second parent of each release commit).
-- `develop` is **forward-only** - there are no `main → develop` back-merges. Dependabot and the daily codegen workflow both target `main` and `develop` in parallel via separate PRs.
+- Feature branch -> `develop` via **squash merge** (develop is kept linear).
+- `develop` -> `main` via **merge commit** (preserves develop's commit list on main as the second parent of each release commit).
+- `develop` is **forward-only** - there are no `main -> develop` back-merges. Dependabot and the daily codegen workflow both target `main` and `develop` in parallel via separate PRs.
 
 See [`AGENTS.md`](./AGENTS.md) for the complete branching, PR, and workflow conventions and [`CODESTYLE.md`](./CODESTYLE.md) for C# code style rules.
 
@@ -447,7 +447,7 @@ See [`AGENTS.md`](./AGENTS.md) for the complete branching, PR, and workflow conv
 
 CI/CD relies on these secrets being configured on the repo:
 
-- `CODEGEN_APP_CLIENT_ID` and `CODEGEN_APP_PRIVATE_KEY` - GitHub App credentials used by the codegen and merge-bot workflows. Must be present in **both** the Actions secret store **and** the Dependabot secret store (the merge-bot runs under Dependabot's restricted secret context on Dependabot PRs). The `_CLIENT_ID` half holds the GitHub App's Client ID (e.g. `Iv23li…`); `actions/create-github-app-token` accepts either a numeric App ID or a Client ID at its `app-id` input.
+- `CODEGEN_APP_CLIENT_ID` and `CODEGEN_APP_PRIVATE_KEY` - GitHub App credentials used by the codegen and merge-bot workflows. Must be present in **both** the Actions secret store **and** the Dependabot secret store (the merge-bot runs under Dependabot's restricted secret context on Dependabot PRs). The `_CLIENT_ID` half holds the GitHub App's Client ID (e.g. `Iv23li...`); `actions/create-github-app-token` accepts either a numeric App ID or a Client ID at its `app-id` input.
 - `NUGET_USERNAME` - the NuGet.org account (profile) name used for OIDC trusted publishing. Actions store only. There is no long-lived API key: the publish workflow exchanges a GitHub OIDC token for a short-lived NuGet key via [`NuGet/login`](https://github.com/NuGet/login). This requires a matching trusted-publishing policy on NuGet.org (account: `ptr727`, repository: `ptr727/LanguageTags`, workflow: `publish-release.yml`).
 
 Branch protection is split across two rulesets:

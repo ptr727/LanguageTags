@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace ptr727.LanguageTags;
 
+// CI smoke-flow validation marker (temporary; PR not for merge).
 internal static class LanguageSchema
 {
     internal static string GetCodeGenString(string? text) =>

@@ -109,16 +109,20 @@ jobs:
         with:
           ref: ${{ needs.get-version.outputs.GitCommitId }}
 
-      # Build and pack the library (also the smoke compile/pack check). Testing and lint are the
-      # validate-task gate, which the publisher's publish job needs before it reaches this task (D4.6), so
-      # this task only builds and packs. IncludeSymbols + snupkg in the project produce the paired .snupkg
-      # alongside the .nupkg.
-      - name: Pack library step
+      # Build the library (also the smoke compile check). The project sets GeneratePackageOnBuild, so the
+      # build itself emits the .nupkg, and IncludeSymbols + snupkg produce the paired .snupkg. OutputPath
+      # and PackageOutputPath redirect the assembly and the packages out of the .artifacts layout - running
+      # dotnet pack on top of GeneratePackageOnBuild double-packs and fails to find the assembly, so build
+      # (not pack) is the one-step producer. Testing and lint are the validate-task gate the publish job
+      # needs before this task (D4.6), so this only builds. The packages land in the publish dir for the
+      # push and release-asset steps; the compiled assembly goes to a separate build dir.
+      - name: Build library step
         run: |
           set -euo pipefail
-          dotnet pack ${{ env.PROJECT_FILE }} \
+          dotnet build ${{ env.PROJECT_FILE }} \
             --configuration ${{ github.ref_name == 'main' && 'Release' || 'Debug' }} \
-            --output ${{ runner.temp }}/publish \
+            -property:OutputPath=${{ runner.temp }}/build/ \
+            -property:PackageOutputPath=${{ runner.temp }}/publish/ \
             -property:Version=${{ needs.get-version.outputs.SemVer2 }} \
             -property:FileVersion=${{ needs.get-version.outputs.AssemblyFileVersion }} \
             -property:AssemblyVersion=${{ needs.get-version.outputs.AssemblyVersion }} \

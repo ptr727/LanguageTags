@@ -49,8 +49,8 @@ REPO=ptr727/LanguageTags ./repo-config/configure.sh check   # confirm no drift
 ```
 
 First-time adoption is the same step: the live ruleset predates the renamed aggregator, so the first
-`apply` is what lets a pull request against the new workflows go green. both modes need a `gh` login
-with admin on the repo (the rulesets and secrets endpoints require it); `apply` writes, `check` only
+`apply` is what lets a pull request against the new workflows go green. Both modes need a `gh` login
+with admin on the repo (the rulesets and secrets endpoints require it). `apply` writes, `check` only
 reads.
 
 ## Why both a script and JSON

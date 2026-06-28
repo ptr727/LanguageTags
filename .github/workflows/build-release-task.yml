@@ -110,15 +110,13 @@ jobs:
         with:
           ref: ${{ needs.get-version.outputs.GitCommitId }}
 
-      # GeneratePackageOnBuild emits the .nupkg (and .snupkg) from the build, so build, not pack, is the
-      # one-step producer (dotnet pack on top of it double-packs and fails). OutputPath and PackageOutputPath
-      # redirect the assembly and the packages out of the .artifacts layout into a build and a publish dir.
+      # Build the library and its packages into publish/ (both output paths) so they archive together.
       - name: Build library step
         run: |
           set -euo pipefail
           dotnet build ${{ env.PROJECT_FILE }} \
             --configuration ${{ github.ref_name == 'main' && 'Release' || 'Debug' }} \
-            -property:OutputPath=${{ runner.temp }}/build/ \
+            -property:OutputPath=${{ runner.temp }}/publish/ \
             -property:PackageOutputPath=${{ runner.temp }}/publish/ \
             -property:Version=${{ needs.get-version.outputs.SemVer2 }} \
             -property:FileVersion=${{ needs.get-version.outputs.AssemblyFileVersion }} \
@@ -145,14 +143,26 @@ jobs:
             --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} \
             --skip-duplicate
 
-      # Hand the package to the github-release job. Plain name (single target). Consumed within this run,
+      # Bundle the build output and packages into a flat LanguageTags.7z (cd in so the paths are relative).
+      - name: Compress release asset step
+        if: ${{ inputs.publish && !inputs.smoke }}
+        run: |
+          set -euo pipefail
+          if ! command -v 7z >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends p7zip-full
+          fi
+          cd ${{ runner.temp }}/publish
+          7z a -t7z ${{ runner.temp }}/LanguageTags.7z ./*
+
+      # Hand the archive to the github-release job. Plain name (single target). Consumed within this run,
       # so retention-days: 1 is the failure-path backstop.
       - name: Upload release asset step
         if: ${{ inputs.publish && !inputs.smoke }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: release-asset
-          path: ${{ runner.temp }}/publish/*
+          path: ${{ runner.temp }}/LanguageTags.7z
           retention-days: 1
 
   github-release:
@@ -190,8 +200,7 @@ jobs:
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
-      # target_commitish must be the built commit, or GitHub tags the release on the default branch. The
-      # release is the tag plus the auto source zip, README, LICENSE, and the .nupkg/.snupkg.
+      # target_commitish must be the built commit, or GitHub tags the release on the default branch.
       - name: Create GitHub release step
         if: ${{ steps.release-exists.outputs.exists == 'false' || github.event_name == 'workflow_dispatch' }}
         uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
@@ -204,7 +213,7 @@ jobs:
           files: |
             LICENSE
             README.md
-            ${{ runner.temp }}/publish/*
+            ${{ runner.temp }}/publish/LanguageTags.7z
 
       # Reclaim the transfer artifact now the release holds durable copies. Same gate as the create step
       # (exists == false || dispatch), so a no-op re-run keeps its artifact for the retention backstop.

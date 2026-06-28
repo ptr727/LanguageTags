@@ -148,7 +148,10 @@ jobs:
         if: ${{ inputs.publish && !inputs.smoke }}
         run: |
           set -euo pipefail
-          command -v 7z >/dev/null 2>&1 || { sudo apt-get update && sudo apt-get install -y p7zip-full; }
+          if ! command -v 7z >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends p7zip-full
+          fi
           cd ${{ runner.temp }}/publish
           7z a -t7z ${{ runner.temp }}/LanguageTags.7z ./*
 

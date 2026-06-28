@@ -322,7 +322,8 @@ applicable guarantee is not operational (section 1).
   GitHub OIDC token for a temporary key, using the `NUGET_USERNAME` profile name), and `dotnet nuget push`
   uses that key. There is **no** long-lived `NUGET_API_KEY` secret. The key is requested immediately
   before the push (1-hour lifetime, single use). The matching trusted-publishing policy on NuGet.org
-  (section 6) names the entry workflow `publish-release.yml`. *Prevents: a leaked long-lived publish
+  (section 6) names `build-release-task.yml`, the reusable task that requests the token (the OIDC
+  `job_workflow_ref`), not the `publish-release.yml` entry workflow. *Prevents: a leaked long-lived publish
   credential.*
 
 ### D5 - Resource cleanup
@@ -535,8 +536,10 @@ in its own right, not merely discoverable by failure (D10; audit 5D).
 
 **NuGet.org trusted-publishing policy.** Publishing is keyless via OIDC (D4.7), so a trusted-publishing
 policy must exist in the NuGet.org account naming Repository Owner `ptr727`, Repository `LanguageTags`, and
-Workflow File `publish-release.yml` (filename only). It lives on NuGet.org, not GitHub, so `configure.sh`
-cannot read it - a manual checklist item. A private-repo policy stays provisional for 7 days until the
+Workflow File `build-release-task.yml` (filename only) - the reusable task that runs `NuGet/login` and
+requests the token, which the OIDC `job_workflow_ref` claim names rather than the `publish-release.yml`
+entry workflow. It lives on NuGet.org, not GitHub, so `configure.sh` cannot read it - a manual checklist
+item. A private-repo policy stays provisional for 7 days until the
 first successful publish locks it to the repo and owner IDs.
 
 **Branch rulesets.**

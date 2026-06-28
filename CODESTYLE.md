@@ -1,46 +1,45 @@
 # Code Style and Formatting Rules
 
-This is the single code-style guide for the repo. The **General** section applies to every language. Each **language section** (.NET, Python) is self-contained: a repo reads only the section(s) for the languages it ships and ignores the rest. The whole file is carried, not trimmed - an unused-language section costs nothing and keeps re-sync a clean overwrite, the same carry-whole model as [`.editorconfig`](./.editorconfig), whose inert `[*.cs]` block a non-.NET repo keeps.
+This is the single code-style guide for the repo. The **General** section applies repo-wide, and the **.NET** section covers the C# code. The formatting rules the editor and CI enforce live in [`.editorconfig`](./.editorconfig).
 
 Cross-cutting *process* rules (PR titles, branching, US English, markdown style, comments philosophy, workflow YAML, PR review etiquette) live in [AGENTS.md](./AGENTS.md) and are not repeated here.
 
 ## General
 
-These rules apply to every language in the repo.
+These rules apply repo-wide.
 
 ### Tooling Names and Casing
 
-Use each tool's official casing in task labels, docs, and prose - `.NET` (not `.Net`), `CSharpier`, `ruff`, `pyright`, `uv`. Don't invent personal variants.
+Use each tool's official casing in task labels, docs, and prose - `.NET` (not `.Net`), `CSharpier`, `NuGet`, `actionlint`. Don't invent personal variants.
 
 ### Clean-Compile Verification
 
-Each language defines a **clean-compile** verification - the combination of build, formatter, linter, and code-analysis tools that must report clean before a commit. It is exposed as one or more **named** VS Code tasks (or, where a language ships no tasks, documented commands), and those definitions are **carried verbatim** across derived repos. The concrete names live in each language section below.
+The **clean-compile** verification is the combination of build, formatter, linter, and code-analysis tools that must report clean before a commit. It is exposed as **named** VS Code tasks; the concrete names live in the .NET section below.
 
-- **Run it after every code change.** The relevant language's clean-compile must pass before you commit; CI runs the same checks as a backstop.
+- **Run it after every code change.** The clean-compile must pass before you commit, and CI runs the same checks as a backstop.
 - **The named task definition is the canonical spec** - its exact command sequence, arguments, and strictness. You may run it through the VS Code task **or** by invoking the equivalent native commands directly; either is fine **only if the sequence, arguments, and strictness match exactly**. No shortcuts and no more-lenient options (for example, never drop `--verify-no-changes` or loosen a `--severity`).
-- **A local commit/pre-commit gate is the repo's choice.** No single hook runner fits every language (a `dotnet`-tool runner like Husky.Net suits .NET but not Python), so none is mandated - but that is **not** a recommendation against commit gates. CI is the authoritative backstop regardless; a local gate is an additive convenience a repo may wire and keep - Husky.Net (and `dotnet husky run` as a style step) for .NET, `pre-commit` for Python. Keeping a working gate is not drift.
+- **A local commit/pre-commit gate is the repo's choice.** CI is the authoritative backstop regardless. A local gate is an additive convenience: here Husky.Net runs the .NET clean-compile checks (with `dotnet husky run` as a style step). Keeping a working gate is not drift.
+- **Keep the editor task, the local hook, and CI in sync.** The same formatter and style checks run in three places from the same config: the VS Code clean-compile task, the local commit hook, and the CI lint job. The editor task and hook *apply* the formatter (CSharpier rewrites files) and verify style; CI *verifies* both and fails if the code is not formatted or `dotnet format` reports changes. CI is authoritative because a local hook can be bypassed or never installed. When you change a tool version, an argument, or a rule, change all three together so they cannot diverge.
 
 ### Analyzer Diagnostics and Suppressions
 
-- **A new port is not a license to silence diagnostics.** Brownfield / just-ported status never justifies relaxing analyzer or linter severities or muting newly surfaced warnings - fix them. (The only brownfield allowance in this template is the one-time git-signing / line-ending migration described in [AGENTS.md](./AGENTS.md) and [README.md](./README.md), which has nothing to do with code analysis.)
+- **Don't silence diagnostics to make the build pass.** Never relax analyzer or linter severities or mute newly surfaced warnings - fix them.
 - **Suppress only genuine false-positives or deliberate, documented exceptions**, always at the **narrowest scope that fits**, in this order of preference:
   1. An **in-code annotation on the specific symbol**, with a justification - the language's attribute/comment form, never a blanket pragma spanning a region.
-  2. The **owning project's local config** when the exception is project-wide for one project (e.g. a test project's own `.editorconfig` / `pyproject.toml`).
+  2. The **owning project's local config** when the exception is project-wide for one project (e.g. a test project's own `.editorconfig`).
   3. The **root / shared config** only when the suppression is genuinely applicable to **every** project in the repo.
-- **Never blanket-relax a batch of rules project-wide** to get a port to build. The per-language mechanics (which attribute, which config key) are in each language section.
+- **Never blanket-relax a batch of rules project-wide** to get a port to build. The suppression mechanics (which attribute, which config key) are in the .NET section.
 
 ### Markdown and Spelling
 
 These apply repo-wide, in every directory:
 
-1. **Markdown linting**: All `.md` files must be lint-clean (error and warning free) via the VS Code `markdownlint` extension. [`.markdownlint-cli2.jsonc`](./.markdownlint-cli2.jsonc) at the repo root is the single source of truth - the davidanson `markdownlint` extension and a command-line `markdownlint-cli2` run both read it, so the IDE and CLI stay in lock-step. Rules it deliberately disables (e.g. `MD013` line-length, `MD033` inline HTML) are **intentional** - do not "fix" them. Fix violations at the source rather than disabling rules.
-2. **Spelling**: All spelling must be clean via the CSpell VS Code integration; words must be correctly spelled in **US English** (the repo-wide convention - see [AGENTS.md](./AGENTS.md)). Project-specific terms go in the workspace CSpell config.
+1. **Markdown linting**: All `.md` files must be lint-clean (error and warning free) against [`.markdownlint-cli2.jsonc`](./.markdownlint-cli2.jsonc) at the repo root, the single source of truth. The davidanson `markdownlint` VS Code extension and a command-line `markdownlint-cli2` both read it, and **CI enforces it** (the `lint` job runs `markdownlint-cli2`), so the editor, CLI, and CI stay in lock-step. Rules it deliberately disables (e.g. `MD013` line-length, `MD033` inline HTML) are **intentional** - do not "fix" them. Fix violations at the source rather than disabling rules.
+2. **Spelling**: Spelling must be clean in **US English** (the repo-wide convention - see [AGENTS.md](./AGENTS.md)). [`cspell.json`](./cspell.json) at the repo root holds the workspace config the CSpell VS Code extension and the CLI both read; it excludes the embedded multilingual data (`LanguageData/**`, the generated `*Data.cs`, build output) so that data is not flagged. **CI spell-checks the user-facing docs** (`README.md`, `HISTORY.md`) via the `lint` job; a whole-tree check stays in the editor. Add a genuine project term to `cspell.json` `words`; fix a real misspelling at the source.
 
 ## .NET
 
-*This section applies only to the .NET side. A repo with no .NET projects still carries it (the file is carried whole) and ignores it.*
-
-This is the style guide for any **.NET projects** in this repo.
+This is the style guide for the **.NET projects** in this repo.
 
 ### Build Requirements
 
@@ -49,7 +48,7 @@ This is the style guide for any **.NET projects** in this repo.
 **CRITICAL**: All builds must complete without warnings. The project enforces this through:
 
 1. **The `.NET Format` clean-compile task** (see [Clean-Compile Verification](#clean-compile-verification))
-   - The .NET clean-compile is the **`.NET Format`** VS Code task, which chains `CSharpier Format` -> `.NET Build` -> `dotnet format style --verify-no-changes`. These three task definitions are carried verbatim in [`.vscode/tasks.json`](./.vscode/tasks.json).
+   - The .NET clean-compile is the **`.NET Format`** VS Code task, which chains `CSharpier Format` -> `.NET Build` -> `dotnet format style --verify-no-changes`. These three task definitions live in [`.vscode/tasks.json`](./.vscode/tasks.json).
    - After any code change it must pass before commit. Run the `.NET Format` task. To run it natively instead, reproduce that task chain from [`.vscode/tasks.json`](./.vscode/tasks.json) exactly - `CSharpier Format`, then `.NET Build`, then the `dotnet format style --verify-no-changes --severity=info ...` verify - without dropping or loosening any argument (tasks.json is the canonical command spec). Bare `dotnet format` alone, skipping CSharpier or the build, is not sufficient.
 
 2. **Analyzer configuration**
@@ -58,11 +57,11 @@ This is the style guide for any **.NET projects** in this repo.
 
 3. **CI lint backstop**
    - CI runs the clean-compile checks on every PR as the authoritative backstop
-   - Git hooks are optional; a repo may wire a local runner (Husky.Net) for pre-commit enforcement, but CI is the gate that matters
+   - Git hooks are optional. A local runner (Husky.Net) can enforce the checks pre-commit, but CI is the gate that matters
 
 #### Build Tasks
 
-Available VS Code tasks (run them from VS Code's task runner - **Terminal -> Run Task** - or an agent's task-running tool). The three clean-compile tasks below are carried verbatim; a repo adds its own convenience tasks (tool updates, dependency upgrades, benchmarks) on top:
+Available VS Code tasks (run them from VS Code's task runner - **Terminal -> Run Task** - or an agent's task-running tool). The first three are the clean-compile tasks (the canonical command spec), the rest are convenience:
 
 - `.NET Build`: Build with diagnostic verbosity *(clean-compile)*
 - `CSharpier Format`: Auto-format code with CSharpier *(clean-compile)*
@@ -241,7 +240,7 @@ Follow the scope hierarchy in [Analyzer Diagnostics and Suppressions](#analyzer-
   ```
 
 - **Project-scoped** (e.g. a test project): a `dotnet_diagnostic.<RULE>.severity` entry in *that project's own* `.editorconfig`, with a comment explaining why.
-- **Repo-wide**: a `dotnet_diagnostic.<RULE>.severity` entry in the root `.editorconfig`, only when the rule is genuinely not applicable to any project. Relaxing a batch of `CA*` rules (or `dotnet_analyzer_diagnostic.severity`) to push a brownfield port through the build is exactly what this forbids.
+- **Repo-wide**: a `dotnet_diagnostic.<RULE>.severity` entry in the root `.editorconfig`, only when the rule is genuinely not applicable to any project. Relaxing a batch of `CA*` rules (or `dotnet_analyzer_diagnostic.severity`) to push the build through is exactly what this forbids.
 
 #### Error Handling and Logging
 
@@ -340,124 +339,3 @@ Follow the scope hierarchy in [Analyzer Diagnostics and Suppressions](#analyzer-
 ### Best Practices
 
 1. **Code reviews**: All changes go through pull requests
-
-## Python
-
-*This section applies only to the Python side. A repo with no Python projects still carries it (the file is carried whole) and ignores it.*
-
-This is the style guide for any **Python project(s)** in this repo.
-
-### Toolchain
-
-| Tool | Role | Config |
-|---|---|---|
-| [uv](https://docs.astral.sh/uv/) | env, deps, build, publish | `pyproject.toml` `[dependency-groups]`, `uv.lock` |
-| [hatchling](https://hatch.pypa.io/latest/) | build backend | `pyproject.toml` `[build-system]` |
-| [ruff](https://docs.astral.sh/ruff/) | lint + format + import sort | `pyproject.toml` `[tool.ruff]` |
-| [pyright](https://microsoft.github.io/pyright/) | type checker | `pyproject.toml` `[tool.pyright]` |
-| [pytest](https://docs.pytest.org/) | test runner | `pyproject.toml` `[tool.pytest.ini_options]` |
-
-`pyright` is consumed in two places: as a dev dependency (`uv run pyright` for CI/scripted runs) and via VS Code's **Pylance** extension (which embeds pyright). The standalone `ms-pyright.pyright` extension is in `unwantedRecommendations` because Pylance covers it. `mypy` is **not used** here - don't introduce it.
-
-### Local Development Loop
-
-From inside the Python project directory:
-
-```sh
-uv sync                          # creates .venv, installs deps + dev group
-uv run ruff format               # auto-format
-uv run ruff check --fix          # auto-fix lint
-uv run ruff check                # verify lint clean
-uv run ruff format --check       # verify format clean
-uv run pyright                   # verify types
-uv run pytest                    # run tests
-uv build                         # produce wheel + sdist in ./dist
-```
-
-The Python clean-compile (see [Clean-Compile Verification](#clean-compile-verification)) is `uv run ruff format` + `uv run ruff check` + `uv run pyright`; run it (plus `uv run pytest`) before committing. These are documented commands, not VS Code tasks. CI runs the same clean-compile commands as the authoritative backstop. Git hooks are opt-in; wire `pre-commit` for `ruff` and `pyright` yourself if you want local enforcement.
-
-### Layout
-
-`src` layout - keeps the package out of the repo root and prevents accidental imports of unbuilt code:
-
-```text
-<python-project>/
-    pyproject.toml
-    README.md
-    uv.lock                # committed for reproducible CI
-    src/
-        <package_name>/
-            __init__.py
-            _version.py
-            <modules>.py
-    tests/
-        __init__.py
-        test_<module>.py
-```
-
-### Code Style
-
-#### Formatting and Linting
-
-- **`ruff format` is authoritative.** Don't argue with the formatter; if it reformats your code, that's the final form. Configure (line length, target version) in `pyproject.toml` `[tool.ruff]`, not via inline `# fmt:` directives.
-- **Run `ruff check --fix` before committing.** Most ruff lint rules have safe autofixes; let the tool handle them. The configured rule families are listed under `[tool.ruff.lint]` `select`. Add new rule families project-wide rather than scattering inline `# noqa` markers.
-- **`# noqa` is a last resort.** When you must use one, scope it narrowly (`# noqa: E501`, not bare `# noqa`) and add a short comment on the same line explaining why. False-positive patterns that recur across the codebase belong in `[tool.ruff.lint]` `ignore` or per-file `[tool.ruff.lint.per-file-ignores]`, with a comment. Porting an existing codebase is not a license to add `ignore` / `per-file-ignores` blocks to mute newly surfaced lint - fix it (see [Analyzer Diagnostics and Suppressions](#analyzer-diagnostics-and-suppressions)).
-
-#### Comments
-
-- **Inline `#` comments**: keep tight and local. One line is preferred, but multi-line is fine when you need to document a non-obvious implementation constraint, a local trade-off, or coupling that future edits could easily break. Keep that rationale next to the affected block so the reviewer/maintainer sees it at edit-time.
-- **Don't explain *what* the code does** - well-named identifiers handle that. Don't reference the current task ("added for X", "used by Y"); that belongs in the PR description.
-
-#### Docstrings
-
-- Follow [PEP 257](https://peps.python.org/pep-0257/). Focus docstrings primarily on the **behavior contract** (what callers and tests can rely on), public semantics, and edge-case expectations. Implementation-local rationale belongs in inline `#` comments, not docstrings.
-- A short one-liner is fine for trivial functions and tests with self-documenting names.
-- For non-trivial behavior - non-obvious test scenarios, contracts a test pins, edge cases callers must know about, design trade-offs that are load-bearing for future maintainers - write a one-line summary, blank line, then a details paragraph. Multi-paragraph docstrings are fine when the contract earns it.
-- Design notes belong **in the code** (docstrings or inline comments). They do NOT belong in [`HISTORY.md`](./HISTORY.md) - that file is end-user release notes, not a design log.
-
-#### Type Hints
-
-- **All public APIs are typed.** Pyright runs on `src/` in strict mode (`[tool.pyright]` `strict = ["src"]`); tests run in standard mode.
-- **Use modern syntax**: `list[int]` not `List[int]`, `dict[str, X]` not `Dict[str, X]`, `X | None` not `Optional[X]`, `from __future__ import annotations` only when needed for forward references.
-- **Don't add `# type: ignore` to silence pyright errors without a comment** explaining the constraint. If a recurring false positive needs suppression, configure it project-wide in `[tool.pyright]`. A new port doesn't change this - fix freshly surfaced type errors rather than muting them (see [Analyzer Diagnostics and Suppressions](#analyzer-diagnostics-and-suppressions)).
-
-#### Naming
-
-- `snake_case` for functions, methods, variables, modules, package directories.
-- `PascalCase` for classes, type aliases, type vars, enum members.
-- `UPPER_SNAKE_CASE` for module-level constants.
-- Single leading underscore for module-private; double leading underscore for name-mangled (rare - usually means rethink the design).
-
-#### Imports
-
-- **Let ruff sort imports.** `[tool.ruff.lint]` `select` includes the `I` rule family (isort-equivalent). Don't hand-sort.
-- Standard library first, then third-party, then first-party (the project itself), each block separated by a blank line - ruff enforces this automatically.
-- Avoid wildcard imports (`from x import *`) outside `__init__.py` re-exports.
-
-#### Patterns to Avoid
-
-- **Don't add backward-compat shims, `# removed` markers, or rename-to-`_` for unused vars** - just delete. Git history is the audit trail.
-- **Don't add error handling for impossible cases.** Trust internal code; only validate at boundaries (user input, parsed config, external APIs).
-- **Don't use exceptions for expected control flow.** Exceptions are for *unexpected* states.
-- **Don't suppress errors silently** (`except Exception: pass`). Either handle the specific exception and document why it's safe, or let it propagate.
-
-### Tests
-
-- `pytest` with the configuration in `[tool.pytest.ini_options]`. Default invocation: `uv run pytest`.
-- One test file per module under test, named `test_<module>.py`.
-- Test functions named `test_<scenario>_<expected_behavior>` - descriptive, not numbered.
-- Use fixtures (defined in `conftest.py` for shared ones, or per-test for narrowly-scoped) instead of setup/teardown methods.
-- **Avoid mocking when fakes work.** Hand-rolled fakes that implement the protocol you depend on are usually clearer and break less than `unittest.mock` magic.
-- **Test edge cases that the docstring promises**, not implementation details. If the test breaks when you refactor *without changing behavior*, the test is asserting on an implementation detail.
-
-### Versioning
-
-`_version.py` ships with `__version__ = "0.0.0"` as a placeholder. Until you wire `_version.py` to something that increments (the usual options are `hatch-vcs`, a version.json bridge, or manual bumps), no new PyPI versions will land - publishing with `skip-existing: true` keeps a stuck placeholder version from failing the run.
-
-### Linter Cleanliness
-
-Before pushing or opening a PR:
-
-- VS Code's **Problems** pane should be quiet for the files you touched. The relevant linters are ruff (via the `charliermarsh.ruff` extension) and pyright (via the `ms-python.python` extension's bundled Pylance).
-- The CI gate is `uv run ruff check && uv run ruff format --check && uv run pyright && uv run pytest` - same as the local commands above, run from the Python project directory.
-- Markdown in this directory follows the repo-wide [Markdown and Spelling](#markdown-and-spelling) rules.

@@ -52,15 +52,14 @@ end_of_line = lf
 [*.{cmd,bat,ps1}]
 end_of_line = crlf
 
-# --- .NET-only below: C# and ReSharper style. Everything above is the line-ending
-# governance every derived repo carries; a non-.NET repo may drop from here down. ---
+# --- .NET-only below: C# and ReSharper style. Everything above is line-ending governance. ---
 
 # C# files
 [*.cs]
 end_of_line = crlf
 # Suppressions follow CODESTYLE.md "Analyzer Diagnostics and Suppressions": prefer a
-# [SuppressMessage] attribute or the owning project's .editorconfig; relax a rule
-# repo-wide here only when it applies to every project (never a brownfield batch).
+# [SuppressMessage] attribute or the owning project's .editorconfig, and relax a rule
+# repo-wide here only when it applies to every project, never as a batch.
 dotnet_diagnostic.IDE0055.severity = none
 dotnet_analyzer_diagnostic.severity = suggestion
 csharp_indent_block_contents = true

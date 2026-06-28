@@ -21,7 +21,8 @@ templates); repository administration config-as-code is the maintainer's, so it 
 - [`ruleset-main.json`](./ruleset-main.json) - the `main` branch ruleset (merge-commit-only, signed
   commits, the same required check, strict **off**; no linear-history rule).
 - [`settings.json`](./settings.json) - repository settings (auto-merge on; squash **and** merge-commit
-  allowed; rebase off; delete branch on merge).
+  allowed; rebase off; auto-delete-on-merge **off**, so `main`/`develop` survive a promotion - feature and
+  bot branches are deleted explicitly via `--delete-branch`).
 
 ## What it does not store
 

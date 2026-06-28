@@ -110,10 +110,7 @@ jobs:
         with:
           ref: ${{ needs.get-version.outputs.GitCommitId }}
 
-      # GeneratePackageOnBuild emits the .nupkg (and .snupkg) from the build, so build, not pack, is the
-      # one-step producer (dotnet pack on top of it double-packs and fails). OutputPath and PackageOutputPath
-      # both point at the publish dir, so the compiled library and the packages land together for the
-      # release archive; the push below still globs only *.nupkg.
+      # Build the library and its packages into publish/ (both output paths) so they archive together.
       - name: Build library step
         run: |
           set -euo pipefail
@@ -146,13 +143,13 @@ jobs:
             --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} \
             --skip-duplicate
 
-      # Bundle the compiled library plus the .nupkg/.snupkg into one fixed-name LanguageTags.7z, so the
-      # release exposes a single deterministic asset (releases/latest/download/LanguageTags.7z).
+      # Bundle the build output and packages into a flat LanguageTags.7z (cd in so the paths are relative).
       - name: Compress release asset step
         if: ${{ inputs.publish && !inputs.smoke }}
         run: |
           set -euo pipefail
-          7z a -t7z ${{ runner.temp }}/LanguageTags.7z ${{ runner.temp }}/publish/*
+          cd ${{ runner.temp }}/publish
+          7z a -t7z ${{ runner.temp }}/LanguageTags.7z ./*
 
       # Hand the archive to the github-release job. Plain name (single target). Consumed within this run,
       # so retention-days: 1 is the failure-path backstop.
@@ -199,9 +196,7 @@ jobs:
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
-      # target_commitish must be the built commit, or GitHub tags the release on the default branch. The
-      # release is the tag plus the auto source zip, README, LICENSE, and LanguageTags.7z (the compiled
-      # library bundled with the .nupkg/.snupkg).
+      # target_commitish must be the built commit, or GitHub tags the release on the default branch.
       - name: Create GitHub release step
         if: ${{ steps.release-exists.outputs.exists == 'false' || github.event_name == 'workflow_dispatch' }}
         uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1

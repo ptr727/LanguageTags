@@ -1,61 +1,65 @@
 name: Build project release task
 
+# The single build/version/release task, called by publish-release (real publish) and test-pull-request
+# (smoke). NBGV runs once in get-version and threads the version to every consumer. github.ref_name
+# decides everything: main builds Release and a stable version, every other branch Debug and a prerelease.
+# On a real publish the build job pushes to NuGet via OIDC trusted publishing (no API key) and hands the
+# package to the github-release job. Permissions are granted by the caller (this task declares none) so
+# the smoke caller, which grants only read, does not startup-fail on a write-scoped job.
+
+env:
+  PROJECT_FILE: ./LanguageTags/LanguageTags.csproj
+
 on:
   workflow_call:
     inputs:
-      # Whether to create a GitHub release.
-      github:
+      # Create the GitHub release and push to NuGet. Off for smoke.
+      publish:
         required: false
         type: boolean
         default: false
-      # Whether to push the library to NuGet.org.
-      nuget:
-        required: false
-        type: boolean
-        default: false
-      # Git ref to check out / version (empty = default checkout ref).
-      ref:
-        required: false
-        type: string
-        default: ''
-      # Logical branch driving config / tags / prerelease for every target. Required (no fallback) because the
-      # publisher builds both `main` and `develop` in one run, so a silent fallback would mislabel the develop leg.
-      branch:
-        required: true
-        type: string
-      # Smoke mode: reduced, never-published build for fast PR feedback. Forwarded to every target and hard-disables
-      # every push below, so a smoke run can never publish regardless of the publish flags.
+      # Build and test only, never publish or upload. Forces every publish step off regardless of publish.
       smoke:
         required: false
         type: boolean
         default: false
-      # Per-target presence gate. Default true (build everything); a PR smoke run sets it from the paths-filter
-      # so the library only builds when it changed.
-      enable_nuget:
+    secrets:
+      # nuget.org profile name for OIDC trusted publishing. Not needed for smoke.
+      NUGET_USERNAME:
         required: false
-        type: boolean
-        default: true
-      # Set false for a repo that produces no release-asset-* files (e.g. Docker-only): the release is then just the
-      # tag + source zip + README + LICENSE; the artifact download is skipped and the unmatched-files guard relaxes.
-      expect_release_assets:
-        required: false
-        type: boolean
-        default: true
 
 jobs:
 
   get-version:
     name: Get version information job
-    uses: ./.github/workflows/get-version-task.yml
-    secrets: inherit
-    with:
-      ref: ${{ inputs.ref }}
-      branch: ${{ inputs.branch }}
+    runs-on: ubuntu-latest
+    outputs:
+      SemVer2: ${{ steps.nbgv.outputs.SemVer2 }}
+      AssemblyVersion: ${{ steps.nbgv.outputs.AssemblyVersion }}
+      AssemblyFileVersion: ${{ steps.nbgv.outputs.AssemblyFileVersion }}
+      AssemblyInformationalVersion: ${{ steps.nbgv.outputs.AssemblyInformationalVersion }}
+      GitCommitId: ${{ steps.nbgv.outputs.GitCommitId }}
 
-  # Entry gate: validate branch<->version consistency once, before the build jobs, so an NBGV mis-classification fails
-  # fast instead of after building and publishing. main must be a public release (no prerelease '-'); every other branch
-  # must carry a prerelease '-' (guards a develop leg being classified public and published as stable). Strip
-  # '+buildmetadata' first; a '-' there is legitimate, only a '-' in the core/prerelease segment marks a prerelease.
+    steps:
+
+      - name: Setup .NET SDK step
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
+        with:
+          dotnet-version: 10.x
+
+      # Default checkout: the triggering commit on its real branch. NBGV classifies from GITHUB_REF
+      # directly. fetch-depth: 0 gives NBGV the full history for the version height.
+      - name: Checkout code step
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Run Nerdbank.GitVersioning tool step
+        id: nbgv
+        uses: dotnet/nbgv@master
+
+  # Entry gate: assert branch and version classification agree before any build, so a misclassification
+  # fails fast. main must be a public release (no prerelease '-'), and every other branch must carry one.
   validate-release:
     name: Validate release version job
     needs: [get-version]
@@ -64,74 +68,115 @@ jobs:
       - name: Validate branch and version consistency step
         env:
           SEMVER2: ${{ needs.get-version.outputs.SemVer2 }}
-          BRANCH: ${{ inputs.branch }}
+          REF_NAME: ${{ github.ref_name }}
           SMOKE: ${{ inputs.smoke }}
         run: |
           set -euo pipefail
-          # This gate guards real publishes. A smoke build checks out the PR head in detached HEAD, so NBGV always
-          # yields a prerelease version; on a main-base PR that would trip the public-release check and fail every
-          # develop->main promotion that carries a build target. Skip the gate for smoke builds (they never publish).
+          # Smoke never publishes, so the publish-time branch/version gate does not apply. Smoke also runs
+          # on branches whose classification will not match an eventual publish target (a feature-branch
+          # smoke reads prerelease and would trip the main arm of a main-base PR), so skip it on smoke.
           if [[ "$SMOKE" == "true" ]]; then
             echo "Smoke build; skipping release version validation."
             exit 0
           fi
+          # Strip +buildmetadata. Only a '-' in the core/prerelease segment marks a prerelease.
           CORE_AND_PRE="${SEMVER2%%+*}"
-          if [[ "$BRANCH" == "main" ]]; then
+          if [[ "$REF_NAME" == "main" ]]; then
             if [[ "$CORE_AND_PRE" == *-* ]]; then
-              echo "::error::Public (main) release version '$SEMVER2' carries a prerelease suffix; refusing to publish."
+              echo "::error::Public (main) version '$SEMVER2' carries a prerelease suffix; refusing to publish."
               exit 1
             fi
           elif [[ "$CORE_AND_PRE" != *-* ]]; then
-            echo "::error::Prerelease ($BRANCH) version '$SEMVER2' has no prerelease suffix (NBGV classified it public); refusing to publish."
+            echo "::error::Prerelease ($REF_NAME) version '$SEMVER2' has no prerelease suffix; refusing to publish."
             exit 1
           fi
 
-  build-nugetlibrary:
+  build:
     name: Build NuGet library job
-    if: ${{ inputs.enable_nuget }}
     needs: [get-version, validate-release]
-    uses: ./.github/workflows/build-nugetlibrary-task.yml
-    secrets: inherit
-    with:
-      # Pin to the resolved commit so the artifacts match the release tag even if the branch advances mid-run.
-      ref: ${{ needs.get-version.outputs.GitCommitId }}
-      branch: ${{ inputs.branch }}
-      # Push to NuGet.org, never on a smoke build.
-      push: ${{ inputs.nuget && !inputs.smoke }}
-      # Skip the artifact zip/upload on smoke (nothing consumes it on a PR).
-      smoke: ${{ inputs.smoke }}
-
-  github-release:
-    name: Publish GitHub release job
-    # `!inputs.smoke` enforces "smoke never publishes" at the job level, so a smoke caller that also set
-    # `github: true` still can't create a release.
-    if: ${{ inputs.github && !inputs.smoke }}
     runs-on: ubuntu-latest
-    needs: [get-version, validate-release, build-nugetlibrary]
 
     steps:
 
-      # Check out the exact built commit so the uploaded release files match the tag even if the branch advances mid-run.
+      - name: Setup .NET SDK step
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
+        with:
+          dotnet-version: 10.x
+
+      # Pin to the versioned commit so the package and the release tag match even if the branch advances
+      # mid-run. This is a compile checkout only, NBGV already ran in get-version.
       - name: Checkout code step
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: ${{ needs.get-version.outputs.GitCommitId }}
 
-      # Collect assets by the `release-asset-<branch>-*` pattern so this step is target-agnostic: subset releases by
-      # deleting the target, not `enable_*: false` (a skipped `needs` job would skip this release job too). The release
-      # step guards `fail_on_unmatched_files: true`, so at least one `release-asset-*` must match; a repo that drops
-      # every file-producing target (e.g. a Docker-only repo, whose release carries only source zip + README + LICENSE)
-      # relaxes that guard.
-      - name: Download release asset artifacts step
-        if: ${{ inputs.expect_release_assets }}
+      # GeneratePackageOnBuild emits the .nupkg (and .snupkg) from the build, so build, not pack, is the
+      # one-step producer (dotnet pack on top of it double-packs and fails). OutputPath and PackageOutputPath
+      # redirect the assembly and the packages out of the .artifacts layout into a build and a publish dir.
+      - name: Build library step
+        run: |
+          set -euo pipefail
+          dotnet build ${{ env.PROJECT_FILE }} \
+            --configuration ${{ github.ref_name == 'main' && 'Release' || 'Debug' }} \
+            -property:OutputPath=${{ runner.temp }}/build/ \
+            -property:PackageOutputPath=${{ runner.temp }}/publish/ \
+            -property:Version=${{ needs.get-version.outputs.SemVer2 }} \
+            -property:FileVersion=${{ needs.get-version.outputs.AssemblyFileVersion }} \
+            -property:AssemblyVersion=${{ needs.get-version.outputs.AssemblyVersion }} \
+            -property:InformationalVersion=${{ needs.get-version.outputs.AssemblyInformationalVersion }} \
+            -property:PackageVersion=${{ needs.get-version.outputs.SemVer2 }}
+
+      # OIDC trusted publishing: trade the GitHub OIDC token for a short-lived (1-hour) NuGet key, so there
+      # is no stored API key. Needs id-token: write from the caller.
+      - name: NuGet login step
+        if: ${{ inputs.publish && !inputs.smoke }}
+        id: nuget-login
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+        with:
+          user: ${{ secrets.NUGET_USERNAME }}
+
+      # Pushing the .nupkg also pushes the co-located .snupkg to nuget.org's symbol server (no --no-symbols).
+      - name: Push to NuGet.org step
+        if: ${{ inputs.publish && !inputs.smoke }}
+        run: |
+          set -euo pipefail
+          dotnet nuget push ${{ runner.temp }}/publish/*.nupkg \
+            --source https://api.nuget.org/v3/index.json \
+            --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} \
+            --skip-duplicate
+
+      # Hand the package to the github-release job. Plain name (single target). Consumed within this run,
+      # so retention-days: 1 is the failure-path backstop.
+      - name: Upload release asset step
+        if: ${{ inputs.publish && !inputs.smoke }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-asset
+          path: ${{ runner.temp }}/publish/*
+          retention-days: 1
+
+  github-release:
+    name: Publish GitHub release job
+    if: ${{ inputs.publish && !inputs.smoke }}
+    needs: [get-version, validate-release, build]
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # Same versioned commit (GitCommitId) the build used, so the release tag and files match it.
+      - name: Checkout code step
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ needs.get-version.outputs.GitCommitId }}
+
+      - name: Download release asset step
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          pattern: release-asset-${{ inputs.branch }}-*
-          merge-multiple: true
-          path: ./Publish
+          name: release-asset
+          path: ${{ runner.temp }}/publish
 
-      # The weekly publisher re-runs even with no new commits, so the version may already be released. Skip the release
-      # step when a release for this tag already exists to avoid a no-op republish.
+      # A re-run may target an already-released tag. Skip release creation when the tag exists, but let a
+      # manual dispatch through to refresh it.
       - name: Check for existing release step
         id: release-exists
         env:
@@ -141,22 +186,12 @@ jobs:
           set -euo pipefail
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
-            if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-              echo "Release $TAG already exists; workflow_dispatch will refresh it."
-            else
-              echo "Release $TAG already exists; skipping release creation (no-op republish)."
-            fi
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
 
-      # `target_commitish` must be set explicitly: otherwise GitHub's REST API tags the release on the default branch.
-      # Pin it to `GitCommitId` so the tag is on the exact built commit, consistent with the SemVer2 tag and artifacts.
-      # Skip when the release already exists, but always let a manual `workflow_dispatch` through to refresh it.
-      # Every release (any branch, any target) is a tag on the built commit plus the auto-attached source zip, README,
-      # and LICENSE; targets amend it by uploading `release-asset-*` files (binaries/packages) or pushing elsewhere
-      # (image/registry). `fail_on_unmatched_files: true` fails loudly if a promised `release-asset-*` is missing or
-      # misnamed; a no-file-target repo relaxes it (see download step).
+      # target_commitish must be the built commit, or GitHub tags the release on the default branch. The
+      # release is the tag plus the auto source zip, README, LICENSE, and the .nupkg/.snupkg.
       - name: Create GitHub release step
         if: ${{ steps.release-exists.outputs.exists == 'false' || github.event_name == 'workflow_dispatch' }}
         uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b # v3.0.1
@@ -164,30 +199,25 @@ jobs:
           generate_release_notes: true
           tag_name: ${{ needs.get-version.outputs.SemVer2 }}
           target_commitish: ${{ needs.get-version.outputs.GitCommitId }}
-          prerelease: ${{ inputs.branch != 'main' }}
-          fail_on_unmatched_files: ${{ inputs.expect_release_assets }}
+          prerelease: ${{ github.ref_name != 'main' }}
+          fail_on_unmatched_files: true
           files: |
             LICENSE
             README.md
-            ./Publish/*
+            ${{ runner.temp }}/publish/*
 
-      # Surgical cleanup at the point of consumption: the release-asset-<branch>-* transfer artifacts now have durable
-      # copies on the release, so delete them by exact pattern to free the storage quota - scoped to this branch's
-      # assets, leaving diagnostics and any other artifacts. Gated to the same condition as the create step so it only
-      # deletes when a release was actually created/refreshed this run; on a skipped create (existing tag, no new
-      # commits) the fresh artifacts stay for the run, reaped by the retention-days: 1 backstop. Needs the caller to
-      # grant `actions: write` (publish-release's publish job does).
-      - name: Delete consumed release asset artifacts step
-        if: ${{ inputs.expect_release_assets && (steps.release-exists.outputs.exists == 'false' || github.event_name == 'workflow_dispatch') }}
-        # Best-effort: the release is already published, so a listing/delete hiccup must never red the job; the
-        # retention-days: 1 backstop reaps anything missed. Deletes every matching id (a rerun can upload duplicates).
+      # Reclaim the transfer artifact now the release holds durable copies. Same gate as the create step
+      # (exists == false || dispatch), so a no-op re-run keeps its artifact for the retention backstop.
+      # Best-effort: a delete hiccup never fails a successful publish. Needs actions: write from the caller.
+      - name: Delete consumed release asset step
+        if: ${{ steps.release-exists.outputs.exists == 'false' || github.event_name == 'workflow_dispatch' }}
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           if ! ids=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/${{ github.run_id }}/artifacts" --paginate \
-            --jq ".artifacts[] | select(.name | startswith(\"release-asset-${{ inputs.branch }}-\")) | .id"); then
+            --jq '.artifacts[] | select(.name == "release-asset") | .id'); then
             echo "::warning::Could not list run artifacts; retention-days backstop will reap them."
             ids=""
           fi

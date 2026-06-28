@@ -1,9 +1,18 @@
 name: Test pull request action
 
+# CI for every branch. Runs on push so the reusable tasks resolve from the pushed head: a PR that edits a
+# workflow or the build task tests its own copy. validate-task (unit tests + lint) and smoke-build run on
+# every push with no paths filter, so a reusable-workflow change is always exercised. The aggregator below
+# is the ruleset required-status-check, produced here on the head SHA. validate-task is the same gate the
+# publisher runs, so nothing merges or publishes that would fail it.
+#
+# There is deliberately no pull_request trigger: a fork PR cannot push to this repo, so it produces no run
+# and cannot satisfy the required check. A maintainer lands such a contribution on an in-repo branch (which
+# does push, and so validates) before merging. This is the documented exception (see WORKFLOW.md).
 on:
-  pull_request:
-    # Matches the PR's base branch; `codegen-main`/`codegen-develop` are head-only, so only the protected bases go here.
-    branches: [ main, develop ]
+  # All branches, but not tags: release tags must not re-run CI.
+  push:
+    branches: ['**']
   workflow_dispatch:
 
 concurrency:
@@ -12,106 +21,37 @@ concurrency:
 
 jobs:
 
-  # Detect whether a PR touches the library so we smoke-build only when it changed.
-  # Build-workflow files are deliberately excluded - a path filter can't tell a logic
-  # change from an action-version bump - so workflow-only changes aren't smoke-built;
-  # lint them with `actionlint` locally. workflow_dispatch forces the build on.
-  changes:
-    name: Detect changed targets job
-    runs-on: ubuntu-latest
-    # dorny/paths-filter reads changed files via the API (no checkout), so grant pull-requests: read.
+  validate:
+    name: Validate job
+    uses: ./.github/workflows/validate-task.yml
+
+  # Build and pack the library in its branch configuration to prove it ships, publishing nothing. Runs on
+  # every push, so a change to build-release-task is exercised head-resolved in the PR that makes it.
+  smoke-build:
+    name: Smoke build job
+    uses: ./.github/workflows/build-release-task.yml
     permissions:
       contents: read
-      pull-requests: read
-    outputs:
-      nuget: ${{ github.event_name == 'pull_request' && steps.filter.outputs.nuget || 'true' }}
-    steps:
-      - name: Filter changed paths step
-        id: filter
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
-        with:
-          filters: |
-            shared: &shared
-              - 'Directory.Build.props'
-              - 'Directory.Packages.props'
-              - 'version.json'
-              - '*.slnx'
-            nuget:
-              - *shared
-              - 'LanguageTags/**'
-
-  # Unit tests are cheap and validate the library, so they always run regardless of the smoke-build gate.
-  unit-test:
-    name: Run unit tests job
-    runs-on: ubuntu-latest
-
-    steps:
-
-      - name: Setup .NET SDK step
-        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
-        with:
-          dotnet-version: 10.x
-
-      - name: Checkout code step
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-
-      # `dotnet husky run` runs the repo's git hooks: the CSharpier + dotnet format style checks.
-      - name: Check code style step
-        run: |
-          set -euo pipefail
-          dotnet tool restore
-          dotnet husky install
-          dotnet husky run
-
-      - name: Run unit tests step
-        run: dotnet test
-
-  # Build the library in smoke mode (Debug for develop / Release for main, no publishing), in the PR base-branch
-  # configuration. Skipped when the library didn't change; unit tests still run.
-  smoke-build:
-    name: Smoke build changed targets job
-    needs: [changes, unit-test]
-    if: ${{ needs.changes.outputs.nuget == 'true' }}
-    uses: ./.github/workflows/build-release-task.yml
-    secrets: inherit
     with:
       smoke: true
-      # Do not publish anything from a PR.
-      github: false
-      nuget: false
-      # Check out the PR head by SHA: refs/pull/N/head is reachable in the base repo even for
-      # forks, unlike the head_ref branch name. workflow_dispatch falls back to the triggering ref.
-      ref: ${{ github.event.pull_request.head.sha || github.ref_name }}
-      branch: ${{ github.base_ref || github.ref_name }}
-      enable_nuget: ${{ needs.changes.outputs.nuget == 'true' }}
+      publish: false
 
-  # TODO: GitHub Actions does not support required status checks on conditional jobs.
-  # https://github.com/orgs/community/discussions/12395#discussioncomment-12970019
-  # This aggregator and its job name are verbatim orchestration: the name is the
-  # ruleset-bound required status-check context - do NOT rename it.
+  # Single required status check. Its name is the ruleset-bound context in repo-config/ruleset-*.json. Do
+  # not rename it without updating those in lockstep. Must succeed, not merely not-fail.
   check-workflow-status:
-    name: Check pull request workflow status
+    name: Check pull request workflow status job
     runs-on: ubuntu-latest
-    needs:
-      [ changes, unit-test, smoke-build ]
+    needs: [validate, smoke-build]
     if: always()
     steps:
       - name: Check workflow results step
         run: |
           set -euo pipefail
-          exit_on_result() {
-            if [[ "$2" == "failure" || "$2" == "cancelled" ]]; then
-              echo "Job '$1' failed or was cancelled."
+          for result in "validate:${{ needs.validate.result }}" "smoke-build:${{ needs.smoke-build.result }}"; do
+            name="${result%%:*}"
+            value="${result#*:}"
+            if [[ "$value" != "success" ]]; then
+              echo "::error::Job '$name' did not succeed ($value)."
               exit 1
             fi
-          }
-          # The changes job MUST succeed - a paths-filter error must not let a
-          # library-changing PR merge with its smoke build silently skipped.
-          if [[ "${{ needs.changes.result }}" != "success" ]]; then
-            echo "Job 'changes' did not succeed (${{ needs.changes.result }}); refusing to pass."
-            exit 1
-          fi
-          # smoke-build may be legitimately skipped (library unchanged); only failure/cancelled blocks.
-          exit_on_result "unit-test" "${{ needs.unit-test.result }}"
-          exit_on_result "smoke-build" "${{ needs.smoke-build.result }}"
+          done

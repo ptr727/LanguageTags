@@ -11,8 +11,7 @@ C# .NET library for ISO 639-2, ISO 639-3, RFC 5646 / BCP 47 language tags.
 ### Build Status
 
 [![Release Status][releasebuildstatus-shield]][actions-link]\
-[![Last Commit][lastcommit-shield]][commits-link]\
-[![Last Build][lastbuild-shield]][actions-link]
+[![Last Commit][lastcommit-shield]][commits-link]
 
 ### Releases
 
@@ -22,12 +21,14 @@ C# .NET library for ISO 639-2, ISO 639-3, RFC 5646 / BCP 47 language tags.
 
 ### Release Notes
 
-**Version: 1.4**:
+**Version: 1.5**:
 
 **Summary**:
 
-- Added UN M.49 region containment support sourced from Unicode CLDR.
-- Added opt-in region containment matching, e.g. `es-419` matches `es-MX`, see [Tag Matching](#tag-matching).
+- Internal CI/CD rework, no library API changes.
+  - Branch-scoped self-publishing workflows
+  - Keyless OIDC NuGet publishing.
+  - Hardened repository configuration, see [WORKFLOW.md](./WORKFLOW.md).
 
 See [Release History](./HISTORY.md) for complete release notes and older versions.
 
@@ -431,33 +432,20 @@ LogOptions.SetFactory(loggerFactory);
   - ISO 639-3: [Source][iso6393source-link], [Data](./LanguageData/iso6393), [JSON](./LanguageData/iso6393.json), [Code](./LanguageTags/Iso6393DataGen.cs)
   - RFC 5646 : [Source][rfc5646source-link], [Data](./LanguageData/rfc5646), [JSON](./LanguageData/rfc5646.json), [Code](./LanguageTags/Rfc5646DataGen.cs)
   - UN M.49 : [Source][unm49source-link], [Data](./LanguageData/unm49), [JSON](./LanguageData/unm49.json), [Code](./LanguageTags/UnM49DataGen.cs)
-- A daily [GitHub Actions](./.github/workflows/run-periodic-codegen-pull-request.yml) job opens PRs to keep the data files up to date; a [weekly scheduled job](./.github/workflows/publish-release.yml) publishes new releases. Routine merges (Dependabot, codegen) only smoke-test — the actual build/publish is batched into the weekly run (two-phase model).
+- A daily [GitHub Actions](./.github/workflows/run-periodic-codegen-pull-request.yml) job opens PRs to keep the data files up to date.
 
 ## Contributing
 
-**Branching workflow**:
-
-The repo uses a two-branch model with strict ruleset-enforced merge methods:
-
-- Feature branch → `develop` via **squash merge** (develop is kept linear).
-- `develop` → `main` via **merge commit** (preserves develop's commit list on main as the second parent of each release commit).
-- `develop` is **forward-only** — there are no `main → develop` back-merges. Dependabot and the daily codegen workflow both target `main` and `develop` in parallel via separate PRs.
-
-See [`AGENTS.md`](./AGENTS.md) for the complete branching, PR, and workflow conventions and [`CODESTYLE.md`](./CODESTYLE.md) for C# code style rules.
-
-**Repository setup**:
-
-CI/CD relies on these secrets being configured on the repo:
-
-- `CODEGEN_APP_CLIENT_ID` and `CODEGEN_APP_PRIVATE_KEY` — GitHub App credentials used by the codegen and merge-bot workflows. Must be present in **both** the Actions secret store **and** the Dependabot secret store (the merge-bot runs under Dependabot's restricted secret context on Dependabot PRs). The `_CLIENT_ID` half holds the GitHub App's Client ID (e.g. `Iv23li…`); `actions/create-github-app-token` accepts either a numeric App ID or a Client ID at its `app-id` input.
-- `NUGET_API_KEY` — NuGet.org API key for package publishing. Actions store only.
-
-Branch protection is split across two rulesets:
-
-- **Develop** ruleset: squash-only, linear history, "branches up to date" check off (the strict check blocks auto-merge when two same-batch bot PRs race — see AGENTS.md), signed commits required.
-- **Main** ruleset: merge-commit only, linear history off, "branches up to date" check off (forward-only develop makes this check incompatible with the merge-commit release shape), signed commits required.
-
-Both rulesets require the `Check pull request workflow status` status check and request Copilot review on every push.
+- **Branching workflow**:
+  - The repo uses a two-branch model with ruleset-enforced merge methods.
+  - Feature branch -> `develop` via **squash merge** (develop is kept linear).
+  - `develop` -> `main` via **merge commit** (preserves develop's commit list on main as the second parent of each release commit).
+  - Dependabot and the daily codegen workflow both target `main` and `develop` in parallel via separate PRs.
+  - See [`WORKFLOW.md`](./WORKFLOW.md) for complete details.
+- **Code style**:
+  - See [`CODESTYLE.md`](./CODESTYLE.md) and [`.editorconfig`](./.editorconfig) for C# code style rules.
+- **Repository setup**:
+  - See [`repo-config/README.md`](./repo-config/README.md) for repo configuration details.
 
 ## Tag Theory
 
@@ -568,7 +556,6 @@ Both rulesets require the `Check pull request workflow status` status check and 
 **3rd party tools used in this project**:
 
 - [AwesomeAssertions][awesomeassertions-link]
-- [Bring Your Own Badge][byob-link]
 - [Create Pull Request][createpr-link]
 - [CSharpier][csharpier-link]
 - [GH Release][ghrelease-link]
@@ -592,21 +579,19 @@ Licensed under the [MIT License][license-link]\
 [discussions-link]: https://github.com/ptr727/LanguageTags/discussions
 [github-link]: https://github.com/ptr727/LanguageTags
 [issues-link]: https://github.com/ptr727/LanguageTags/issues
-[lastbuild-shield]: https://byob.yarr.is/ptr727/LanguageTags/lastbuild
 [lastcommit-shield]: https://img.shields.io/github/last-commit/ptr727/LanguageTags?logo=github&label=Last%20Commit
 [license-link]: ./LICENSE
 [license-shield]: https://img.shields.io/github/license/ptr727/LanguageTags?label=License
 [nuget-link]: https://www.nuget.org/packages/ptr727.LanguageTags/
 [nugetreleaseversion-shield]: https://img.shields.io/nuget/v/ptr727.LanguageTags?logo=nuget&label=NuGet%20Release
 [prereleaseversion-shield]: https://img.shields.io/github/v/release/ptr727/LanguageTags?include_prereleases&filter=*-g*&label=GitHub%20Pre-Release&logo=github
-[releasebuildstatus-shield]: https://img.shields.io/github/actions/workflow/status/ptr727/LanguageTags/publish-release.yml?logo=github&label=Releases%20Build&event=schedule
+[releasebuildstatus-shield]: https://img.shields.io/github/actions/workflow/status/ptr727/LanguageTags/publish-release.yml?logo=github&label=Releases%20Build
 [releases-link]: https://github.com/ptr727/LanguageTags/releases
 [releaseversion-shield]: https://img.shields.io/github/v/release/ptr727/LanguageTags?logo=github&label=GitHub%20Release
 
 <!-- 3rd Party tool links -->
 
 [awesomeassertions-link]: https://awesomeassertions.org/
-[byob-link]: https://github.com/marketplace/actions/bring-your-own-badge
 [createpr-link]: https://github.com/marketplace/actions/create-pull-request
 [csharpier-link]: https://csharpier.com/
 [ghactions-link]: https://github.com/actions

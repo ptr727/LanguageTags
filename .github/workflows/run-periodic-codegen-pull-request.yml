@@ -1,14 +1,16 @@
 name: Run daily codegen and pull request action
 
+# Daily check for upstream language-data changes. The task regenerates LanguageData and opens a PR per
+# branch only when the data changed (see run-codegen-pull-request-task.yml). The merge-bot auto-merges it,
+# and the changed data is a shipped input, so the publisher then releases it.
 on:
   workflow_dispatch:
   schedule:
-    # Daily at 04:00 UTC, staggered after the weekly publish so the two don't start together on Mondays.
     - cron: '0 4 * * *'
 
+# Workflow-only group (no -${{ github.ref }}): the task writes to the fixed codegen-main/codegen-develop
+# branches regardless of the triggering ref, so a dispatch and the scheduled run must not race on them.
 concurrency:
-  # Workflow-only group (no `-${{ github.ref }}`): the task writes to the fixed `codegen-main`/`codegen-develop`
-  # branches regardless of triggering ref, so a dispatch and the scheduled run must not race on them.
   group: ${{ github.workflow }}
   cancel-in-progress: true
 

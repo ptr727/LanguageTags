@@ -4,10 +4,11 @@
 # this directory; `check` validates an existing repo and exits non-zero on drift (the 5D audit). Run from
 # anywhere; the target repo is resolved from the current `gh` context unless $REPO is set (owner/name).
 #
-#   ./repo-config/configure.sh check     # validate only (no writes); CI / audit use
+#   ./repo-config/configure.sh check     # validate only, no writes (the 5D audit)
 #   ./repo-config/configure.sh apply     # create-or-update rulesets + settings (writes)
 #
-# Requires: gh (authenticated with admin on the repo for `apply`), jq.
+# Requires gh and jq. Both modes read the rulesets and secrets endpoints, which need admin on the repo, so
+# gh must be authenticated with admin for `check` as well as `apply`. `check` only reads; `apply` writes.
 
 set -euo pipefail
 

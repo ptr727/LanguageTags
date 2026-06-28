@@ -12,7 +12,8 @@ templates); repository administration config-as-code is the maintainer's, so it 
 
 - [`configure.sh`](./configure.sh) - idempotent `gh api` script with two modes:
   - `./repo-config/configure.sh check` - validate only, no writes; exits non-zero on drift (the 5D
-    audit; safe to run in CI or by an agent).
+    audit). Read-only, but it reads the rulesets and secrets endpoints, so it still needs a `gh` token
+    with admin on the repo.
   - `./repo-config/configure.sh apply` - create-or-update the rulesets and settings to match this
     directory (needs admin; writes).
 - [`ruleset-develop.json`](./ruleset-develop.json) - the `develop` branch ruleset (squash-only, linear
@@ -48,8 +49,9 @@ REPO=ptr727/LanguageTags ./repo-config/configure.sh check   # confirm no drift
 ```
 
 First-time adoption is the same step: the live ruleset predates the renamed aggregator, so the first
-`apply` is what lets a pull request against the new workflows go green. `apply` needs a `gh` login with
-admin on the repo; `check` is read-only and safe for CI or an agent.
+`apply` is what lets a pull request against the new workflows go green. both modes need a `gh` login
+with admin on the repo (the rulesets and secrets endpoints require it); `apply` writes, `check` only
+reads.
 
 ## Why both a script and JSON
 

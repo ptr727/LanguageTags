@@ -10,7 +10,9 @@ name: Test pull request action
 # and cannot satisfy the required check. A maintainer lands such a contribution on an in-repo branch (which
 # does push, and so validates) before merging. This is the documented exception (see WORKFLOW.md).
 on:
+  # All branches, but not tags: release tags must not re-run CI.
   push:
+    branches: ['**']
   workflow_dispatch:
 
 concurrency:

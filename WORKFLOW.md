@@ -212,9 +212,11 @@ release by dispatch. A merged dependency bump does not itself publish. See D8.
 
 The repo produces exactly one shipped artifact, the NuGet package. The leaf pushes the package, and where
 symbols are enabled its symbol package, to NuGet.org via OIDC trusted publishing (no long-lived API key,
-D4.7), and attaches the `.nupkg`/`.snupkg` to the GitHub release. There is no generic multi-target
-abstraction: no `enable_<target>` flag selecting among leaves, no `expect_release_assets` toggle, no
-`release-asset-<branch>-*` glob. The single asset is attached directly by plain name.
+D4.7), and bundles them with the compiled library into a single fixed-name `LanguageTags.7z` attached to
+the GitHub release. There is no generic multi-target abstraction: no `enable_<target>` flag selecting among
+leaves, no `expect_release_assets` toggle, no `release-asset-<branch>-*` glob. The single asset,
+`LanguageTags.7z`, is attached by its fixed name, so `releases/latest/download/LanguageTags.7z` is a stable
+download URL.
 
 ## 4. Behavioral contract - expected outcomes
 
@@ -301,8 +303,9 @@ applicable guarantee is not operational (section 1).
   `GitCommitId`), never `github.sha` of a moving ref. *Prevents: the tag landing on a different commit
   than was built.*
 - **D4.4 Release contents and flag.** Output: every release is a tag on the built commit plus the auto
-  source zip, README, and LICENSE, with the `.nupkg` and (where `IncludeSymbols`) the `.snupkg` attached.
-  The GitHub-release `prerelease` boolean is set to `github.ref_name != 'main'`. *(GitHub computes the
+  source zip, README, and LICENSE, with a fixed-name `LanguageTags.7z` attached that bundles the compiled
+  library, the `.nupkg`, and (where `IncludeSymbols`) the `.snupkg`. The GitHub-release `prerelease`
+  boolean is set to `github.ref_name != 'main'`. *(GitHub computes the
   "Latest" badge from semver across non-prerelease releases, a consequence, not a workflow assertion.)*
 - **D4.5 No-op republish.** Input: a re-run whose version is unchanged. Output: the release-create step
   is skipped when the tag already exists (refreshed only on `workflow_dispatch`). The NuGet push runs and
@@ -437,8 +440,9 @@ guarantee, each pass/fail/N-A with a `file:line` citation:
   `PUBLISH_ON_MERGE`; the dispatch path is guarded to `main`/`develop`; the publisher calls the same
   `validate-task` as a `validate` job and the publish job `needs:` it (D4.6); the run publishes only
   `github.ref_name`; `target_commitish` is the NBGV commit id; the GitHub-release `prerelease` boolean
-  `== (github.ref_name != 'main')`; the release body attaches the source zip, README, and LICENSE; the
-  leaf pushes `*.nupkg` and `*.snupkg` (symbols enabled) with `--skip-duplicate`; the publish job grants
+  `== (github.ref_name != 'main')`; the release body attaches the source zip, README, LICENSE, and a
+  fixed-name `LanguageTags.7z` bundle (compiled library + `.nupkg`/`.snupkg`); the leaf pushes `*.nupkg`
+  and `*.snupkg` (symbols enabled) with `--skip-duplicate`; the publish job grants
   `id-token: write` and pushes with a `NuGet/login@v1` short-lived key, not a `NUGET_API_KEY` secret
   (D4.7); release-create gated `exists == false || workflow_dispatch`.
 - **D5:** each cross-job transfer artifact has a delete gated to its consumer, `continue-on-error: true`,

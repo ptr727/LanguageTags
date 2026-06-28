@@ -393,12 +393,12 @@ applicable guarantee is not operational (section 1).
   required-check `context:` is codified in `repo-config/` and changed only in lockstep with the ruleset.
 - **D9.3** Bash `run:` blocks start `set -euo pipefail`; multi-line `if:` uses `>-`.
 - **D9.4** Line endings follow `.editorconfig`.
-- **D9.6** Style is enforced in CI, not just the editor: the `lint` job (D1.3) runs CSharpier check,
-  `dotnet format style`, `markdownlint-cli2`, `cspell` on the user-facing docs, and `actionlint`, from the
-  same config files the editor and the Husky hook use (CODESTYLE clean-compile sync).
 - **D9.5** No decorative / non-shipped workflow remains, in particular no date-badge workflow
   (`build-datebadge-*`). The contract ships exactly the package and its release. A workflow that produces
   neither is out of scope, and its presence is a defect to remove.
+- **D9.6** Style is enforced in CI, not just the editor: the `lint` job (D1.3) runs CSharpier check,
+  `dotnet format style`, `markdownlint-cli2`, `cspell` on the user-facing docs, and `actionlint`, from the
+  same config files the editor and the Husky hook use (CODESTYLE clean-compile sync).
 
 ### D10 - Repository configuration
 

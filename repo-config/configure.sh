@@ -153,7 +153,7 @@ cmd_check() {
   check_app
   # External, not checkable via gh api: the NuGet.org trusted-publishing policy that makes publishing
   # keyless (WORKFLOW.md D4.7). Verify it by hand in the nuget.org account.
-  note "verify manually: NuGet.org trusted-publishing policy (owner ptr727, repo LanguageTags, workflow publish-release.yml)"
+  note "verify manually: NuGet.org trusted-publishing policy (owner ptr727, repo LanguageTags, workflow build-release-task.yml)"
   if [[ "$FAILED" -ne 0 ]]; then echo "Configuration drift detected."; exit 1; fi
   echo "Configuration matches."
 }

@@ -21,8 +21,11 @@ templates); repository administration config-as-code is the maintainer's, so it 
 - [`ruleset-main.json`](./ruleset-main.json) - the `main` branch ruleset (merge-commit-only, signed
   commits, the same required check, strict **off**; no linear-history rule).
 - [`settings.json`](./settings.json) - repository settings (auto-merge on; squash **and** merge-commit
-  allowed; rebase off; auto-delete-on-merge **off**, so `main`/`develop` survive a promotion - the
-  merge-bot passes `--delete-branch` for bot PRs, and feature PRs are merged with `--delete-branch`).
+  allowed; rebase off; auto-delete-on-merge **off**). The repo-wide auto-delete **setting** is off so a
+  `develop -> main` promotion does not delete `develop` (GitHub's auto-delete would remove the merged head
+  branch). Per-merge deletion is explicit instead: the merge-bot deletes a merged bot branch with
+  `gh pr merge --delete-branch`, and a feature branch is deleted the same way (or via the merge UI's delete
+  button) - so `main`/`develop` survive while bot/feature branches are still cleaned up.
 
 ## What it does not store
 

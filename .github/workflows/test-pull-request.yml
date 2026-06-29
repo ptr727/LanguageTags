@@ -21,14 +21,17 @@ concurrency:
 
 jobs:
 
+  # `!github.event.deleted` skips a branch-deletion push (github.sha is all-zeros, so checkout/build fail).
   validate:
     name: Validate job
+    if: ${{ !github.event.deleted }}
     uses: ./.github/workflows/validate-task.yml
 
   # Build and pack the library in its branch configuration to prove it ships, publishing nothing. Runs on
   # every push, so a change to build-release-task is exercised head-resolved in the PR that makes it.
   smoke-build:
     name: Smoke build job
+    if: ${{ !github.event.deleted }}
     uses: ./.github/workflows/build-release-task.yml
     permissions:
       contents: read
@@ -42,7 +45,7 @@ jobs:
     name: Check pull request workflow status job
     runs-on: ubuntu-latest
     needs: [validate, smoke-build]
-    if: always()
+    if: ${{ always() && !github.event.deleted }}
     steps:
       - name: Check workflow results step
         run: |

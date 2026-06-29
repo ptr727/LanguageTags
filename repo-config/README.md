@@ -31,7 +31,8 @@ templates); repository administration config-as-code is the maintainer's, so it 
 
 Secret **values** are never readable through the API, so the script only asserts the required secret
 **names** exist (`NUGET_USERNAME` and the App credentials `CODEGEN_APP_CLIENT_ID` /
-`CODEGEN_APP_PRIVATE_KEY`) and that a GitHub App is installed. Set the values in the repository (or
+`CODEGEN_APP_PRIVATE_KEY`), and *notes* (best-effort) whether a GitHub App is installed - a precise check
+needs app-level auth, so that one does not fail the audit. Set the values in the repository (or
 organization) secret store directly. Publishing is keyless via OIDC trusted publishing (WORKFLOW.md
 D4.7), so there is no `NUGET_API_KEY`; the matching trusted-publishing policy lives on NuGet.org and is
 verified by hand, not by this script.

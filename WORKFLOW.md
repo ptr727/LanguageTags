@@ -17,7 +17,8 @@ Each guarantee names the **failure it prevents**, so the reason survives a reimp
 A run targets **one branch, the one it was triggered on** (`github.ref_name`): `main` builds a stable
 release, `develop` a prerelease. The version is computed once and threaded downstream. A pull request
 builds and tests but never publishes. The package **publishes itself** when a shipped input changes (the
-source, the embedded data, the version floor, or the build configuration), so releases track the code
+source, the embedded data, the version floor, the build configuration, or the package versions - so a
+dependency bump republishes to keep the package's dependencies current), so releases track the code
 without a person cutting them. A maintainer dispatches only to force a release. Dependabot and codegen
 pull requests merge themselves once their checks pass.
 

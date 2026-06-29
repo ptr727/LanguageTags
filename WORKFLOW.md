@@ -150,8 +150,10 @@ skips the delete still reclaims its artifact. The run's artifact set is never bl
 A pull request validates fast and never publishes. Validation is a reusable `validate-task` holding two
 jobs, `unit-test` (build and test) and `lint` (the editor's checks, enforced in CI). The pull request runs
 it as a `validate` job alongside `smoke-build` (build and pack the library to prove it ships, uploading and
-pushing nothing). Both run unconditionally, no paths filter, so a reusable-workflow change is always
-exercised head-resolved. Packaging validation as one task lets the publisher run the identical gate (D4.6).
+pushing nothing). Both run on every push with no paths filter (a branch-deletion push is the one exception -
+a `!github.event.deleted` guard skips them, since `github.sha` is all-zeros and checkout would fail), so a
+reusable-workflow change is always exercised head-resolved. Packaging validation as one task lets the
+publisher run the identical gate (D4.6).
 One required aggregator gates the merge. See D1.
 
 ### Self-testing workflows, and the required-context invariant
@@ -241,10 +243,12 @@ applicable guarantee is not operational (section 1).
 ### D1 - Pull-request fast feedback
 
 - **D1.1 Every push builds, lints, and tests.** Output: on any push the `validate` job - the reusable
-  `validate-task`, holding the `unit-test` and `lint` jobs - and `smoke-build` all run unconditionally,
-  no paths filter. `smoke-build` builds and packs the library in its branch configuration through the same
-  `build-release-task` the publisher uses. *Prevents: a reusable-workflow change shipping untested because
-  a filter excluded it; a build/packaging break slipping through.*
+  `validate-task`, holding the `unit-test` and `lint` jobs - and `smoke-build` run with no paths filter.
+  The one exception is a branch-deletion push: a `!github.event.deleted` guard skips every job (and the
+  aggregator skips too, so the required check is not left pending), because `github.sha` is all-zeros and a
+  checkout/build would fail. `smoke-build` builds and packs the library in its branch configuration through
+  the same `build-release-task` the publisher uses. *Prevents: a reusable-workflow change shipping untested
+  because a filter excluded it; a build/packaging break slipping through; a branch-deletion push failing CI.*
 - **D1.2 Unit tests always run.** Output: the `unit-test` job (in `validate-task`) runs `dotnet test`
   (build with `TreatWarningsAsErrors`, so analyzer/style warnings fail here), and the aggregator reaches
   it through the `validate` job it `needs:`.
@@ -431,7 +435,8 @@ guarantee, each pass/fail/N-A with a `file:line` citation:
   other consumer reading it via `needs:` outputs (a second invocation that recomputes is the defect; a
   commit checkout that only compiles is allowed).
 - **D1:** the PR workflow runs on `push` with no paths filter; the `validate` job (the reusable
-  `validate-task`, holding `unit-test` + `lint`) and `smoke-build` both run unconditionally; the smoke call
+  `validate-task`, holding `unit-test` + `lint`) and `smoke-build` run on every push except a branch deletion
+  (every job, the aggregator included, carries a `!github.event.deleted` guard); the smoke call
   sets publish off and `smoke: true`; every build `upload-artifact` is gated `!smoke`; the `lint` job runs
   CSharpier check, `dotnet format style --verify-no-changes`, `markdownlint-cli2`, `cspell` on
   README/HISTORY, and `actionlint`; the aggregator `needs:` `validate` + `smoke-build` and blocks on any
@@ -488,6 +493,7 @@ determined by NBGV from the checkout state in section 3.*
 | S13 | `version.json` floor bump merged to a branch | version floor is a shipped input -> **auto-publish** that branch at the new floor | D3.3, D4.1, D4.2 |
 | S14 | Dependabot **major** bump whose tests fail | required check fails -> auto-merge does **not** complete; no merge, no publish; maintainer notified | D8.2 |
 | S15 | `develop` -> `main` promotion (merge commit) carrying a shipped change | the merge commit's diff (`before..after`, `before` = prior `main` tip) includes the promoted shipped input -> `main` **auto-publishes the stable release**; a promotion carrying only non-shipped changes does not | D4.1, D4.2, D8.1 |
+| S16 | a branch is **deleted** (a push event with `github.sha` all-zeros) | the `!github.event.deleted` guard skips `validate`, `smoke-build`, and the aggregator -> no failed CI run, no pending required check | D1.1 |
 
 ### 5C. Live probe (where warranted, never publishing)
 

@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
 
-  # `!github.event.deleted` skips a branch-deletion push (github.sha is all-zeros, so checkout/build fail).
+  # `!github.event.deleted` skips a branch-deletion push (github.sha is all-zeros, so checkout/build fails).
   validate:
     name: Validate job
     if: ${{ !github.event.deleted }}

@@ -8,7 +8,7 @@ name: Publish project release action
 #   (Directory.Packages.props) ARE listed: a NuGet package cannot be rebuilt on a cadence (a version can't be
 #   re-pushed), so a dependency bump must republish to keep the package's declared dependencies current - this
 #   closes the stale/vulnerable-dependency window. GitHub Actions bumps are not listed (they do not ship in
-#   the package), so that Dependabot churn does not republish.
+#   the package), so an Actions Dependabot bump does not republish (a package-version bump does).
 # - Output: main publishes a stable release, develop a prerelease. A dispatch force-publishes its branch.
 # - Gate: the publish job needs the same validate-task the PR runs, so nothing publishes that would fail
 #   validation, on any path (push, dispatch, or force-push).

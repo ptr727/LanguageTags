@@ -87,7 +87,8 @@ jq_has() { jq -e "$@" >/dev/null 2>&1; }
 
 # jq_lacks FILTER... - true iff the jq filter selects nothing (jq exit 1). A real jq error (exit >1, e.g. a
 # malformed filter or input) is propagated, not treated as "lacks", so the calling assert fails loudly.
-jq_lacks() { local rc; jq -e "$@" >/dev/null 2>&1; rc=$?; case "$rc" in 0) return 1 ;; 1) return 0 ;; *) return "$rc" ;; esac; }
+# The `|| rc=$?` keeps jq in a list (exempt from set -e) so an exit-1 no-match captures rc instead of aborting.
+jq_lacks() { local rc=0; jq -e "$@" >/dev/null 2>&1 || rc=$?; case "$rc" in 1) return 0 ;; 0) return 1 ;; *) return "$rc" ;; esac; }
 
 check_ruleset() { # name  expected-merge-method  expect-linear(true/false)
   local name="$1" method="$2" linear="$3" id rs

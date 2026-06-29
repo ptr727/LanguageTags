@@ -68,10 +68,5 @@ jobs:
             HISTORY.md
           incremental_files_only: false
 
-      # Lint the workflow YAML, including publish-release which the smoke path never runs. The action
-      # vendors actionlint (SHA-pinned, shellcheck included), so there is no hand-rolled download. The
-      # actionlint version is pinned for reproducibility - bump it alongside the action.
       - name: Lint workflows step
         uses: raven-actions/actionlint@3d39aea434753780c3b3d4a1a31c854b4dbf49d7 # v2.2.0
-        with:
-          version: 1.7.12

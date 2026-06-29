@@ -16,9 +16,11 @@ Each guarantee names the **failure it prevents**, so the reason survives a reimp
 
 A run targets **one branch, the one it was triggered on** (`github.ref_name`): `main` builds a stable
 release, `develop` a prerelease. The version is computed once and threaded downstream. A pull request
-builds and tests but never publishes. The package **publishes itself** when a shipped input changes (the
-source, the embedded data, the version floor, or the build configuration), so releases track the code
-without a person cutting them. A maintainer dispatches only to force a release. Dependabot and codegen
+builds and tests but never publishes. The package **publishes itself** when a shipped input changes - the
+source, the embedded data, the version floor, the build configuration, or the package versions
+(`Directory.Packages.props`) - so releases track the code without a person cutting them. Listing the package
+versions means a dependency bump republishes too, keeping the package's declared dependencies current. A
+maintainer dispatches only to force a release. Dependabot and codegen
 pull requests merge themselves once their checks pass.
 
 ### Glossary
@@ -37,11 +39,13 @@ pull requests merge themselves once their checks pass.
   the **base** branch's copy, while a `push`/`workflow_dispatch` event resolves it from the **pushed**
   head. Self-testing (section 3) depends on this.
 - **Shipped input** - a file that changes what the package ships: the library source (`LanguageTags/**`),
-  the embedded data (`LanguageData/**`), the version floor (`version.json`), or the build configuration
-  (`Directory.Build.props`). It is an explicit **inclusion list** (the publisher's `on.push.paths`), so a
-  change confined to tests, the codegen tool, dependencies, GitHub Actions, docs, or CI is **not** a
-  shipped input. Dependency bumps are excluded by policy to avoid republish churn (frequent, and not each
-  worth a release), so they ship on the next promotion or a dispatch.
+  the embedded data (`LanguageData/**`), the version floor (`version.json`), the build configuration
+  (`Directory.Build.props`), or the package versions (`Directory.Packages.props`). It is an explicit
+  **inclusion list** (the publisher's `on.push.paths`), so a change confined to tests, the codegen tool,
+  GitHub Actions, docs, or CI is **not** a shipped input. Package versions are included because a NuGet
+  version cannot be re-pushed (no scheduled rebuild like a Docker image), so a dependency bump must
+  republish to keep the package's declared dependencies current and close the stale/vulnerable-dependency
+  window. GitHub Actions bumps stay excluded - they do not ship in the package.
 - **GitHub App token** - a short-lived installation token from `actions/create-github-app-token`, minted
   from the App credentials (`CODEGEN_APP_CLIENT_ID` / `CODEGEN_APP_PRIVATE_KEY`). Automation that must
   trigger downstream workflows or write to bot pull requests uses **this token, not `GITHUB_TOKEN`**: a
@@ -148,8 +152,10 @@ skips the delete still reclaims its artifact. The run's artifact set is never bl
 A pull request validates fast and never publishes. Validation is a reusable `validate-task` holding two
 jobs, `unit-test` (build and test) and `lint` (the editor's checks, enforced in CI). The pull request runs
 it as a `validate` job alongside `smoke-build` (build and pack the library to prove it ships, uploading and
-pushing nothing). Both run unconditionally, no paths filter, so a reusable-workflow change is always
-exercised head-resolved. Packaging validation as one task lets the publisher run the identical gate (D4.6).
+pushing nothing). Both run on every push with no paths filter (a branch-deletion push is the one exception -
+a `!github.event.deleted` guard skips them, since `github.sha` is all-zeros and checkout would fail), so a
+reusable-workflow change is always exercised head-resolved. Packaging validation as one task lets the
+publisher run the identical gate (D4.6).
 One required aggregator gates the merge. See D1.
 
 ### Self-testing workflows, and the required-context invariant
@@ -182,9 +188,10 @@ Two things publish:
 
 - **An automatic release on a shipped change.** The publisher runs on `push` to `main`/`develop` with the
   `on.push.paths` inclusion list (`LanguageTags/**`, `LanguageData/**`, `version.json`,
-  `Directory.Build.props`), so it triggers only when a shipped input changed. `Directory.Packages.props`
-  and `.github/**` are not listed, so dependency and Actions bumps do not republish. The merge-bot merges
-  with the App token, so its merge commits reach this push trigger.
+  `Directory.Build.props`, `Directory.Packages.props`), so it triggers only when a shipped input changed.
+  `.github/**` is not listed, so Actions bumps do not republish; `Directory.Packages.props` is listed, so a
+  dependency bump republishes to keep the package's dependencies current. The merge-bot merges with the App
+  token, so its merge commits reach this push trigger.
 - **A manual release on demand.** A `workflow_dispatch` on a branch publishes it immediately, whatever
   changed - the "release now" control.
 
@@ -206,7 +213,8 @@ D4.
 
 The library is self-maintaining: data and dependencies stay current on both branches, each shipped change
 releases automatically, and a person steps in only for a breaking change (a red check) or to force a
-release by dispatch. A merged dependency bump does not itself publish. See D8.
+release by dispatch. A merged dependency bump republishes (its `Directory.Packages.props` change is a
+shipped input), keeping the published package's dependencies current. See D8.
 
 ### Single-target output seam
 
@@ -237,10 +245,12 @@ applicable guarantee is not operational (section 1).
 ### D1 - Pull-request fast feedback
 
 - **D1.1 Every push builds, lints, and tests.** Output: on any push the `validate` job - the reusable
-  `validate-task`, holding the `unit-test` and `lint` jobs - and `smoke-build` all run unconditionally,
-  no paths filter. `smoke-build` builds and packs the library in its branch configuration through the same
-  `build-release-task` the publisher uses. *Prevents: a reusable-workflow change shipping untested because
-  a filter excluded it; a build/packaging break slipping through.*
+  `validate-task`, holding the `unit-test` and `lint` jobs - and `smoke-build` run with no paths filter.
+  The one exception is a branch-deletion push: a `!github.event.deleted` guard skips every job (and the
+  aggregator skips too, so the required check is not left pending), because `github.sha` is all-zeros and a
+  checkout/build would fail. `smoke-build` builds and packs the library in its branch configuration through
+  the same `build-release-task` the publisher uses. *Prevents: a reusable-workflow change shipping untested
+  because a filter excluded it; a build/packaging break slipping through; a branch-deletion push failing CI.*
 - **D1.2 Unit tests always run.** Output: the `unit-test` job (in `validate-task`) runs `dotnet test`
   (build with `TreatWarningsAsErrors`, so analyzer/style warnings fail here), and the aggregator reaches
   it through the `validate` job it `needs:`.
@@ -291,11 +301,12 @@ applicable guarantee is not operational (section 1).
 - **D4.1 Publish only by dispatch or a shipped-input change.** Output: the publisher is reachable via (a)
   `workflow_dispatch` on a branch (force-publish, guarded to `main`/`develop`), or (b) a `push` to
   `main`/`develop` matching the **`on.push.paths` inclusion list** of shipped inputs (`LanguageTags/**`,
-  `LanguageData/**`, `version.json`, `Directory.Build.props`). The list is inclusion-only: it does not
-  list `Directory.Packages.props`, `.github/**`, docs, tests, or the codegen tool, so a dependency bump,
-  a GitHub Actions bump, or a docs change does not republish. There is no `schedule` and no
-  `PUBLISH_ON_MERGE`. *Prevents: a blind scheduled republish; a no-impact change (dependency bump, actions
-  bump, docs) cutting a release.*
+  `LanguageData/**`, `version.json`, `Directory.Build.props`, `Directory.Packages.props`). The list is
+  inclusion-only: it does not list `.github/**`, docs, tests, or the codegen tool, so a GitHub Actions bump
+  or a docs change does not republish. `Directory.Packages.props` **is** listed, so a dependency bump
+  republishes (a NuGet version can't be re-pushed, so deps must republish to stay current). There is no
+  `schedule` and no `PUBLISH_ON_MERGE`. *Prevents: a blind scheduled republish; a no-impact change (actions
+  bump, docs) cutting a release; and a stale/vulnerable dependency lingering in the published package.*
 - **D4.2 Publish exactly the triggering branch.** Output: the run publishes only `github.ref_name`
   (`develop` -> prerelease, `main` -> stable; a shipped change or dispatch on `main` cuts a stable release
   by design). *Prevents: a publish shipping the wrong branch.*
@@ -377,9 +388,10 @@ applicable guarantee is not operational (section 1).
 - **D8.2 Dependabot auto-merges on green, every tier.** Output: every Dependabot pull request, any
   ecosystem and semver-major included, auto-merges once the required checks pass, with no version-tier
   exception. A failing check blocks the merge and surfaces via GitHub's check-failure notification. A
-  merged dependency bump does **not** itself publish (dependencies are not in the shipped-input inclusion
-  list, D4.1); it ships with the next shipped change or a dispatch. *Prevents: a breaking update merging
-  unverified; a safe update stalled waiting for a human; and dependency churn cutting needless releases.*
+  merged dependency bump **republishes** (`Directory.Packages.props` is a shipped input, D4.1), keeping the
+  published package's declared dependencies current; a GitHub-Actions bump does not. *Prevents: a breaking
+  update merging unverified; a safe update stalled waiting for a human; and a stale/vulnerable dependency
+  lingering in the published package.*
 - **D8.3 Codegen is deterministic and content-gated.** Output: codegen regenerates `LanguageData/` purely
   from its upstream sources (no per-run timestamps/GUIDs), opens a pull request only when the data changed,
   and auto-merges it on green. The merged data is a shipped input, so the publisher releases it (D4.1).
@@ -425,7 +437,8 @@ guarantee, each pass/fail/N-A with a `file:line` citation:
   other consumer reading it via `needs:` outputs (a second invocation that recomputes is the defect; a
   commit checkout that only compiles is allowed).
 - **D1:** the PR workflow runs on `push` with no paths filter; the `validate` job (the reusable
-  `validate-task`, holding `unit-test` + `lint`) and `smoke-build` both run unconditionally; the smoke call
+  `validate-task`, holding `unit-test` + `lint`) and `smoke-build` run on every push except a branch deletion
+  (every job, the aggregator included, carries a `!github.event.deleted` guard); the smoke call
   sets publish off and `smoke: true`; every build `upload-artifact` is gated `!smoke`; the `lint` job runs
   CSharpier check, `dotnet format style --verify-no-changes`, `markdownlint-cli2`, `cspell` on
   README/HISTORY, and `actionlint`; the aggregator `needs:` `validate` + `smoke-build` and blocks on any
@@ -436,7 +449,7 @@ guarantee, each pass/fail/N-A with a `file:line` citation:
   `publicReleaseRefSpec` is `^refs/heads/main$`.
 - **D4:** the publisher's triggers are `workflow_dispatch` and a `push` to `main`/`develop` with an
   `on.push.paths` inclusion list of exactly `LanguageTags/**`, `LanguageData/**`, `version.json`,
-  `Directory.Build.props` (no `Directory.Packages.props`, no `.github/**`); no `schedule`, no
+  `Directory.Build.props`, `Directory.Packages.props` (no `.github/**`); no `schedule`, no
   `PUBLISH_ON_MERGE`; the dispatch path is guarded to `main`/`develop`; the publisher calls the same
   `validate-task` as a `validate` job and the publish job `needs:` it (D4.6); the run publishes only
   `github.ref_name`; `target_commitish` is the NBGV commit id; the GitHub-release `prerelease` boolean
@@ -477,11 +490,12 @@ determined by NBGV from the checkout state in section 3.*
 | S8 | branch/version classification disagree (e.g. `main` carries `-g`) | validate-release fails loud; build/publish skip | D2.2 |
 | S9 | merged codegen `LanguageData/**` change | shipped input changed -> that branch **auto-publishes** | D4.1, D8.3 |
 | S10 | merged GitHub-Actions version bump only | `.github/workflows/**` is not a shipped input -> **no publish** | D4.1 |
-| S11 | merged dependency bump, any kind (e.g. `Microsoft.Extensions.Logging.Abstractions` or `xunit.v3`) | `Directory.Packages.props` is not in the inclusion list -> **no publish**; ships on the next shipped change or a dispatch | D4.1, D8.2 |
+| S11 | merged dependency bump, any kind (e.g. `Microsoft.Extensions.Logging.Abstractions` or `xunit.v3`) | `Directory.Packages.props` is a shipped input -> that branch **auto-publishes**, keeping the package's declared dependencies current | D4.1, D8.2 |
 | S12 | PR with a CSharpier, dotnet-format, markdown, spelling, or workflow-YAML violation | the `lint` job fails -> aggregator blocks the merge | D1.3, D1.5 |
 | S13 | `version.json` floor bump merged to a branch | version floor is a shipped input -> **auto-publish** that branch at the new floor | D3.3, D4.1, D4.2 |
 | S14 | Dependabot **major** bump whose tests fail | required check fails -> auto-merge does **not** complete; no merge, no publish; maintainer notified | D8.2 |
 | S15 | `develop` -> `main` promotion (merge commit) carrying a shipped change | the merge commit's diff (`before..after`, `before` = prior `main` tip) includes the promoted shipped input -> `main` **auto-publishes the stable release**; a promotion carrying only non-shipped changes does not | D4.1, D4.2, D8.1 |
+| S16 | a branch is **deleted** (a push event with `github.sha` all-zeros) | the `!github.event.deleted` guard skips `validate`, `smoke-build`, and the aggregator -> no failed CI run, no pending required check | D1.1 |
 
 ### 5C. Live probe (where warranted, never publishing)
 

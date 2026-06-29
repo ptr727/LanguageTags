@@ -29,8 +29,20 @@ pass()  { printf '  \033[32mok\033[0m   %s\n' "$*"; }
 fail()  { printf '  \033[31mFAIL\033[0m %s\n' "$*"; FAILED=1; }
 FAILED=0
 
-ruleset_id() { # name -> id (empty if absent)
-  gh api "repos/$REPO/rulesets" --jq ".[] | select(.name==\"$1\") | .id" 2>/dev/null | head -1
+ruleset_id() { # name -> id (empty if absent); aborts with a visible reason on an API error
+  local out
+  # An absent ruleset is a successful call with no match (empty); only a real API error fails. Let gh print its
+  # own error on stderr (do not suppress it); add a generic context line and return non-zero so the run stops
+  # (the caller's $(...) cannot print the cause itself).
+  # per_page=100 returns every ruleset in one array (a repo has only a handful); the default page size is 30.
+  if ! out="$(gh api "repos/$REPO/rulesets?per_page=100")"; then
+    echo "ERROR: could not list rulesets for $REPO (see gh error above)" >&2
+    return 1
+  fi
+  # shellcheck disable=SC2016  # $n is a jq variable (--arg n), not a shell expansion
+  # Select the first match inside jq (not `| head -1`): under pipefail, head closing the pipe early can
+  # SIGPIPE jq and fail the function.
+  jq -r --arg n "$1" '[.[] | select(.name==$n) | .id] | first // empty' <<<"$out"
 }
 
 apply_ruleset() {
@@ -73,6 +85,11 @@ assert() {
 # caller's. Reads JSON from stdin.
 jq_has() { jq -e "$@" >/dev/null 2>&1; }
 
+# jq_lacks FILTER... - true iff the jq filter selects nothing (jq exit 1). A real jq error (exit >1, e.g. a
+# malformed filter or input) is propagated, not treated as "lacks", so the calling assert fails loudly.
+# The `|| rc=$?` keeps jq in a list (exempt from set -e) so an exit-1 no-match captures rc instead of aborting.
+jq_lacks() { local rc=0; jq -e "$@" >/dev/null 2>&1 || rc=$?; case "$rc" in 1) return 0 ;; 0) return 1 ;; *) return "$rc" ;; esac; }
+
 check_ruleset() { # name  expected-merge-method  expect-linear(true/false)
   local name="$1" method="$2" linear="$3" id rs
   id="$(ruleset_id "$name")"
@@ -92,6 +109,10 @@ check_ruleset() { # name  expected-merge-method  expect-linear(true/false)
   if [[ "$linear" == "true" ]]; then
     assert "'$name' requires linear history" \
       jq_has '.rules[] | select(.type=="required_linear_history")' <<<"$rs"
+  else
+    # main must NOT require linear history - it would block the develop -> main merge-commit promotion.
+    assert "'$name' does not require linear history" \
+      jq_lacks '.rules[] | select(.type=="required_linear_history")' <<<"$rs"
   fi
 }
 
@@ -121,10 +142,16 @@ check_security() {
 
 check_secrets() {
   # --paginate: the secrets endpoints page at 30, so without it a repo with many secrets could miss a
-  # required name and report a false failure.
+  # required name and report a false failure. An API/auth error FAILs fast (the required secrets cannot be
+  # verified, so reporting "matches" would be wrong) - distinct from a genuinely missing secret, which also
+  # FAILs. gh prints its own error (stderr not suppressed) so the cause is actionable.
   local actions deps
-  actions="$(gh api --paginate "repos/$REPO/actions/secrets" --jq '.secrets[].name' 2>/dev/null || true)"
-  deps="$(gh api --paginate "repos/$REPO/dependabot/secrets" --jq '.secrets[].name' 2>/dev/null || true)"
+  if ! actions="$(gh api --paginate "repos/$REPO/actions/secrets" --jq '.secrets[].name')"; then
+    fail "could not list Actions secrets (API error - cannot verify required secrets)"; return
+  fi
+  if ! deps="$(gh api --paginate "repos/$REPO/dependabot/secrets" --jq '.secrets[].name')"; then
+    fail "could not list Dependabot secrets (API error - cannot verify required secrets)"; return
+  fi
   for s in "${REQUIRED_ACTIONS_SECRETS[@]}"; do
     assert "actions secret $s present" grep -qx "$s" <<<"$actions"
   done

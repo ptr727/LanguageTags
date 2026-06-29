@@ -106,7 +106,7 @@ The repo runs a review loop on every PR: local agent iteration plus remote autom
 
 `mergeStateStatus: CLEAN` reflects **only** required statuses - it never reflects open bot review comments, so `CLEAN` alone is **never** sufficient to merge. A green/`CLEAN` PR with an unresolved Copilot finding fails this gate; treat it as "not mergeable" no matter what the merge-state field says. The agent never merges on its own (consistent with "default to staging"; merging is maintainer-authorized).
 
-**Merging a shipped change releases.** A merge to `main` or `develop` that changes a shipped input auto-publishes that branch (see [`WORKFLOW.md`](./WORKFLOW.md)); a merge confined to tests, tooling, docs, CI, or non-shipped dependencies does not. Releasing is a configured consequence of merging a shipped change, so weigh the release impact before merging to `main`. Never manually force a publish (`workflow_dispatch`) without explicit maintainer instruction.
+**Merging a shipped change releases.** A merge to `main` or `develop` that changes a shipped input - including a dependency bump (`Directory.Packages.props`), so the published package's dependencies stay current - auto-publishes that branch (see [`WORKFLOW.md`](./WORKFLOW.md)); a merge confined to tests, tooling, docs, CI, or GitHub-Actions bumps does not. Releasing is a configured consequence of merging a shipped change, so weigh the release impact before merging to `main`. Never manually force a publish (`workflow_dispatch`) without explicit maintainer instruction.
 
 ### Expected Review Loop
 

@@ -85,8 +85,9 @@ assert() {
 # caller's. Reads JSON from stdin.
 jq_has() { jq -e "$@" >/dev/null 2>&1; }
 
-# jq_lacks FILTER... - true iff the jq filter selects nothing. Reads JSON from stdin.
-jq_lacks() { ! jq -e "$@" >/dev/null 2>&1; }
+# jq_lacks FILTER... - true iff the jq filter selects nothing (jq exit 1). A real jq error (exit >1, e.g. a
+# malformed filter or input) is propagated, not treated as "lacks", so the calling assert fails loudly.
+jq_lacks() { local rc; jq -e "$@" >/dev/null 2>&1; rc=$?; case "$rc" in 0) return 1 ;; 1) return 0 ;; *) return "$rc" ;; esac; }
 
 check_ruleset() { # name  expected-merge-method  expect-linear(true/false)
   local name="$1" method="$2" linear="$3" id rs
@@ -140,13 +141,14 @@ check_security() {
 
 check_secrets() {
   # --paginate: the secrets endpoints page at 30, so without it a repo with many secrets could miss a
-  # required name and report a false failure. Distinguish an API/auth error (note + skip) from a genuinely
-  # missing secret (FAIL), so a transient failure does not masquerade as every secret being absent.
+  # required name and report a false failure. An API/auth error FAILs fast (the required secrets cannot be
+  # verified, so reporting "matches" would be wrong) - distinct from a genuinely missing secret, which also
+  # FAILs. gh prints its own error (stderr not suppressed) so the cause is actionable.
   local actions deps
-  if ! actions="$(gh api --paginate "repos/$REPO/actions/secrets" --jq '.secrets[].name' 2>/dev/null)"; then
+  if ! actions="$(gh api --paginate "repos/$REPO/actions/secrets" --jq '.secrets[].name')"; then
     fail "could not list Actions secrets (API error - cannot verify required secrets)"; return
   fi
-  if ! deps="$(gh api --paginate "repos/$REPO/dependabot/secrets" --jq '.secrets[].name' 2>/dev/null)"; then
+  if ! deps="$(gh api --paginate "repos/$REPO/dependabot/secrets" --jq '.secrets[].name')"; then
     fail "could not list Dependabot secrets (API error - cannot verify required secrets)"; return
   fi
   for s in "${REQUIRED_ACTIONS_SECRETS[@]}"; do

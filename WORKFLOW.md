@@ -109,7 +109,7 @@ violate section 4.
   trigger blocks. `workflow_dispatch` delivers the string `"true"`/`"false"`, so any `if:` consuming it
   compares both forms: `${{ inputs.foo == true || inputs.foo == 'true' }}`.
 - **Reusable-workflow permissions.** Job-level `permissions:` are validated before `if:`, so even a
-  skipped job needs valid permissions declared. Grant least privilege. A callee's extra scope (e.g.
+  skipped job's declared permissions must be valid. Grant least privilege. A callee's extra scope (e.g.
   `actions: write` to delete artifacts) is granted by the caller at the `uses:` job.
 - **Allowlist `success` and `skipped` explicitly** when chaining across an optional dependency.
   `!= 'failure'` lets `cancelled` through. Use `(needs.X.result == 'success' || needs.X.result ==
@@ -468,7 +468,7 @@ applicable guarantee is not operational (section 1).
   ref-independent group with `cancel-in-progress: false`. All other entry workflows use the
   `...-${{ github.ref }}` group with `cancel-in-progress: true`, except the merge-bot (PR-number group, D8.1) and the daily codegen
   workflow (ref-independent `${{ github.workflow }}` group with `cancel-in-progress: true`, section 2).
-- **D7.2 Skipped jobs still need valid permissions.** Output: every reusable job declares valid
+- **D7.2 Skipped jobs still need valid permissions.** Output: every reusable job runs under valid least-privilege
   `permissions:`, and a callee's extra scope is granted by the caller.
 - **D7.3 Boolean inputs both forms.** Output: boolean inputs are declared in both trigger blocks and
   compared against `true` and `'true'`.

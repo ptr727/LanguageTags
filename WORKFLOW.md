@@ -235,7 +235,7 @@ download URL.
 ### Flow diagrams
 
 Three diagrams trace the architecture above: the pull-request gate, the self-publisher, and the bot
-automation. They are the same outcomes section 4 contracts, drawn from the workflow YAML; if a diagram and
+automation. They depict the same outcomes that the section 4 contract specifies, drawn from the workflow YAML; if a diagram and
 a guarantee disagree, one of them is a defect. Triggers are blue, gates yellow, durable/published outputs
 green, and stop/skip outcomes red.
 

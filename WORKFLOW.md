@@ -79,8 +79,10 @@ violate section 4.
 
 - **Action pinning.** Pin every action to a commit SHA with a trailing `# vX.Y.Z` comment, so a tag swap
   cannot change executed code while Dependabot can still bump it. Use `# vX` only when the upstream
-  floating major tag has no specific patch SHA. The one documented no-pin exception is `dotnet/nbgv@master`,
-  whose tag stream lags `master` such that tag-tracking would downgrade.
+  floating major tag has no specific patch SHA. The SHA-pin rule applies to `uses:` action references; a
+  CLI tool an action downloads at runtime (e.g. the actionlint binary) is not a `uses:` ref and is out of
+  scope. The sole `uses:` no-pin exception is `dotnet/nbgv@master`, whose tag stream lags `master` such that
+  tag-tracking would downgrade.
 - **Filename.** Reusable workflows (`on: workflow_call`) end in `-task.yml`. Entry-point workflows end in
   what they do (`-pull-request.yml`, `-release.yml`). Lowercase, hyphen-separated. A `-task.yml` is
   invoked through a `uses:` reference, never triggered directly.
@@ -92,10 +94,14 @@ violate section 4.
   rule like any job, but changing it means updating those ruleset files and the live ruleset **in
   lockstep**, or required-check enforcement silently breaks.
 - **Concurrency.** Every entry-point workflow declares a `concurrency` group. The default is
-  `group: '${{ github.workflow }}-${{ github.ref }}'` with `cancel-in-progress: true`. Two workflows
-  override it. The **publisher** uses a ref-independent group with `cancel-in-progress: false` so publishes
+  `group: '${{ github.workflow }}-${{ github.ref }}'` with `cancel-in-progress: true`. Three entry
+  workflows override it. The **publisher** uses a ref-independent group with `cancel-in-progress: false` so publishes
   serialize and none is cancelled mid-release. The **merge-bot** keys on the PR number with
-  `cancel-in-progress: false` so each PR's events run to completion in order.
+  `cancel-in-progress: false` so each PR's events run to completion in order. The daily codegen workflow
+  (`run-periodic-codegen-pull-request.yml`) uses the same ref-independent group expression as the publisher
+  but with `cancel-in-progress: true`: it only opens the fixed `codegen-main`/`codegen-develop` pull
+  requests, so a dispatch superseding an in-flight scheduled run is harmless, and the shared group still
+  keeps the two from racing.
 - **Shells.** Every multi-line bash `run:` starts with `set -euo pipefail`.
 - **Conditionals.** Multi-line `if:` uses the folded scalar `if: >-`. A literal block `if: |` embeds
   newlines into the boolean and is wrong.
@@ -225,6 +231,96 @@ the GitHub release. There is no generic multi-target abstraction: no `enable_<ta
 leaves, no `expect_release_assets` toggle, no `release-asset-<branch>-*` glob. The single asset,
 `LanguageTags.7z`, is attached by its fixed name, so `releases/latest/download/LanguageTags.7z` is a stable
 download URL.
+
+### Flow diagrams
+
+Three diagrams trace the architecture above: the pull-request gate, the self-publisher, and the bot
+automation. They are the same outcomes section 4 contracts, drawn from the workflow YAML; if a diagram and
+a guarantee disagree, one of them is a defect. Triggers are blue, gates yellow, durable/published outputs
+green, and stop/skip outcomes red.
+
+**Pull request (CI) - `test-pull-request.yml`.** Every push head-resolves the reusable tasks, runs the
+validate gate and a non-publishing smoke build, and a single aggregator produces the ruleset-bound required
+check (D1, D6).
+
+```mermaid
+flowchart TD
+    T(["push: every branch<br/>(or workflow_dispatch)"]):::trig
+    T --> D{"github.event.deleted?"}
+    D -- "yes: branch deletion" --> X(["all jobs + aggregator skip<br/>no failed run, no pending check"]):::stop
+    D -- "no" --> V["validate job<br/>(validate-task.yml)"]
+    D -- "no" --> S["smoke-build job<br/>build-release-task.yml<br/>smoke: true, publish: false"]
+    subgraph VT ["validate-task.yml"]
+        U["unit-test job<br/>dotnet test, warnings-as-errors"]
+        L["lint job<br/>CSharpier, dotnet format,<br/>markdownlint, cspell, actionlint"]
+    end
+    V --> VT
+    S --> SB["build + pack library<br/>head-resolved, no push, no uploads"]
+    VT --> A
+    SB --> A
+    A{"Check pull request workflow status job<br/>validate AND smoke-build succeeded?"}:::gate
+    A -- "yes" --> G(["required check passes<br/>merge unblocked"]):::pub
+    A -- "no" --> R(["required check fails<br/>merge blocked"]):::stop
+    classDef trig fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef gate fill:#fef9c3,stroke:#ca8a04,color:#713f12
+    classDef pub fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef stop fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+```
+
+**Publish - `publish-release.yml` -> `build-release-task.yml`.** A shipped-input push or a dispatch runs
+the same validate gate, then versions once with NBGV, asserts branch-vs-version, builds the pinned commit,
+pushes to NuGet via OIDC, and cuts the GitHub release (D2, D3, D4).
+
+```mermaid
+flowchart TD
+    P1(["push: main/develop<br/>paths = shipped inputs"]):::trig --> VAL
+    P2(["workflow_dispatch"]):::trig --> VAL
+    VAL["validate job<br/>(validate-task.yml)"] --> PG{"publish guard<br/>push OR ref in (main, develop)"}:::gate
+    PG -- "no" --> PSKIP(["publish skipped"]):::stop
+    PG -- "yes" --> GV
+    subgraph BRT ["build-release-task.yml (publish: true)"]
+        GV["get-version job<br/>NBGV @master, runs once<br/>SemVer2 + GitCommitId"] --> VR{"validate-release<br/>branch matches version?"}:::gate
+        VR -- "mismatch" --> VRX(["fail ::error::"]):::stop
+        VR -- "agree" --> B["build job<br/>checkout GitCommitId<br/>build + pack"]
+        B --> NP[("NuGet.org push<br/>OIDC key, skip-duplicate")]:::pub
+        B --> GR{"github-release<br/>tag new OR dispatch?"}:::gate
+        GR -- "exists, not dispatch" --> NOP(["skip create<br/>artifact reclaimed by backstop"]):::stop
+        GR -- "create" --> REL[("GitHub release<br/>tag = SemVer2 at GitCommitId<br/>prerelease = ref != main")]:::pub
+    end
+    classDef trig fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef gate fill:#fef9c3,stroke:#ca8a04,color:#713f12
+    classDef pub fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef stop fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+```
+
+**Automation - codegen + Dependabot + merge-bot.** Daily codegen and Dependabot open in-repo bot PRs; the
+merge-bot enables auto-merge (or disables it on a maintainer push); a merged shipped input then drives the
+publisher above (D8).
+
+```mermaid
+flowchart TD
+    SCH(["schedule daily 04:00 UTC<br/>(or workflow_dispatch)"]):::trig --> CG
+    subgraph CGT ["run-codegen-pull-request-task.yml (matrix: main, develop)"]
+        CG["codegen job per branch<br/>regenerate LanguageData<br/>(deterministic)"] --> CGC{"data changed?"}
+        CGC -- "no" --> CGN(["no PR"]):::stop
+        CGC -- "yes" --> CPR["open codegen-&lt;branch&gt; PR<br/>(App token)"]
+    end
+    DEP(["Dependabot opens PR<br/>any ecosystem/tier"]):::trig --> MB
+    CPR --> MB
+    subgraph MBT ["merge-bot-pull-request.yml (pull_request_target)"]
+        MB{"event / author"}:::gate
+        MB -- "opened/reopened<br/>bot author" --> EN["enable auto-merge<br/>squash develop / merge main"]
+        MB -- "synchronize by maintainer" --> DIS["disable auto-merge"]
+    end
+    EN --> CK{"required checks pass?"}:::gate
+    CK -- "yes" --> MRG(["PR merges (App token)"]):::pub
+    CK -- "no" --> BLK(["merge blocked<br/>maintainer notified"]):::stop
+    MRG -. "shipped input changed" .-> PUBR(["publisher auto-releases"]):::pub
+    classDef trig fill:#dbeafe,stroke:#2563eb,color:#1e3a8a
+    classDef gate fill:#fef9c3,stroke:#ca8a04,color:#713f12
+    classDef pub fill:#dcfce7,stroke:#16a34a,color:#14532d
+    classDef stop fill:#fee2e2,stroke:#dc2626,color:#7f1d1d
+```
 
 ## 4. Behavioral contract - expected outcomes
 
@@ -370,7 +466,8 @@ applicable guarantee is not operational (section 1).
 
 - **D7.1 The publisher does not cancel mid-flight.** Output: the publisher's concurrency uses a
   ref-independent group with `cancel-in-progress: false`. All other entry workflows use the
-  `...-${{ github.ref }}` group with `cancel-in-progress: true`, except the merge-bot (D8.1).
+  `...-${{ github.ref }}` group with `cancel-in-progress: true`, except the merge-bot (PR-number group, D8.1) and the daily codegen
+  workflow (ref-independent `${{ github.workflow }}` group with `cancel-in-progress: true`, section 2).
 - **D7.2 Skipped jobs still need valid permissions.** Output: every reusable job declares valid
   `permissions:`, and a callee's extra scope is granted by the caller.
 - **D7.3 Boolean inputs both forms.** Output: boolean inputs are declared in both trigger blocks and
@@ -403,7 +500,9 @@ applicable guarantee is not operational (section 1).
 
 ### D9 - Style, static, and dropped workflows (see section 2)
 
-- **D9.1** Every action SHA-pinned with a version comment (sole exception: `dotnet/nbgv@master`).
+- **D9.1** Every action SHA-pinned with a version comment (sole exception: `dotnet/nbgv@master`). A tool an
+  action *installs* (e.g. the actionlint binary behind `raven-actions/actionlint`) is not a `uses:` ref and is
+  left unpinned to track latest, so CI picks up new lint rules.
 - **D9.2** File/workflow/job/step names follow the suffix rules. A name also used as a ruleset
   required-check `context:` is codified in `repo-config/` and changed only in lockstep with the ruleset.
 - **D9.3** Bash `run:` blocks start `set -euo pipefail`; multi-line `if:` uses `>-`.

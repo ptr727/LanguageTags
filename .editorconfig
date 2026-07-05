@@ -45,6 +45,10 @@ end_of_line = crlf
 [*.sh]
 end_of_line = lf
 
+# Husky git hook is an extensionless shell script - LF like other scripts (matches the .gitattributes pin)
+[.husky/pre-commit]
+end_of_line = lf
+
 # Dockerfiles - CRLF breaks RUN heredocs and line continuations
 [{Dockerfile,*.Dockerfile}]
 end_of_line = lf
@@ -219,3 +223,7 @@ resharper_csharp_trailing_comma_in_multiline_lists = true
 resharper_csharp_var_for_built_in_types = false
 resharper_csharp_var_when_type_is_apparent = false
 resharper_csharp_var_when_type_is_not_apparent = false
+
+# Downloaded language data - preserve the source bytes/endings, do not enforce an EOL
+[LanguageData/*]
+end_of_line = unset

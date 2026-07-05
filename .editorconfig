@@ -57,6 +57,13 @@ end_of_line = lf
 [*.{cmd,bat,ps1}]
 end_of_line = crlf
 
+# Downloaded language data - preserve the source bytes exactly; enforce no editor normalization
+[LanguageData/*]
+charset = unset
+end_of_line = unset
+insert_final_newline = false
+trim_trailing_whitespace = false
+
 # --- .NET-only below: C# and ReSharper style. Everything above is line-ending governance. ---
 
 # C# files
@@ -223,10 +230,3 @@ resharper_csharp_trailing_comma_in_multiline_lists = true
 resharper_csharp_var_for_built_in_types = false
 resharper_csharp_var_when_type_is_apparent = false
 resharper_csharp_var_when_type_is_not_apparent = false
-
-# Downloaded language data - preserve the source bytes exactly; enforce no editor normalization
-[LanguageData/*]
-charset = unset
-end_of_line = unset
-insert_final_newline = false
-trim_trailing_whitespace = false

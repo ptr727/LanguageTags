@@ -16,6 +16,7 @@ root = true
 # Defaults
 [*]
 charset = utf-8
+end_of_line = crlf
 indent_size = 4
 indent_style = space
 insert_final_newline = true
@@ -44,6 +45,10 @@ end_of_line = crlf
 [*.sh]
 end_of_line = lf
 
+# Husky git hook is an extensionless shell script - LF like other scripts (matches the .gitattributes pin)
+[.husky/pre-commit]
+end_of_line = lf
+
 # Dockerfiles - CRLF breaks RUN heredocs and line continuations
 [{Dockerfile,*.Dockerfile}]
 end_of_line = lf
@@ -51,6 +56,13 @@ end_of_line = lf
 # Windows scripts
 [*.{cmd,bat,ps1}]
 end_of_line = crlf
+
+# Downloaded language data - preserve the source bytes exactly; enforce no editor normalization
+[LanguageData/*]
+charset = unset
+end_of_line = unset
+insert_final_newline = false
+trim_trailing_whitespace = false
 
 # --- .NET-only below: C# and ReSharper style. Everything above is line-ending governance. ---
 

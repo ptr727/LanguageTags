@@ -58,7 +58,7 @@ end_of_line = lf
 end_of_line = crlf
 
 # Downloaded language data - preserve the source bytes exactly; enforce no editor normalization
-[LanguageData/*]
+[LanguageData/**]
 charset = unset
 end_of_line = unset
 insert_final_newline = false

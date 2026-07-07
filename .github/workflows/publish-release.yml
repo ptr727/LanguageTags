@@ -37,6 +37,8 @@ jobs:
   validate:
     name: Validate job
     uses: ./.github/workflows/validate-task.yml
+    # Thread CODECOV_TOKEN through so the unit-test job can upload coverage.
+    secrets: inherit
 
   # Build, version, validate, push, and release the triggering branch. Grants the write scopes
   # build-release-task needs (it declares none, so the read-only smoke caller is not forced to over-grant).

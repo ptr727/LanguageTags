@@ -4,8 +4,8 @@ name: Publish project release action
 #
 # - Push trigger (main only, on.push.paths inclusion list below - library source, embedded data, version floor,
 #   build config, or package versions): a code-affecting Dependabot/codegen merge auto-publishes a stable release.
-#   The publish job is gated to the App identity that merges every bot PR (github.actor), so a human merge or
-#   promotion to main skips - the maintainer dispatches when the change is release-ready.
+#   The plan job (publish-plan-task.yml) computes the gate once - only the codegen App / Dependabot actor
+#   qualifies on a push, so a human merge or promotion to main skips and the maintainer dispatches when ready.
 # - Inclusion-only: add a path when a new input starts affecting the shipped package. Package versions
 #   (Directory.Packages.props) ARE listed: a NuGet version can't be re-pushed, so a dependency bump must
 #   republish to keep declared dependencies current (closes the stale/vulnerable-dependency window). GitHub
@@ -31,26 +31,32 @@ concurrency:
 
 jobs:
 
-  # The same unit-test + lint gate the PR runs. The publish job needs it, so a failing test or lint blocks
-  # the release.
+  # Single source of the release-gate decision (publish? stable?); validate + publish gate on its outputs
+  # instead of re-testing event/actor/branch. See publish-plan-task.yml for the policy.
+  plan:
+    name: Plan release job
+    uses: ./.github/workflows/publish-plan-task.yml
+    with:
+      event_name: ${{ github.event_name }}
+      actor: ${{ github.actor }}
+      ref_name: ${{ github.ref_name }}
+
+  # The same unit-test + lint gate the PR runs, on the branch tip; runs only when a publish will happen.
   validate:
     name: Validate job
+    needs: [plan]
+    if: ${{ needs.plan.outputs.publish == 'true' }}
     uses: ./.github/workflows/validate-task.yml
     # Thread CODECOV_TOKEN through so the unit-test job can upload coverage.
     secrets: inherit
 
-  # Build, version, validate, push, and release the triggering branch. Grants the write scopes
-  # build-release-task needs (it declares none, so the read-only smoke caller is not forced to over-grant).
-  # Release policy: a human PR merge never auto-publishes. On a push (main-only, release-affecting paths) the
-  # release runs only for a bot merge - the codegen App merges every Dependabot/codegen PR, so its identity is
-  # the gate; a human merge/promotion skips and the maintainer dispatches when ready. A workflow_dispatch
-  # publishes the chosen branch (main = release, develop = prerelease).
+  # Build, version, validate, push, and release the triggering branch (main = release, develop = prerelease via
+  # dispatch). Grants the write scopes build-release-task needs (it declares none, so the read-only smoke caller
+  # is not forced to over-grant). Gated on the plan decision.
   publish:
     name: Publish project release job
-    needs: validate
-    if: >-
-      ${{ (github.event_name == 'push' && (github.actor == 'ptr727-codegen[bot]' || github.actor == 'dependabot[bot]')) ||
-          (github.event_name == 'workflow_dispatch' && (github.ref_name == 'main' || github.ref_name == 'develop')) }}
+    needs: [plan, validate]
+    if: ${{ needs.plan.outputs.publish == 'true' }}
     uses: ./.github/workflows/build-release-task.yml
     secrets: inherit
     permissions:

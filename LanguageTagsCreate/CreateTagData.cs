@@ -127,8 +127,8 @@ internal sealed class CreateTagData(
 
         Log.Information("Downloading \"{Uri}\" to \"{FileName}\" ...", uri.ToString(), fileName);
 
-        using Stream httpStream = await HttpClientFactory
-            .GetHttpClient()
+        using Stream httpStream = await Utilities
+            .HttpClientFactory.GetClient()
             .GetStreamAsync(uri, cancellationToken)
             .ConfigureAwait(false);
 

@@ -15,7 +15,7 @@ name: Publish project release action
 # - The merge-bot merges with an App token, so its merge commits reach this push trigger.
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
     paths:
       - 'LanguageTags/**'
       - 'LanguageData/**'
@@ -42,12 +42,16 @@ jobs:
 
   # Build, version, validate, push, and release the triggering branch. Grants the write scopes
   # build-release-task needs (it declares none, so the read-only smoke caller is not forced to over-grant).
-  # The push trigger is already limited to main/develop, and the if-guard covers a workflow_dispatch, which
-  # can target any branch.
+  # Release policy: a human PR merge never auto-publishes. On a push (main-only, release-affecting paths) the
+  # release runs only for a bot merge - the codegen App merges every Dependabot/codegen PR, so its identity is
+  # the gate; a human merge/promotion skips and the maintainer dispatches when ready. A workflow_dispatch
+  # publishes the chosen branch (main = release, develop = prerelease).
   publish:
     name: Publish project release job
     needs: validate
-    if: ${{ github.event_name == 'push' || github.ref_name == 'main' || github.ref_name == 'develop' }}
+    if: >-
+      ${{ (github.event_name == 'push' && (github.actor == 'ptr727-codegen[bot]' || github.actor == 'dependabot[bot]')) ||
+          (github.event_name == 'workflow_dispatch' && (github.ref_name == 'main' || github.ref_name == 'develop')) }}
     uses: ./.github/workflows/build-release-task.yml
     secrets: inherit
     permissions:

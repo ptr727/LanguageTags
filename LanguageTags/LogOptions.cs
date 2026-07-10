@@ -18,7 +18,7 @@ namespace ptr727.LanguageTags;
 /// </list>
 /// <para>
 /// Note that loggers are created and cached at the time of use by each class instance. Changes to <see cref="LoggerFactory"/>
-/// after a logger has been created will not affect existing cached loggers—only new logger requests will use the updated configuration.
+/// after a logger has been created will not affect existing cached loggers. Only new logger requests will use the updated configuration.
 /// </para>
 /// </remarks>
 public static class LogOptions
@@ -75,9 +75,10 @@ public static class LogOptions
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(categoryName);
 
-        // LoggerFactory -> NullLogger
-        return !ReferenceEquals(LoggerFactory, NullLoggerFactory.Instance)
-            ? LoggerFactory.CreateLogger(categoryName)
+        // Read once so a concurrent swap cannot split the check and the create across two instances.
+        ILoggerFactory factory = LoggerFactory;
+        return !ReferenceEquals(factory, NullLoggerFactory.Instance)
+            ? factory.CreateLogger(categoryName)
             : NullLogger.Instance;
     }
 }

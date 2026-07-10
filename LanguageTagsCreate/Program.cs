@@ -27,7 +27,9 @@ internal sealed class Program(
             Log.Logger = LoggerFactory.Create(
                 commandLine.CreateOptions(commandLine.Result).LogOptions
             );
-            LogOptions.SetFactory(LoggerFactory.CreateLoggerFactory());
+            ILoggerFactory loggerFactory = LoggerFactory.CreateLoggerFactory();
+            LogOptions.SetFactory(loggerFactory);
+            Utilities.LogOptions.SetFactory(loggerFactory);
 
             // Invoke command
             Log.Logger.LogOverrideContext().Information("Starting: {Args}", args);

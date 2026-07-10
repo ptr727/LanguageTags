@@ -15,7 +15,7 @@
     <ProjectReference Include="..\LanguageTags\LanguageTags.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
+    <PackageReference Include="ptr727.Utilities" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
     <PackageReference Include="Serilog.Enrichers.Thread" />

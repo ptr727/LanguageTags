@@ -26,7 +26,6 @@ jobs:
     name: Validate job
     if: ${{ !github.event.deleted }}
     uses: ./.github/workflows/validate-task.yml
-    # Thread CODECOV_TOKEN through so the unit-test job can upload coverage.
     secrets: inherit
 
   # Build and pack the library in its branch configuration to prove it ships, publishing nothing. Runs on

@@ -47,7 +47,6 @@ jobs:
     needs: [plan]
     if: ${{ needs.plan.outputs.publish == 'true' }}
     uses: ./.github/workflows/validate-task.yml
-    # Thread CODECOV_TOKEN through so the unit-test job can upload coverage.
     secrets: inherit
 
   # Build, version, validate, push, and release the triggering branch (main = release, develop = prerelease via

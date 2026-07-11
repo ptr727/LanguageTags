@@ -1,3 +1,6 @@
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+
 namespace ptr727.LanguageTags.Tests;
 
 public sealed class UnM49Tests : SingleInstanceFixture
@@ -127,5 +130,34 @@ public sealed class UnM49Tests : SingleInstanceFixture
     {
         UnM49Data unM49 = UnM49Data.Create();
         _ = unM49.GetAncestors("ZZ").Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task SaveCodeAsync_GeneratesCode()
+    {
+        UnM49Data fromData = await UnM49Data.FromDataAsync(GetDataFilePath(UnM49Data.DataFileName));
+        _ = fromData.RecordList.Length.Should().BeGreaterThan(0);
+
+        string tempFile = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.cs");
+        try
+        {
+            await fromData.SaveCodeAsync(tempFile);
+            string code = await File.ReadAllTextAsync(tempFile);
+
+            // Emitted code must parse as valid C# (catches literal/escaping regressions)
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(code);
+            IEnumerable<string> syntaxErrors = tree.GetDiagnostics()
+                .Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)
+                .Select(diagnostic => diagnostic.ToString());
+            _ = syntaxErrors.Should().BeEmpty();
+            _ = code.Should().Contain("public static UnM49Data Create() =>");
+        }
+        finally
+        {
+            if (File.Exists(tempFile))
+            {
+                File.Delete(tempFile);
+            }
+        }
     }
 }

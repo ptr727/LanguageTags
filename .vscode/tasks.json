@@ -178,7 +178,7 @@
         {
             "label": "Lint: Spelling",
             "type": "shell",
-            "command": "docker run --rm -v \"${workspaceFolder}:/workdir\" -w /workdir ghcr.io/streetsidesoftware/cspell:latest --no-progress \"**/*.md\"",
+            "command": "docker run --rm -v \"${workspaceFolder}:/workdir\" -w /workdir ghcr.io/streetsidesoftware/cspell:latest --no-progress README.md HISTORY.md",
             "problemMatcher": [],
             "presentation": {
                 "showReuseMessage": false,

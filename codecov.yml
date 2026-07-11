@@ -1,0 +1,26 @@
+# Codecov for the LanguageTags NuGet library only. Generated code (embedded *DataGen.cs tables and .g.cs
+# source-generator output) is ignored so coverage reflects hand-written code, not generated lines.
+# Kept informational until a default-branch upload sets a baseline under these ignores; then flip to blocking.
+
+coverage:
+  status:
+    project:
+      default:
+        target: auto         # compare each commit to its base
+        threshold: 1%        # allowed drop before failing
+        informational: true  # report-only; set false to block
+    patch:
+      default:
+        target: auto
+        threshold: 1%
+        informational: true
+
+comment:
+  layout: "condensed_header, diff, files, components"
+  require_changes: false
+
+ignore:
+  - "LanguageTagsCreate"
+  - "LanguageTagsTests"
+  - "**/*Gen.cs"
+  - ".artifacts/**"

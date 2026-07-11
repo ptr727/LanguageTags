@@ -23,4 +23,5 @@ ignore:
   - "LanguageTagsCreate"
   - "LanguageTagsTests"
   - "**/*Gen.cs"
+  - "**/*.g.cs"
   - ".artifacts/**"

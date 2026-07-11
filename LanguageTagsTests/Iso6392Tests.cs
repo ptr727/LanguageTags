@@ -1,3 +1,6 @@
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+
 namespace ptr727.LanguageTags.Tests;
 
 public sealed class Iso6392Tests : SingleInstanceFixture
@@ -125,5 +128,36 @@ public sealed class Iso6392Tests : SingleInstanceFixture
         Iso6392Data iso6392 = Iso6392Data.Create();
         Iso6392Record? record = iso6392.Find(string.Empty, false);
         _ = record.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task SaveCodeAsync_GeneratesCode()
+    {
+        Iso6392Data fromData = await Iso6392Data.FromDataAsync(
+            GetDataFilePath(Iso6392Data.DataFileName)
+        );
+        _ = fromData.RecordList.Length.Should().BeGreaterThan(0);
+
+        string tempFile = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.cs");
+        try
+        {
+            await fromData.SaveCodeAsync(tempFile);
+            string code = await File.ReadAllTextAsync(tempFile);
+
+            // Emitted code must parse as valid C# (catches literal/escaping regressions)
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(code);
+            IEnumerable<string> syntaxErrors = tree.GetDiagnostics()
+                .Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)
+                .Select(diagnostic => diagnostic.ToString());
+            _ = syntaxErrors.Should().BeEmpty();
+            _ = code.Should().Contain("public static Iso6392Data Create() =>");
+        }
+        finally
+        {
+            if (File.Exists(tempFile))
+            {
+                File.Delete(tempFile);
+            }
+        }
     }
 }

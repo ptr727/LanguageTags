@@ -1,3 +1,6 @@
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+
 namespace ptr727.LanguageTags.Tests;
 
 public class Rfc5646Tests : SingleInstanceFixture
@@ -141,5 +144,36 @@ public class Rfc5646Tests : SingleInstanceFixture
         Rfc5646Data rfc5646 = Rfc5646Data.Create();
         _ = rfc5646.FileDate.Should().NotBeNull();
         _ = rfc5646.FileDate.Should().HaveValue();
+    }
+
+    [Fact]
+    public async Task SaveCodeAsync_GeneratesCode()
+    {
+        Rfc5646Data fromData = await Rfc5646Data.FromDataAsync(
+            GetDataFilePath(Rfc5646Data.DataFileName)
+        );
+        _ = fromData.RecordList.Length.Should().BeGreaterThan(0);
+
+        string tempFile = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid()}.cs");
+        try
+        {
+            await fromData.SaveCodeAsync(tempFile);
+            string code = await File.ReadAllTextAsync(tempFile);
+
+            // Emitted code must parse as valid C# (catches literal/escaping regressions)
+            SyntaxTree tree = CSharpSyntaxTree.ParseText(code);
+            IEnumerable<string> syntaxErrors = tree.GetDiagnostics()
+                .Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)
+                .Select(diagnostic => diagnostic.ToString());
+            _ = syntaxErrors.Should().BeEmpty();
+            _ = code.Should().Contain("public static Rfc5646Data Create() =>");
+        }
+        finally
+        {
+            if (File.Exists(tempFile))
+            {
+                File.Delete(tempFile);
+            }
+        }
     }
 }

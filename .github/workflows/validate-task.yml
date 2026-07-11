@@ -82,4 +82,4 @@ jobs:
         uses: raven-actions/actionlint@3d39aea434753780c3b3d4a1a31c854b4dbf49d7 # v2.2.0
 
       - name: Check line endings step
-        uses: editorconfig-checker/action-editorconfig-checker@840e866d93b8e032123c23bac69dece044d4d84c # v2.2.0
+        run: docker run --rm -v "$PWD":/check --workdir /check mstruebing/editorconfig-checker:latest

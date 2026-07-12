@@ -27,27 +27,61 @@ internal sealed class CreateTagData(
     {
         // Download all the data files
         Log.Information("Downloading all language tag data files ...");
+        ResolveDataFilePaths();
 
         Log.Information("Downloading ISO 639-2 data ...");
-        _iso6392DataFile = Path.Combine(dataDirectory, Iso6392Data.DataFileName);
-        await DownloadFileAsync(new Uri(Iso6392Data.DataUri), _iso6392DataFile)
+        await DownloadFileAsync(new Uri(Iso6392Data.DataUri), _iso6392DataFile!)
             .ConfigureAwait(false);
 
         Log.Information("Downloading ISO 639-3 data ...");
-        _iso6393DataFile = Path.Combine(dataDirectory, Iso6393Data.DataFileName);
-        await DownloadFileAsync(new Uri(Iso6393Data.DataUri), _iso6393DataFile)
+        await DownloadFileAsync(new Uri(Iso6393Data.DataUri), _iso6393DataFile!)
             .ConfigureAwait(false);
 
         Log.Information("Downloading RFC 5646 data ...");
-        _rfc5646DataFile = Path.Combine(dataDirectory, Rfc5646Data.DataFileName);
-        await DownloadFileAsync(new Uri(Rfc5646Data.DataUri), _rfc5646DataFile)
+        await DownloadFileAsync(new Uri(Rfc5646Data.DataUri), _rfc5646DataFile!)
             .ConfigureAwait(false);
 
         Log.Information("Downloading UN M.49 data ...");
-        _unM49DataFile = Path.Combine(dataDirectory, UnM49Data.DataFileName);
-        await DownloadFileAsync(new Uri(UnM49Data.DataUri), _unM49DataFile).ConfigureAwait(false);
+        await DownloadFileAsync(new Uri(UnM49Data.DataUri), _unM49DataFile!).ConfigureAwait(false);
 
         Log.Information("Language tag data files downloaded successfully.");
+    }
+
+    internal void UseExistingData()
+    {
+        // Offline mode: regenerate from the already-committed LanguageData/ directory with no network
+        // access. Resolve the same data file paths a download would, then verify each is present.
+        Log.Information(
+            "Using existing language tag data files in {DataDirectory} ...",
+            dataDirectory
+        );
+        ResolveDataFilePaths();
+
+        string[] dataFiles =
+        [
+            _iso6392DataFile!,
+            _iso6393DataFile!,
+            _rfc5646DataFile!,
+            _unM49DataFile!,
+        ];
+        foreach (string dataFile in dataFiles)
+        {
+            if (!File.Exists(dataFile))
+            {
+                throw new FileNotFoundException(
+                    $"Required data file does not exist: {dataFile}",
+                    dataFile
+                );
+            }
+        }
+    }
+
+    private void ResolveDataFilePaths()
+    {
+        _iso6392DataFile = Path.Combine(dataDirectory, Iso6392Data.DataFileName);
+        _iso6393DataFile = Path.Combine(dataDirectory, Iso6393Data.DataFileName);
+        _rfc5646DataFile = Path.Combine(dataDirectory, Rfc5646Data.DataFileName);
+        _unM49DataFile = Path.Combine(dataDirectory, UnM49Data.DataFileName);
     }
 
     internal async Task CreateJsonDataAsync()

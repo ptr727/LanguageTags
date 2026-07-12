@@ -64,9 +64,17 @@ internal sealed class Program(
                 return 1;
             }
 
-            // Download data files
+            // Obtain the source data: download fresh from upstream, or, in offline mode, use the data
+            // already committed under LanguageData/ so codegen can be re-exercised with no network.
             CreateTagData createTagData = new(dataDirectory, codeDirectory, cancellationToken);
-            await createTagData.DownloadDataAsync().ConfigureAwait(false);
+            if (commandLineOptions.SkipDownload)
+            {
+                createTagData.UseExistingData();
+            }
+            else
+            {
+                await createTagData.DownloadDataAsync().ConfigureAwait(false);
+            }
 
             // Convert data files to JSON
             await createTagData.CreateJsonDataAsync().ConfigureAwait(false);

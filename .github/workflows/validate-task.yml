@@ -118,4 +118,11 @@ jobs:
       - name: Check for drift step
         run: |
           set -euo pipefail
+          # Fail on any drift: modified tracked files (git diff) or new untracked generated files
+          # (git diff alone ignores untracked, so a brand-new emitted file would slip through).
           git diff --exit-code
+          if [ -n "$(git status --porcelain --untracked-files=all)" ]; then
+            echo "::error::Codegen output drifted - regenerate offline (--skip-download) and commit the result"
+            git status --porcelain --untracked-files=all
+            exit 1
+          fi

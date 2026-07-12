@@ -122,7 +122,7 @@ jobs:
           # summary plus a diffstat rather than the full patch, which for generated data files can be multi-MB
           # and blow up the Actions log.
           if [ -n "$(git status --porcelain --untracked-files=all)" ]; then
-            echo "::error::Codegen output drifted - regenerate offline (--skip-download) and commit the result"
+            echo "::error::Generated code or formatting drifted - regenerate offline (--skip-download), run 'dotnet csharpier format .', and commit the result"
             git status --porcelain --untracked-files=all
             git diff --stat
             exit 1

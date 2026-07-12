@@ -81,5 +81,49 @@ jobs:
       - name: Lint workflows step
         uses: raven-actions/actionlint@3d39aea434753780c3b3d4a1a31c854b4dbf49d7 # v2.2.0
 
-      - name: Check line endings step
-        run: docker run --rm -v "$PWD":/check --workdir /check mstruebing/editorconfig-checker@sha256:67b9e9b16a674e36f7c05919da789f03a01d343ca8423eb8797179399af07c00 # editorconfig-checker v3.4.0
+      - name: Check EditorConfig step
+        run: docker run --rm -v "$PWD":/check --workdir /check mstruebing/editorconfig-checker:latest
+
+  # Deterministic offline codegen drift guard. Regenerates the embedded data from the committed
+  # LanguageData/ with --skip-download (no network), formats with the same CSharpier the codegen workflow
+  # uses, then fails if the tree drifts from the committed *DataGen.cs / *.json. This catches an emitter or
+  # source-data change whose regenerated output was not committed in the same PR. It never fetches upstream,
+  # so registry drift can never trip it - refreshing from upstream is the scheduled codegen workflow's job.
+  codegen-drift:
+    name: Check codegen drift job
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Setup .NET SDK step
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5.4.0
+        with:
+          dotnet-version: 10.x
+
+      - name: Checkout code step
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Regenerate codegen offline step
+        run: |
+          set -euo pipefail
+          dotnet run --project ./LanguageTagsCreate/LanguageTagsCreate.csproj -- \
+            --codepath . --skip-download
+
+      - name: Format code step
+        run: |
+          set -euo pipefail
+          dotnet tool restore
+          dotnet csharpier format .
+
+      - name: Check for drift step
+        run: |
+          set -euo pipefail
+          # Fail on any drift - modified tracked files or new untracked generated files. Report a porcelain
+          # summary plus a diffstat rather than the full patch, which for generated data files can be multi-MB
+          # and blow up the Actions log.
+          if [ -n "$(git status --porcelain --untracked-files=all)" ]; then
+            echo "::error::Generated code or formatting drifted - regenerate offline (--skip-download), run 'dotnet csharpier format .', and commit the result"
+            git status --porcelain --untracked-files=all
+            git diff --stat
+            exit 1
+          fi

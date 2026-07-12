@@ -9,6 +9,7 @@ internal sealed class CommandLine
     private readonly Option<string> _logFileOption = CreateLogFileOption();
     private readonly Option<bool> _logFileClearOption = CreateLogFileClearOption();
     private readonly Option<DirectoryInfo> _codePathOption = CreateCodePathOption();
+    private readonly Option<bool> _skipDownloadOption = CreateSkipDownloadOption();
 
     private static readonly FrozenSet<string> s_cliBypassList = FrozenSet.Create(
         StringComparer.OrdinalIgnoreCase,
@@ -33,6 +34,7 @@ internal sealed class CommandLine
             _logFileOption,
             _logFileClearOption,
             _codePathOption,
+            _skipDownloadOption,
         };
         rootCommand.SetAction(
             (parseResult, cancellationToken) =>
@@ -55,6 +57,7 @@ internal sealed class CommandLine
                 FileClear = parseResult.GetValue(_logFileClearOption),
             },
             CodePath = parseResult.GetValue(_codePathOption)!,
+            SkipDownload = parseResult.GetValue(_skipDownloadOption),
         };
 
     private static Option<bool> CreateLogFileClearOption() =>
@@ -82,6 +85,13 @@ internal sealed class CommandLine
         return option.AcceptLegalFileNamesOnly();
     }
 
+    private static Option<bool> CreateSkipDownloadOption() =>
+        new("--skip-download", "-s")
+        {
+            Description =
+                "Regenerate from the committed LanguageData/ directory without downloading, offline (default: false).",
+        };
+
     private static Option<DirectoryInfo> CreateCodePathOption()
     {
         Option<DirectoryInfo> option = new("--codepath", "-p")
@@ -103,5 +113,6 @@ internal sealed class CommandLine
     {
         internal required LoggerFactory.Options LogOptions { get; init; }
         internal required DirectoryInfo CodePath { get; init; }
+        internal bool SkipDownload { get; init; }
     }
 }

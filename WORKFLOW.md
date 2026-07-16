@@ -610,13 +610,13 @@ determined by NBGV from the checkout state in section 3.*
 
 ### 5D. Configuration audit
 
-Run [`repo-config/configure.sh check`](./repo-config/) (section 6). It confirms the listed secrets exist,
-the `main`/`develop` rulesets enforce the required merge method + status check + signed commits +
-strict-off, and the repository settings (auto-merge, allowed merge methods) are in place, exiting non-zero
-on any drift. A missing or incorrect configuration item is a defect (D10). Secret *values* cannot be read
-back, so the audit asserts the names exist and a GitHub App is installed. The NuGet.org trusted-publishing
-policy (D4.7) lives outside GitHub and cannot be checked by `gh api`; the script flags it as a manual
-verification item.
+Run the self-audit in [`AUDIT.md`](./AUDIT.md) (section 6). It confirms the listed secret names exist,
+the `main`/`develop` rulesets match the committed payloads in [`repo-config/`](./repo-config/) (merge
+method + status check + signed commits + strict-off), and the repository settings (auto-merge, allowed
+merge methods) are in place. A missing or incorrect configuration item is a defect (D10). Secret *values*
+cannot be read back, so the audit asserts the names exist and a GitHub App is installed. The NuGet.org
+trusted-publishing policy (D4.7) lives outside GitHub and cannot be checked by `gh api`; it remains a
+manual verification item.
 
 ### Assessment
 
@@ -642,7 +642,9 @@ in its own right, not merely discoverable by failure (D10; audit 5D).
 **Secrets.**
 
 - `NUGET_USERNAME` - the NuGet.org profile name passed to `NuGet/login@v1` for OIDC trusted publishing
-  (D4.7). Actions store. **No `NUGET_API_KEY`** secret is used; publishing is keyless.
+  (D4.7). Kept in **both** the Actions and Dependabot secret stores, like the App pair, so a publish run
+  triggered by a Dependabot-actor merge still resolves it (Dependabot-triggered runs get the Dependabot
+  store, not Actions secrets). **No `NUGET_API_KEY`** secret is used; publishing is keyless.
 - `CODEGEN_APP_CLIENT_ID` / `CODEGEN_APP_PRIVATE_KEY` - the GitHub App credentials the merge-bot and
   codegen mint the App token from. Required in **both** the Actions and Dependabot secret stores: codegen
   and the publisher read them from Actions, but the merge-bot reads them from the Dependabot store when it
@@ -679,8 +681,9 @@ first successful publish locks it to the repo and owner IDs.
 - The GitHub App installed with the scopes above.
 
 **Validation.** This configuration is codified in [`repo-config/`](./repo-config/): the branch rulesets
-and repository settings as JSON, applied and audited by an idempotent `gh api` script.
-`repo-config/configure.sh check` reads the live rulesets, settings, and secret names and exits non-zero
-on any drift; that command **is** the 5D audit. `repo-config/configure.sh apply` configures a fresh repo
-to match. Secret values cannot be read back, so the audit asserts the names exist and a GitHub App is
-installed rather than checking contents.
+and repository settings as JSON. The self-audit in [`AUDIT.md`](./AUDIT.md) diffs the live rulesets,
+settings, and secret names against the committed baseline; that self-audit **is** the 5D audit.
+`repo-config/configure.sh` applies the rulesets and settings idempotently to a repository; Dependabot
+vulnerability alerts and security updates are enabled once at provisioning time, outside the script.
+Secret values cannot be read back, so the audit asserts the names exist and a GitHub App is installed
+rather than checking contents.

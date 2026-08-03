@@ -13399,7 +13399,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Laoktu Chin",
+                    RefName = "Ekai Chin",
                     Comment = null,
                 },
                 new()
@@ -43935,7 +43935,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Magar",
+                    RefName = "Eastern Magar",
                     Comment = null,
                 },
                 new()
@@ -46756,6 +46756,17 @@ public sealed partial class Iso6393Data
                 },
                 new()
                 {
+                    Id = "mrd",
+                    Part2B = null,
+                    Part2T = null,
+                    Part1 = null,
+                    Scope = "I",
+                    LanguageType = "L",
+                    RefName = "Western Magar",
+                    Comment = null,
+                },
+                new()
+                {
                     Id = "mre",
                     Part2B = null,
                     Part2T = null,
@@ -46795,7 +46806,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Mara",
+                    RefName = "Mara Chin",
                     Comment = null,
                 },
                 new()
@@ -64286,6 +64297,17 @@ public sealed partial class Iso6393Data
                     Scope = "I",
                     LanguageType = "L",
                     RefName = "Shilluk",
+                    Comment = null,
+                },
+                new()
+                {
+                    Id = "shl",
+                    Part2B = null,
+                    Part2T = null,
+                    Part1 = null,
+                    Scope = "I",
+                    LanguageType = "L",
+                    RefName = "Shendu",
                     Comment = null,
                 },
                 new()

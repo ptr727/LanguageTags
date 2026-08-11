@@ -1,5 +1,5 @@
 {
-  "FileDate": "2026-06-14",
+  "FileDate": "2026-08-08",
   "RecordList": [
     {
       "Type": "Language",
@@ -16228,7 +16228,7 @@
       "Type": "Language",
       "SubTag": "cey",
       "Description": [
-        "Ekai Chin"
+        "Laoktu Chin"
       ],
       "Added": "2019-04-16",
       "Scope": "None",
@@ -47597,7 +47597,8 @@
       "Type": "Language",
       "SubTag": "mgp",
       "Description": [
-        "Eastern Magar"
+        "Magar",
+        "Magar Dhut"
       ],
       "Added": "2009-07-29",
       "Scope": "None",
@@ -50507,8 +50508,10 @@
       ],
       "Added": "2009-07-29",
       "Scope": "None",
+      "Deprecated": "2026-08-08",
       "Comments": [],
-      "Prefix": []
+      "Prefix": [],
+      "PreferredValue": "mgp"
     },
     {
       "Type": "Language",
@@ -50547,7 +50550,8 @@
       "Type": "Language",
       "SubTag": "mrh",
       "Description": [
-        "Mara Chin"
+        "Mara",
+        "Shendu"
       ],
       "Added": "2009-07-29",
       "Scope": "None",
@@ -67825,7 +67829,8 @@
       "Type": "Language",
       "SubTag": "scs",
       "Description": [
-        "North Slavey"
+        "North Slavey",
+        "Dene Ked\u00E9"
       ],
       "Added": "2009-07-29",
       "Scope": "None",
@@ -68856,8 +68861,10 @@
       ],
       "Added": "2009-07-29",
       "Scope": "None",
+      "Deprecated": "2026-08-08",
       "Comments": [],
-      "Prefix": []
+      "Prefix": [],
+      "PreferredValue": "mrh"
     },
     {
       "Type": "Language",
@@ -73543,7 +73550,8 @@
       "Type": "Language",
       "SubTag": "tce",
       "Description": [
-        "Southern Tutchone"
+        "Southern Tutchone",
+        "D\u00E4n K\u0027\u00E8"
       ],
       "Added": "2009-07-29",
       "Scope": "None",
@@ -86727,7 +86735,8 @@
       "Type": "Language",
       "SubTag": "xsl",
       "Description": [
-        "South Slavey"
+        "South Slavey",
+        "Dene Zhati\u00E9"
       ],
       "Added": "2009-07-29",
       "Scope": "None",

@@ -7435,7 +7435,7 @@
       "Id": "cey",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Laoktu Chin"
+      "RefName": "Ekai Chin"
     },
     {
       "Id": "cfa",
@@ -24538,7 +24538,7 @@
       "Id": "mgp",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Magar"
+      "RefName": "Eastern Magar"
     },
     {
       "Id": "mgq",
@@ -26103,6 +26103,12 @@
       "RefName": "Maricopa"
     },
     {
+      "Id": "mrd",
+      "Scope": "I",
+      "LanguageType": "L",
+      "RefName": "Western Magar"
+    },
+    {
       "Id": "mre",
       "Scope": "I",
       "LanguageType": "E",
@@ -26124,7 +26130,7 @@
       "Id": "mrh",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Mara"
+      "RefName": "Mara Chin"
     },
     {
       "Id": "mri",
@@ -35846,6 +35852,12 @@
       "Scope": "I",
       "LanguageType": "L",
       "RefName": "Shilluk"
+    },
+    {
+      "Id": "shl",
+      "Scope": "I",
+      "LanguageType": "L",
+      "RefName": "Shendu"
     },
     {
       "Id": "shm",

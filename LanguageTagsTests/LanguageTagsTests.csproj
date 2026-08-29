@@ -13,8 +13,12 @@
     </PackageReference>
     <PackageReference Include="xunit.v3" />
     <!-- coverlet.MTP is a native Microsoft.Testing.Platform extension, not a build-time-only tool
-         like the VSTest coverlet.collector was: it needs to be on the compile-time closure so its
-         self-registration codegen resolves, hence no PrivateAssets/IncludeAssets restriction. -->
+         like the VSTest coverlet.collector was: its self-registration codegen needs the package on
+         this project's own compile-time closure, so IncludeAssets must not exclude "compile" (the
+         collector's restricted list omitted it, which is fine for a VSTest data collector but
+         breaks a compiled-against library). PrivateAssets is unrelated to that and stays unset,
+         since it only controls exposure to downstream consumers, which this test project has none
+         of. -->
     <PackageReference Include="coverlet.MTP" />
   </ItemGroup>
   <ItemGroup>

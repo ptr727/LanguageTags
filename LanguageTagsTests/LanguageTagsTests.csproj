@@ -11,12 +11,11 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="xunit.runner.visualstudio" PrivateAssets="All" />
     <PackageReference Include="xunit.v3" />
-    <PackageReference Include="coverlet.collector">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <!-- coverlet.MTP is a native Microsoft.Testing.Platform extension, not a build-time-only tool
+         like the VSTest coverlet.collector was: it needs to be on the compile-time closure so its
+         self-registration codegen resolves, hence no PrivateAssets/IncludeAssets restriction. -->
+    <PackageReference Include="coverlet.MTP" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LanguageTags\LanguageTags.csproj" />

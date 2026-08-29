@@ -30,7 +30,7 @@ internal static class LanguageSchema
     PreferredObjectCreationHandling = JsonObjectCreationHandling.Populate,
     ReadCommentHandling = JsonCommentHandling.Skip,
     WriteIndented = true,
-    NewLine = "\r\n"
+    NewLine = "\n"
 )]
 [JsonSerializable(typeof(Iso6392Data))]
 [JsonSerializable(typeof(Iso6393Data))]

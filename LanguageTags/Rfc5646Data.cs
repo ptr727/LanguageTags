@@ -178,7 +178,7 @@ public sealed partial class Rfc5646Data
             new UTF8Encoding(false)
         )
         {
-            NewLine = "\r\n",
+            NewLine = "\n",
         };
 
         await WriteLineAsync("namespace ptr727.LanguageTags;");

@@ -114,8 +114,8 @@ violate section 4.
 - **Allowlist `success` and `skipped` explicitly** when chaining across an optional dependency.
   `!= 'failure'` lets `cancelled` through. Use `(needs.X.result == 'success' || needs.X.result ==
   'skipped')`.
-- **Line endings.** Workflow YAML follows [`.editorconfig`](./.editorconfig) (CRLF here). Preserve
-  endings on every edit.
+- **Line endings.** Workflow YAML is LF, per [`.editorconfig`](./.editorconfig)'s repo-wide
+  default. Preserve endings on every edit.
 
 ## 3. Architecture
 

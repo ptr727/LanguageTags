@@ -33,6 +33,8 @@ Each language defines a **clean-compile** verification: the combination of build
 
 These apply repo-wide, in every directory: Markdown lints clean via `markdownlint-cli2` against the shared config, spelling is US English via CSpell against the shared `cspell.json`, the CI spelling gate covers `README.md` and `HISTORY.md` only, `HISTORY.md` mirrors the README's opening, and "Markdown" is a proper noun in prose. The full rules are in the `comment-and-doc-style` Skill referenced above.
 
+The CI spelling gate is deliberately not all `**/*.md`: a repo carries many Markdown files full of technical terms, and gating every one of them would mean endlessly padding `cspell.json` just to keep CI green. `README.md` and `HISTORY.md` are the files every repo visitor sees, so those stay clean in CI; broad, live spell-checking across any file is the editor's Code Spell Checker extension's job instead, so a typo elsewhere still surfaces to whoever is editing it.
+
 ## .NET
 
 *This section applies only to the .NET side. A repo with no .NET projects still carries it (the file is carried whole) and ignores it.*

@@ -297,7 +297,10 @@ Every repo's GitHub repository details (the About panel) follow a fixed conventi
 - [`CLAUDE.md`](./CLAUDE.md): imports `AGENTS.md`, since Claude Code reads `CLAUDE.md` and never `AGENTS.md` on its own. Carries no rule of its own.
 - [`GOVERNANCE.md`](./GOVERNANCE.md), [`CODESTYLE.md`](./CODESTYLE.md), [`WORKFLOW.md`](./WORKFLOW.md): the governance docs. This file is the cross-cutting-rules authority.
 - [`OPERATIONS.md`](./OPERATIONS.md): how this repo is run, day to day, beyond what CI covers.
+- [`AUDIT.md`](./AUDIT.md): how this repo is measured against the fleet ground truth, and where the settings, ruleset, and secret checks are run from.
 - [`.github/copilot-instructions.md`](./.github/copilot-instructions.md): GitHub Copilot / VS Code mechanics, including the Copilot review runbook that implements "PR Review Etiquette".
+- [`.github/skills/`](./.github/skills/): the fleet's Skills, carried rather than authored here, so an agent loads the rule for a task from this tree instead of re-reading a whole governance doc.
+- [`host-tools.json`](./host-tools.json): this repo's own host-tool floors, layered tighten-only over the fleet declaration. It declares the .NET SDK, which the fleet set does not carry.
 - **`LanguageTags`** (`LanguageTags/LanguageTags.csproj`): the core library project, published as NuGet `ptr727.LanguageTags`. Target framework .NET 10.0, AOT compatible (`<IsAotCompatible>true</IsAotCompatible>`).
 - **`LanguageTagsCreate`** (`LanguageTagsCreate/LanguageTagsCreate.csproj`): the CLI codegen tool. Downloads ISO 639-2/3 + RFC 5646 / BCP 47 data from official sources (Library of Congress, SIL, IANA), converts to JSON, and generates C# data files. Invoked by [`.github/workflows/run-codegen-pull-request-task.yml`](./.github/workflows/run-codegen-pull-request-task.yml).
 - **`LanguageTagsTests`** (`LanguageTagsTests/LanguageTagsTests.csproj`): the xUnit v3 test suite, assertions via AwesomeAssertions.

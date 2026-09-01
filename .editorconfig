@@ -8,7 +8,7 @@
 # https://github.com/dotnet/runtime/blob/main/.editorconfig
 
 # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-format
-# dotnet format style --verify-no-changes --severity=info --verbosity=detailed
+# Verify with: dotnet format style --verify-no-changes --severity=info --verbosity=detailed
 
 # Root config
 root = true
@@ -52,9 +52,9 @@ trim_trailing_whitespace = false
 
 # C# files
 [*.cs]
-# Suppressions follow CODESTYLE.md "Analyzer Diagnostics and Suppressions": prefer a
-# [SuppressMessage] attribute or the owning project's .editorconfig, and relax a rule
-# repo-wide here only when it applies to every project, never as a batch.
+# Suppressions follow CODESTYLE.md "Analyzer Diagnostics and Suppressions".
+# Prefer a [SuppressMessage] attribute, or the owning project's .editorconfig.
+# Relax a rule repo-wide here only when it applies to every project, never for a brownfield batch.
 dotnet_diagnostic.IDE0055.severity = none
 dotnet_analyzer_diagnostic.severity = suggestion
 csharp_indent_block_contents = true

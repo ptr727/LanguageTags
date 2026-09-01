@@ -2,7 +2,7 @@
 # `text=auto` leaves binary files byte-preserved.
 * text=auto eol=lf
 
-# Windows batch and command scripts require CRLF.
+# Windows command scripts require CRLF.
 *.bat text eol=crlf
 *.cmd text eol=crlf
 

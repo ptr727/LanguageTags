@@ -445,7 +445,7 @@ LogOptions.SetFactory(loggerFactory);
 - **Code style**:
   - See [`CODESTYLE.md`](./CODESTYLE.md) and [`.editorconfig`](./.editorconfig) for C# code style rules.
 - **Repository setup**:
-  - See [`repo-config/README.md`](./repo-config/README.md) for repo configuration details.
+  - See [`AUDIT.md`](./AUDIT.md) for how repository settings, rulesets, and secrets are checked.
 
 ## Tag Theory
 

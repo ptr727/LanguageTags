@@ -1,0 +1,18 @@
+{
+    "note": "This repository's own host-tool declaration, layered over the fleet declaration in the hub's spec/host-tools.json by the hub's scripts/host_gate.py, which reads this file relative to its --repo argument. Layering is tighten-only: an entry here may add a tool, raise a floor, or turn an optional tool required, and may not lower a floor or turn a required tool optional. It carries no $schema pointer, because the schemas are hub-only and no selector carries one, so a relative pointer here would resolve to a path this repository does not have. Only the .NET SDK is declared. The codegen tool in LanguageTagsCreate/ downloads the ISO 639 and RFC 5646 registries over HTTPS at run time, and that is a network reachability question rather than a host tool to probe, so nothing is declared for it.",
+    "tools": [
+        {
+            "name": "dotnet",
+            "required": true,
+            "probes": [["dotnet", "--version"]],
+            "pattern": "(\\d+(?:\\.\\d+)*)",
+            "minimum": "10.0",
+            "why": "The build toolchain, and the clean-compile verification CODESTYLE.md requires before a commit runs through it. The floor is the target framework rather than a measured breakage one version below it, and it says so rather than implying a defect nobody found: Directory.Build.props targets net10.0, so an SDK below 10.0 cannot restore or build the solution at all, and the CI workflows install `10.x` through actions/setup-dotnet. The floor is also what global.json's Microsoft.Testing.Platform test runner needs, since the .NET 10 SDK is the first to route `dotnet test` through it. The probe reads the SDK version the current directory resolves, so a host carrying several SDKs passes when the newest meets the floor.",
+            "source": {
+                "linux": "The Microsoft package repository per https://learn.microsoft.com/dotnet/core/install/linux, or the dotnet-install script, and not a distribution package that trails upstream.",
+                "macos": "The installer from https://dotnet.microsoft.com/download, or Homebrew's dotnet-sdk cask.",
+                "windows": "winget (Microsoft.DotNet.SDK.10), or the installer from https://dotnet.microsoft.com/download."
+            }
+        }
+    ]
+}

@@ -2,7 +2,9 @@ name: Run daily codegen and pull request action
 
 # Daily check for upstream language-data changes.
 # The hub task regenerates the data through this repository's own codegen hook and opens a pull request per branch only when it changed.
-# The merge-bot auto-merges that pull request, and the changed data is a shipped input, so the publisher then releases it.
+# The merge-bot auto-merges that pull request.
+# On the main leg the changed data is a shipped input pushed by a bot, so the publisher then releases it.
+# On the develop leg nothing publishes, since the publisher's push trigger is main-only and a develop prerelease is dispatch-only.
 on:
   workflow_dispatch:
   schedule:

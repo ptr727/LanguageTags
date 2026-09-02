@@ -50,6 +50,8 @@ jobs:
             release:
               - 'LanguageTags/**'
               - 'LanguageData/**'
+              # Packed into the package, so it is a shipped input like any source file.
+              - 'README.md'
               - 'version.json'
               - 'Directory.Build.props'
               - 'Directory.Packages.props'

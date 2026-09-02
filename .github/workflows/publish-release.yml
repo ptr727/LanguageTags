@@ -17,6 +17,9 @@ on:
     paths:
       - 'LanguageTags/**'
       - 'LanguageData/**'
+      # README.md is packed into the package itself, per LanguageTags.csproj's PackageReadmeFile and its Pack="true" None item.
+      # A README-only change therefore ships, and omitting it here would leave a stale readme on the gallery page until some other input moved.
+      - 'README.md'
       - 'version.json'
       - 'Directory.Build.props'
       - 'Directory.Packages.props'

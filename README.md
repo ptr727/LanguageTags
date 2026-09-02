@@ -75,7 +75,8 @@ See [Usage](#usage) for detailed usage instructions.
     - [Release Notes](#release-notes)
   - [Getting Started](#getting-started)
   - [Table of Contents](#table-of-contents)
-  - [Use Cases](#use-cases)
+  - [Overview](#overview)
+  - [Installation](#installation)
   - [Usage](#usage)
     - [Tag Lookup](#tag-lookup)
     - [Tag Conversion](#tag-conversion)
@@ -84,7 +85,6 @@ See [Usage](#usage) for detailed usage instructions.
     - [Tag Parser](#tag-parser)
     - [Tag Normalization](#tag-normalization)
     - [Tag Validation](#tag-validation)
-  - [Installation](#installation)
   - [Questions or Issues](#questions-or-issues)
   - [Build Artifacts](#build-artifacts)
   - [Contributing](#contributing)
@@ -96,7 +96,7 @@ See [Usage](#usage) for detailed usage instructions.
   - [3rd Party Tools](#3rd-party-tools)
   - [License](#license)
 
-## Use Cases
+## Overview
 
 > **ℹ️ TL;DR**:
 >
@@ -108,6 +108,38 @@ See [Usage](#usage) for detailed usage instructions.
 > - Verify the results for your specific usage.
 > - Refer to [Libraries](#libraries) for other known implementations.
 > - Refer to [References](#references) for specification details.
+
+## Installation
+
+**Project integration**:
+
+```shell
+# Add the package to your project
+dotnet add package ptr727.LanguageTags
+```
+
+```csharp
+// Include the namespace
+using ptr727.LanguageTags;
+```
+
+**Debug log configuration**:
+
+```csharp
+// Configure global logging (static override/factory)
+using Microsoft.Extensions.Logging;
+using ptr727.LanguageTags;
+using Serilog;
+using Serilog.Extensions.Logging;
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .WriteTo.Debug()
+    .CreateLogger();
+
+ILoggerFactory loggerFactory = new SerilogLoggerFactory(Log.Logger, dispose: true);
+LogOptions.SetFactory(loggerFactory);
+```
 
 ## Usage
 
@@ -370,38 +402,6 @@ bool isValid = languageTag.Validate(); // true
 isValid = languageTag.IsValid; // true
 ```
 
-## Installation
-
-**Project integration**:
-
-```shell
-# Add the package to your project
-dotnet add package ptr727.LanguageTags
-```
-
-```csharp
-// Include the namespace
-using ptr727.LanguageTags;
-```
-
-**Debug log configuration**:
-
-```csharp
-// Configure global logging (static override/factory)
-using Microsoft.Extensions.Logging;
-using ptr727.LanguageTags;
-using Serilog;
-using Serilog.Extensions.Logging;
-
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Debug()
-    .WriteTo.Debug()
-    .CreateLogger();
-
-ILoggerFactory loggerFactory = new SerilogLoggerFactory(Log.Logger, dispose: true);
-LogOptions.SetFactory(loggerFactory);
-```
-
 ## Questions or Issues
 
 **Tag testing**:
@@ -553,79 +553,75 @@ LogOptions.SetFactory(loggerFactory);
 
 ## 3rd Party Tools
 
-**3rd party tools used in this project**:
+The third-party tools, libraries, and actions this project depends on.
 
-- [AwesomeAssertions][awesomeassertions-link]
-- [Create Pull Request][createpr-link]
-- [CSharpier][csharpier-link]
-- [GH Release][ghrelease-link]
-- [Git Auto Commit][ghautocommit-link]
-- [GitHub Actions][ghactions-link]
-- [GitHub Dependabot][ghdependabot-link]
-- [Husky.Net][huskynet-link]
-- [Nerdbank.GitVersioning][nerbankgitversion-link]
-- [Serilog][serilog-link]
-- [xUnit.Net][xunit-link]
+- [AwesomeAssertions][awesomeassertions-link]: Assertion library for .NET tests.
+- [Create Pull Request][createpr-link]: GitHub action that opens a pull request from workspace changes.
+- [CSharpier][csharpier-link]: C# code formatter.
+- [GH Release][ghrelease-link]: GitHub action that creates a release.
+- [Git Auto Commit][ghautocommit-link]: GitHub action that commits workspace changes.
+- [GitHub Actions][ghactions-link]: CI and automation runner.
+- [GitHub Dependabot][ghdependabot-link]: Dependency update bot.
+- [Husky.Net][huskynet-link]: Git hook manager for .NET.
+- [Nerdbank.GitVersioning][nerbankgitversion-link]: Version computation from git height.
+- [Serilog][serilog-link]: Structured logging library for .NET.
+- [xUnit.Net][xunit-link]: Test framework for .NET.
 
 ## License
 
-Licensed under the [MIT License][license-link]\
+Licensed under the [MIT License][license]\
 ![GitHub License][license-shield]
 
-<!-- Shields links -->
+<!-- Shields -->
+
+[lastcommit-shield]: https://img.shields.io/github/last-commit/ptr727/LanguageTags?logo=github&label=Last%20Commit
+[license-shield]: https://img.shields.io/github/license/ptr727/LanguageTags?label=License
+[nugetreleaseversion-shield]: https://img.shields.io/nuget/v/ptr727.LanguageTags?logo=nuget&label=NuGet%20Release
+[prereleaseversion-shield]: https://img.shields.io/github/v/release/ptr727/LanguageTags?include_prereleases&filter=*-g*&label=GitHub%20Pre-Release&logo=github
+[releasebuildstatus-shield]: https://img.shields.io/github/actions/workflow/status/ptr727/LanguageTags/publish-release.yml?logo=github&label=Releases%20Build
+[releaseversion-shield]: https://img.shields.io/github/v/release/ptr727/LanguageTags?logo=github&label=GitHub%20Release
+
+<!-- Distribution -->
 
 [actions-link]: https://github.com/ptr727/LanguageTags/actions
 [commits-link]: https://github.com/ptr727/LanguageTags/commits/main
 [discussions-link]: https://github.com/ptr727/LanguageTags/discussions
 [github-link]: https://github.com/ptr727/LanguageTags
 [issues-link]: https://github.com/ptr727/LanguageTags/issues
-[lastcommit-shield]: https://img.shields.io/github/last-commit/ptr727/LanguageTags?logo=github&label=Last%20Commit
-[license-link]: ./LICENSE
-[license-shield]: https://img.shields.io/github/license/ptr727/LanguageTags?label=License
 [nuget-link]: https://www.nuget.org/packages/ptr727.LanguageTags/
-[nugetreleaseversion-shield]: https://img.shields.io/nuget/v/ptr727.LanguageTags?logo=nuget&label=NuGet%20Release
-[prereleaseversion-shield]: https://img.shields.io/github/v/release/ptr727/LanguageTags?include_prereleases&filter=*-g*&label=GitHub%20Pre-Release&logo=github
-[releasebuildstatus-shield]: https://img.shields.io/github/actions/workflow/status/ptr727/LanguageTags/publish-release.yml?logo=github&label=Releases%20Build
 [releases-link]: https://github.com/ptr727/LanguageTags/releases
-[releaseversion-shield]: https://img.shields.io/github/v/release/ptr727/LanguageTags?logo=github&label=GitHub%20Release
 
-<!-- 3rd Party tool links -->
+<!-- Repo -->
 
+[license]: ./LICENSE
+
+<!-- External -->
+
+[acceptlanguage-link]: https://www.rfc-editor.org/rfc/rfc9110.html#name-accept-language
 [awesomeassertions-link]: https://awesomeassertions.org/
+[bcp47-link]: https://www.rfc-editor.org/info/bcp47
+[cldr-link]: https://cldr.unicode.org/
+[contentlanguage-link]: https://www.rfc-editor.org/rfc/rfc9110.html#name-content-language
 [createpr-link]: https://github.com/marketplace/actions/create-pull-request
 [csharpier-link]: https://csharpier.com/
+[dansmithlanguagetagssharp-link]: https://github.com/DanSmith/languagetags-sharp
 [ghactions-link]: https://github.com/actions
 [ghautocommit-link]: https://github.com/marketplace/actions/git-auto-commit
 [ghdependabot-link]: https://github.com/dependabot
 [ghrelease-link]: https://github.com/marketplace/actions/gh-release
 [huskynet-link]: https://alirezanet.github.io/Husky.Net/
-[nerbankgitversion-link]: https://github.com/marketplace/actions/nerdbank-gitversioning
-[serilog-link]: https://serilog.net/
-[xunit-link]: https://xunit.net/
-
-<!-- Data source links -->
-
-[iso6392source-link]: https://www.loc.gov/standards/iso639-2/ISO-639-2_utf-8.txt
-[iso6393source-link]: https://iso639-3.sil.org/sites/iso639-3/files/downloads/iso-639-3.tab
-[rfc5646source-link]: https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
-[unm49source-link]: https://raw.githubusercontent.com/unicode-org/cldr/main/common/supplemental/supplementalData.xml
-
-<!-- Other links -->
-
-[acceptlanguage-link]: https://www.rfc-editor.org/rfc/rfc9110.html#name-accept-language
-[bcp47-link]: https://www.rfc-editor.org/info/bcp47
-[cldr-link]: https://cldr.unicode.org/
-[contentlanguage-link]: https://www.rfc-editor.org/rfc/rfc9110.html#name-content-language
-[dansmithlanguagetagssharp-link]: https://github.com/DanSmith/languagetags-sharp
 [ianatags-link]: https://www.iana.org/assignments/language-subtags-tags-extensions/language-subtags-tags-extensions.xhtml
 [ietflanguagetag-link]: https://en.wikipedia.org/wiki/IETF_language_tag
 [iso15924-link]: https://unicode.org/iso15924/iso15924-codes.html
 [iso31661-link]: https://en.wikipedia.org/wiki/ISO_3166-1
 [iso6392-link]: https://www.loc.gov/standards/iso639-2/
+[iso6392source-link]: https://www.loc.gov/standards/iso639-2/ISO-639-2_utf-8.txt
 [iso6393-link]: https://iso639-3.sil.org/
+[iso6393source-link]: https://iso639-3.sil.org/sites/iso639-3/files/downloads/iso-639-3.tab
 [jkporterbcp47-link]: https://github.com/jkporter/bcp47
 [matroskalanguage-link]: https://datatracker.ietf.org/doc/html/draft-ietf-cellar-matroska-07#name-language-codes
 [mattcglanguagesubtagregistry-link]: https://github.com/mattcg/language-subtag-registry
+[nerbankgitversion-link]: https://github.com/dotnet/Nerdbank.GitVersioning
 [oxigraphoxilangtag-link]: https://github.com/oxigraph/oxilangtag
 [pyfischrustlanguagetags-link]: https://github.com/pyfisch/rust-language-tags/
 [r12asubtags-link]: https://r12a.github.io/app-subtags/
@@ -642,8 +638,12 @@ Licensed under the [MIT License][license-link]\
 [rfc5646section228-link]: https://www.rfc-editor.org/rfc/rfc5646#section-2.2.8
 [rfc5646section229-link]: https://www.rfc-editor.org/rfc/rfc5646#section-2.2.9
 [rfc5646section45-link]: https://www.rfc-editor.org/rfc/rfc5646#section-4.5
+[rfc5646source-link]: https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
 [rspeerlangcodes-link]: https://github.com/rspeer/langcodes
+[serilog-link]: https://serilog.net/
 [unm49-link]: https://unstats.un.org/unsd/methodology/m49/
+[unm49source-link]: https://raw.githubusercontent.com/unicode-org/cldr/main/common/supplemental/supplementalData.xml
 [w3cchoosingtag-link]: https://www.w3.org/International/questions/qa-choosing-language-tags
 [w3ctags-link]: https://www.w3.org/International/articles/language-tags/
 [wikipediacodes-link]: https://en.wikipedia.org/wiki/Codes_for_constructed_languages
+[xunit-link]: https://xunit.net/

@@ -1,0 +1,44 @@
+# This repository's validate hook, run by the hub's validate-task.yml validate job.
+# The hub task already covers the fleet doc-lint block, the language lint, and the unit tests, so this hook carries only the domain check those cannot express.
+name: Validate repository (LanguageTags)
+description: Deterministic offline codegen drift guard over the committed language data and its generated C#.
+
+runs:
+  using: composite
+  steps:
+
+    - name: Setup .NET SDK step
+      uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+      with:
+        dotnet-version: 10.x
+
+    # --skip-download regenerates from the committed LanguageData/ rather than from upstream, so this check never reaches the network.
+    # That is what makes it deterministic: registry drift can never trip it, and refreshing from upstream stays the scheduled codegen workflow's job.
+    - name: Regenerate codegen offline step
+      shell: bash
+      run: |
+        set -Eeuo pipefail
+        dotnet run --project ./LanguageTagsCreate/LanguageTagsCreate.csproj -- \
+          --codepath . --skip-download
+
+    # The same formatter the codegen workflow runs, so formatting alone can never read as drift.
+    - name: Format code step
+      shell: bash
+      run: |
+        set -Eeuo pipefail
+        dotnet tool restore
+        dotnet csharpier format .
+
+    - name: Check for drift step
+      shell: bash
+      run: |
+        set -Eeuo pipefail
+        # Fail on any drift, whether a modified tracked file or a new untracked generated one.
+        # Report a porcelain summary plus a diffstat rather than the full patch.
+        # A generated data file's patch can run to megabytes and would bury the rest of the log.
+        if [ -n "$(git status --porcelain --untracked-files=all)" ]; then
+          echo "::error::Generated code or formatting drifted. Regenerate offline with --skip-download, run 'dotnet csharpier format .', and commit the result."
+          git status --porcelain --untracked-files=all
+          git diff --stat
+          exit 1
+        fi

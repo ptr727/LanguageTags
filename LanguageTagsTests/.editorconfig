@@ -8,3 +8,7 @@ dotnet_diagnostic.CA1707.severity = none
 
 # Fixture and collection-definition types must be public for xUnit discovery
 dotnet_diagnostic.CA1515.severity = none
+
+# Tests drive the library's own async API to completion rather than racing a canceller.
+# Threading TestContext.Current.CancellationToken through every BCL and Roslyn call would add ceremony without making a single test more cancellable.
+dotnet_diagnostic.xUnit1051.severity = none

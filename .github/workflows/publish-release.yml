@@ -1,59 +1,136 @@
 name: Publish project release action
 
-# Branch-scoped self-publisher: a push to main or develop, or a manual dispatch, publishes that branch.
+# Publisher for this repository, wiring its one target, the NuGet package, into the reusable release chain.
+# A human pull request merge never auto-publishes, so a release is a deliberate dispatch or a bot merge to main that touches a shipped input.
+# The plan job computes that gate once, and only the codegen App or Dependabot actor qualifies on a push.
 #
-# - Trigger: a push that changes a shipped input (the on.push.paths inclusion list below - library source,
-#   embedded data, version floor, build configuration, or package versions), or a workflow_dispatch.
-# - Inclusion-only: add a path to that list when a new input starts affecting the shipped package. Package versions
-#   (Directory.Packages.props) ARE listed: a NuGet package cannot be rebuilt on a cadence (a version can't be
-#   re-pushed), so a dependency bump must republish to keep the package's declared dependencies current - this
-#   closes the stale/vulnerable-dependency window. GitHub Actions bumps are not listed (they do not ship in
-#   the package), so an Actions Dependabot bump does not republish (a package-version bump does).
-# - Output: main publishes a stable release, develop a prerelease. A dispatch force-publishes its branch.
-# - Gate: the publish job needs the same validate-task the PR runs, so nothing publishes that would fail
-#   validation, on any path (push, dispatch, or force-push).
-# - The merge-bot merges with an App token, so its merge commits reach this push trigger.
+# A dispatch is the only path that reaches develop, and it publishes a prerelease there.
+# The plan task refuses a dispatch from any ref other than main or develop.
+# The release task then refuses to publish a main version carrying a prerelease suffix, or a develop version lacking one, so the two channels cannot cross.
+#
+# The push path list is inclusion-only, so a path joins it when a new input starts affecting the shipped package.
+# Package versions are listed because a NuGet version cannot be re-pushed, so a dependency bump must republish to keep the declared dependencies current.
+# GitHub Actions bumps are absent for the same reason inverted, since they do not ship in the package.
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
     paths:
       - 'LanguageTags/**'
       - 'LanguageData/**'
+      # README.md is packed into the package itself, per LanguageTags.csproj's PackageReadmeFile and its Pack="true" None item.
+      # A README-only change therefore ships, and omitting it here would leave a stale readme on the gallery page until some other input moved.
+      - 'README.md'
       - 'version.json'
       - 'Directory.Build.props'
       - 'Directory.Packages.props'
   workflow_dispatch:
 
-# Ref-independent group so concurrent publishes serialize, and cancel-in-progress: false so a publish is
-# never cancelled mid-release (a half-created GitHub release or partial NuGet push).
+# The group is ref-independent so concurrent publishes serialize.
+# The cancel-in-progress setting is false so a publish is never cancelled mid-release, which would leave a half-created GitHub release or a partial NuGet push.
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
 
+# GITHUB_TOKEN gets no scope by default, and each job below grants only what it writes with.
+permissions: {}
+
 jobs:
 
-  # The same unit-test + lint gate the PR runs. The publish job needs it, so a failing test or lint blocks
-  # the release.
+  # Single source of the release-gate decision, publish or not and stable or not, reused by every job below.
+  plan:
+    name: Plan release job
+    uses: ptr727/ProjectTemplate/.github/workflows/publish-plan-task.yml@a9afa1d0f56e0160b65baf70ae64a9b6122e8405 # 2.0.539
+    with:
+      event_name: ${{ github.event_name }}
+      actor: ${{ github.actor }}
+      ref_name: ${{ github.ref_name }}
+
+  # The same gate the pull request runs, on the branch tip, running only when a publish will happen.
   validate:
     name: Validate job
-    uses: ./.github/workflows/validate-task.yml
-    # Thread CODECOV_TOKEN through so the unit-test job can upload coverage.
-    secrets: inherit
+    needs: [plan]
+    if: ${{ needs.plan.outputs.publish == 'true' }}
+    uses: ptr727/ProjectTemplate/.github/workflows/validate-task.yml@a9afa1d0f56e0160b65baf70ae64a9b6122e8405 # 2.0.539
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+    permissions:
+      contents: read
 
-  # Build, version, validate, push, and release the triggering branch. Grants the write scopes
-  # build-release-task needs (it declares none, so the read-only smoke caller is not forced to over-grant).
-  # The push trigger is already limited to main/develop, and the if-guard covers a workflow_dispatch, which
-  # can target any branch.
+  # Build, version, push, and release the triggering branch, main a stable release and develop a prerelease by dispatch.
+  # This repository ships one target, the NuGet package, so every other target is disabled explicitly rather than left at its default.
+  # The grants are what the enabled paths write with.
+  # Contents and actions cover the release upload and its artifact cleanup.
+  # The NuGet push is not here, so neither is id-token, see the publish-nuget job below.
   publish:
     name: Publish project release job
-    needs: validate
-    if: ${{ github.event_name == 'push' || github.ref_name == 'main' || github.ref_name == 'develop' }}
-    uses: ./.github/workflows/build-release-task.yml
-    secrets: inherit
+    needs: [plan, validate]
+    if: ${{ needs.plan.outputs.publish == 'true' && needs.validate.result == 'success' }}
+    uses: ptr727/ProjectTemplate/.github/workflows/build-release-task.yml@a9afa1d0f56e0160b65baf70ae64a9b6122e8405 # 2.0.539
     permissions:
       contents: write
-      id-token: write
       actions: write
     with:
-      publish: true
+      ref: ${{ github.sha }}
+      branch: ${{ github.ref_name }}
       smoke: false
+      github: true
+      enable_nuget: true
+      enable_docker: false
+      enable_pypi: false
+      enable_dotnet_publish: false
+      nuget_project: ./LanguageTags/LanguageTags.csproj
+
+  # The push lives here rather than in the hub task so the OIDC token's job_workflow_ref claim names this repository, which NuGet.org validates against the package owner (ptr727/ProjectTemplate#1126).
+  # A skipped publish job skips this one too, so no separate release gate is needed.
+  # The release is cut before this job runs, so a failed push leaves a release for a version that never reached NuGet.org.
+  # Re-running the publisher is the remedy, since the release-exists gate and --skip-duplicate are both idempotent.
+  publish-nuget:
+    name: Publish NuGet library job
+    needs: [validate, publish]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      actions: write
+    steps:
+      - name: Download build artifacts step
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: nuget-build-${{ github.ref_name }}
+          path: ./nuget
+      - name: Setup .NET SDK step
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 10.x
+      # Trades the GitHub OIDC token for a short-lived NuGet key, so there is no stored API key.
+      - name: NuGet login step
+        id: nuget-login
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+        with:
+          user: ${{ secrets.NUGET_USERNAME }}
+      # Pushing the .nupkg also pushes the co-located .snupkg to nuget.org's symbol server, since no --no-symbols flag is set.
+      - name: Push to NuGet.org step
+        env:
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
+        run: |
+          set -Eeuo pipefail
+          dotnet nuget push ./nuget/*.nupkg \
+            --source https://api.nuget.org/v3/index.json \
+            --api-key "$NUGET_API_KEY" \
+            --skip-duplicate
+      - name: Delete consumed NuGet build artifact step
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          if ! ids=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/${{ github.run_id }}/artifacts" --paginate \
+            --jq ".artifacts[] | select(.name == \"nuget-build-${{ github.ref_name }}\") | .id"); then
+            echo "::warning::Could not list NuGet build artifacts. The retention-days backstop will reap them."
+            ids=""
+          fi
+          for id in $ids; do
+            if ! gh api --method DELETE "repos/$GITHUB_REPOSITORY/actions/artifacts/$id"; then
+              echo "::warning::Failed to delete artifact $id. The retention-days backstop will reap it."
+            fi
+          done

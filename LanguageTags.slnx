@@ -1,9 +1,12 @@
 <Solution>
     <Folder Name="/GitHub/">
         <File Path=".github/dependabot.yml" />
-        <File Path=".github/workflows/merge-bot-pr.yml" />
+        <File Path=".github/actions/codegen/action.yml" />
+        <File Path=".github/actions/validate/action.yml" />
+        <File Path=".github/workflows/merge-bot-pull-request.yml" />
         <File Path=".github/workflows/publish-release.yml" />
-        <File Path=".github/workflows/update-languagedata.yml" />
+        <File Path=".github/workflows/run-periodic-codegen-pull-request.yml" />
+        <File Path=".github/workflows/test-pull-request.yml" />
     </Folder>
     <Folder Name="/LanguageData/">
         <File Path="LanguageData/iso6392" />

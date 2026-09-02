@@ -28,9 +28,9 @@ C# .NET library for ISO 639-2, ISO 639-3, RFC 5646 / BCP 47 language tags.
 - Internal CI/CD rework, no library API changes.
   - Branch-scoped self-publishing workflows
   - Keyless OIDC NuGet publishing.
-  - Hardened repository configuration, see [WORKFLOW.md](./WORKFLOW.md).
+  - Hardened repository configuration, see [WORKFLOW.md][workflow].
 
-See [Release History](./HISTORY.md) for complete release notes and older versions.
+See [Release History][history] for complete release notes and older versions.
 
 ## Getting Started
 
@@ -64,7 +64,7 @@ Get started with LanguageTags in two easy steps:
    string tag = languageTag.ToString(); // "en-latn-gb-boont-r-extended-sequence-x-private"
    ```
 
-See [Usage](#usage) for detailed usage instructions.
+See [Usage][usage] for detailed usage instructions.
 
 ## Table of Contents
 
@@ -106,8 +106,8 @@ See [Usage](#usage) for detailed usage instructions.
 > **⚠️ Note**: The implemented language tag parsing and normalization logic may be incomplete or inaccurate.
 >
 > - Verify the results for your specific usage.
-> - Refer to [Libraries](#libraries) for other known implementations.
-> - Refer to [References](#references) for specification details.
+> - Refer to [Libraries][libraries] for other known implementations.
+> - Refer to [References][references] for specification details.
 
 ## Installation
 
@@ -143,7 +143,7 @@ LogOptions.SetFactory(loggerFactory);
 
 ## Usage
 
-> **ℹ️ Note**: Refer to the [Tag Theory](#tag-theory) section for an overview of terms and theory of operation.
+> **ℹ️ Note**: Refer to the [Tag Theory][tag-theory] section for an overview of terms and theory of operation.
 
 ### Tag Lookup
 
@@ -263,10 +263,10 @@ IEnumerable<string> expanded = languageLookup.ExpandRegion("es-MX");
 The `LanguageTagBuilder` class supports fluent builder style tag construction, and will return a constructed `LanguageTag` class through the final `Build()` or `Normalize()` methods.
 
 The `Build()` method will construct the tag, but will not perform any correctness validation or normalization.\
-Use the `Validate()` method to test for shape correctness. See [Tag Validation](#tag-validation) for details.
+Use the `Validate()` method to test for shape correctness. See [Tag Validation][tag-validation] for details.
 
 The `Normalize()` method will build the tag and perform normalization only.\
-Use `Validate()` to check structural correctness. See [Tag Normalization](#tag-normalization) for details.
+Use `Validate()` to check structural correctness. See [Tag Normalization][tag-normalization] for details.
 
 ```csharp
 LanguageTag languageTag = LanguageTag.CreateBuilder()
@@ -309,7 +309,7 @@ Grandfathered tags will be converted to their current preferred form and parsed 
 E.g. `en-gb-oed` -> `en-GB-oxendict`, `i-klingon` -> `tlh`.
 
 The `ParseAndNormalize()` method will parse the text tag and perform normalization.\
-See [Tag Normalization](#tag-normalization) for details.
+See [Tag Normalization][tag-normalization] for details.
 
 ```csharp
 LanguageTag? languageTag = LanguageTag.Parse("en-latn-gb-boont-r-extended-sequence-x-private");
@@ -388,7 +388,7 @@ Note that `LanguageTag` objects created by `Parse()` or `Normalize()` are alread
 
 Validation includes the following:
 
-- Subtag shape correctness, see [Format](#format) for a summary.
+- Subtag shape correctness, see [Format][format] for a summary.
 - No duplicate variants, extension prefixes, extension tags, or private tags.
 - Does not validate subtag values against the registry or enforce the full grammar beyond these checks.
 
@@ -407,7 +407,7 @@ isValid = languageTag.IsValid; // true
 **Tag testing**:
 
 - The [BCP47 language subtag lookup][r12asubtags-link] site offers convenient tag parsing and validation capabilities.
-- Refer to the [unit tests](./LanguageTagsTests) for examples, do note that tests may pass but not be complete or accurate per the RFC spec.
+- Refer to the [unit tests][tests-project] for examples, do note that tests may pass but not be complete or accurate per the RFC spec.
 
 **General questions**:
 
@@ -423,16 +423,16 @@ isValid = languageTag.IsValid; // true
 
 **Build process and artifacts**:
 
-- **[`LanguageTagsCreate`](./LanguageTagsCreate) project**:
+- **[`LanguageTagsCreate`][codegen-project] project**:
   - Downloads language tag data files.
   - Converts the tag data into JSON files.
   - Generates C# records of the tags.
-- **[`LanguageData`](./LanguageData/) directory**:
-  - ISO 639-2: [Source][iso6392source-link], [Data](./LanguageData/iso6392), [JSON](./LanguageData/iso6392.json), [Code](./LanguageTags/Iso6392DataGen.cs)
-  - ISO 639-3: [Source][iso6393source-link], [Data](./LanguageData/iso6393), [JSON](./LanguageData/iso6393.json), [Code](./LanguageTags/Iso6393DataGen.cs)
-  - RFC 5646 : [Source][rfc5646source-link], [Data](./LanguageData/rfc5646), [JSON](./LanguageData/rfc5646.json), [Code](./LanguageTags/Rfc5646DataGen.cs)
-  - UN M.49 : [Source][unm49source-link], [Data](./LanguageData/unm49), [JSON](./LanguageData/unm49.json), [Code](./LanguageTags/UnM49DataGen.cs)
-- A daily [GitHub Actions](./.github/workflows/run-periodic-codegen-pull-request.yml) job opens PRs to keep the data files up to date.
+- **[`LanguageData`][language-data] directory**:
+  - ISO 639-2: [Source][iso6392source-link], [Data][iso6392-data], [JSON][iso6392-json], [Code][iso6392-code]
+  - ISO 639-3: [Source][iso6393source-link], [Data][iso6393-data], [JSON][iso6393-json], [Code][iso6393-code]
+  - RFC 5646 : [Source][rfc5646source-link], [Data][rfc5646-data], [JSON][rfc5646-json], [Code][rfc5646-code]
+  - UN M.49 : [Source][unm49source-link], [Data][unm49-data], [JSON][unm49-json], [Code][unm49-code]
+- A daily [GitHub Actions][codegen-workflow] job opens PRs to keep the data files up to date.
 
 ## Contributing
 
@@ -441,15 +441,15 @@ isValid = languageTag.IsValid; // true
   - Feature branch -> `develop` via **squash merge** (develop is kept linear).
   - `develop` -> `main` via **merge commit** (preserves develop's commit list on main as the second parent of each release commit).
   - Dependabot and the daily codegen workflow both target `main` and `develop` in parallel via separate PRs.
-  - See [`WORKFLOW.md`](./WORKFLOW.md) for complete details.
+  - See [`WORKFLOW.md`][workflow] for complete details.
 - **Code style**:
-  - See [`CODESTYLE.md`](./CODESTYLE.md) and [`.editorconfig`](./.editorconfig) for C# code style rules.
+  - See [`CODESTYLE.md`][codestyle] and [`.editorconfig`][editorconfig] for C# code style rules.
 - **Repository setup**:
-  - See [`AUDIT.md`](./AUDIT.md) for how repository settings, rulesets, and secrets are checked.
+  - See [`AUDIT.md`][audit] for how repository settings, rulesets, and secrets are checked.
 
 ## Tag Theory
 
-> **ℹ️ Note**: Refer to [References](#references) for complete specification details.
+> **ℹ️ Note**: Refer to [References][references] for complete specification details.
 
 ### Terminology
 
@@ -572,6 +572,16 @@ The third-party tools, libraries, and actions this project depends on.
 Licensed under the [MIT License][license]\
 ![GitHub License][license-shield]
 
+<!-- Sections -->
+
+[format]: #format
+[libraries]: #libraries
+[references]: #references
+[tag-normalization]: #tag-normalization
+[tag-theory]: #tag-theory
+[tag-validation]: #tag-validation
+[usage]: #usage
+
 <!-- Shields -->
 
 [lastcommit-shield]: https://img.shields.io/github/last-commit/ptr727/LanguageTags?logo=github&label=Last%20Commit
@@ -593,7 +603,28 @@ Licensed under the [MIT License][license]\
 
 <!-- Repo -->
 
+[audit]: ./AUDIT.md
+[codegen-project]: ./LanguageTagsCreate
+[codegen-workflow]: ./.github/workflows/run-periodic-codegen-pull-request.yml
+[codestyle]: ./CODESTYLE.md
+[editorconfig]: ./.editorconfig
+[history]: ./HISTORY.md
+[iso6392-code]: ./LanguageTags/Iso6392DataGen.cs
+[iso6392-data]: ./LanguageData/iso6392
+[iso6392-json]: ./LanguageData/iso6392.json
+[iso6393-code]: ./LanguageTags/Iso6393DataGen.cs
+[iso6393-data]: ./LanguageData/iso6393
+[iso6393-json]: ./LanguageData/iso6393.json
+[language-data]: ./LanguageData/
 [license]: ./LICENSE
+[rfc5646-code]: ./LanguageTags/Rfc5646DataGen.cs
+[rfc5646-data]: ./LanguageData/rfc5646
+[rfc5646-json]: ./LanguageData/rfc5646.json
+[tests-project]: ./LanguageTagsTests
+[unm49-code]: ./LanguageTags/UnM49DataGen.cs
+[unm49-data]: ./LanguageData/unm49
+[unm49-json]: ./LanguageData/unm49.json
+[workflow]: ./WORKFLOW.md
 
 <!-- External -->
 

@@ -685,8 +685,8 @@ first successful publish locks it to the repo and owner IDs.
 **Validation.** This configuration is codified as JSON in the fleet's repository-configuration payloads,
 which the hub hosts rather than this repository carrying them: the branch rulesets and repository settings.
 The self-audit in [`AUDIT.md`](./AUDIT.md) diffs the live rulesets, settings, and secret names against the
-committed baseline, and that self-audit **is** the 5D audit. The fleet's configuration script applies the
-rulesets and settings idempotently to a repository. Dependabot vulnerability alerts and security updates
-are enabled once at provisioning time, outside the script.
+committed baseline, and that self-audit **is** the 5D audit. Run `repo-config/configure.sh check <owner>/<repo> release`
+from a hub checkout to compare them, and `apply` for what it reports, which is idempotent. Dependabot
+vulnerability alerts and security updates are enabled once at provisioning time, outside the script.
 Secret values cannot be read back, so the audit asserts the names exist and a GitHub App is installed
 rather than checking contents.

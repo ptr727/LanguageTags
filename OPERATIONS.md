@@ -30,7 +30,7 @@ Nothing beyond ordinary git history and GitHub's own repository backups. The rep
 
 ## Logs and Debugging
 
-No runtime logging to inspect: the library exposes structured logging via `ILoggerFactory`/`ILogger` (see [`AGENTS.md`](./AGENTS.md) "Library API Conventions" for the library's own logging surface, and [`CODESTYLE.md`](./CODESTYLE.md) ".NET", which points to the hub's `dotnet-codestyle` Skill, for the error-handling and logging conventions) for a consumer to wire up, but this repo does not itself run as a service. Diagnosing a CI failure means reading the failed job's log in the Actions run; diagnosing a codegen discrepancy means re-running the offline regeneration in "Local Verification" above and reading its `[t:...]` structured log lines.
+No runtime logging to inspect: the library exposes structured logging via `ILoggerFactory`/`ILogger` (see [`ARCHITECTURE.md`](./ARCHITECTURE.md) "Public API Conventions" for the library's own logging surface, and [`CODESTYLE.md`](./CODESTYLE.md) ".NET", which points to the hub's `dotnet-codestyle` Skill, for the error-handling and logging conventions) for a consumer to wire up, but this repo does not itself run as a service. Diagnosing a CI failure means reading the failed job's log in the Actions run. Diagnosing a codegen discrepancy means re-running the offline regeneration in "Local Verification" above and reading its `[t:...]` structured log lines.
 
 ## Tool Usage
 

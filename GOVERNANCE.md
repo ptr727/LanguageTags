@@ -293,9 +293,10 @@ Every repo's GitHub repository details (the About panel) follow a fixed conventi
 
 ## Repository Layout
 
-- [`AGENTS.md`](./AGENTS.md): the agent entry point, carrying context and delegation rules plus the map to the sections below, and this repo's public-API/behavioral contract (Key Public API, Library API Conventions).
+- [`AGENTS.md`](./AGENTS.md): the agent entry point, carrying context and delegation rules plus the map to the sections below.
 - [`CLAUDE.md`](./CLAUDE.md): imports `AGENTS.md`, since Claude Code reads `CLAUDE.md` and never `AGENTS.md` on its own. Carries no rule of its own.
 - [`GOVERNANCE.md`](./GOVERNANCE.md), [`CODESTYLE.md`](./CODESTYLE.md), [`WORKFLOW.md`](./WORKFLOW.md): the governance docs. This file is the cross-cutting-rules authority.
+- [`ARCHITECTURE.md`](./ARCHITECTURE.md): how the library is laid out, and the public-API and behavioral contracts a consumer is entitled to assume.
 - [`OPERATIONS.md`](./OPERATIONS.md): how this repo is run, day to day, beyond what CI covers.
 - [`AUDIT.md`](./AUDIT.md): how this repo is measured against the fleet ground truth, and where the settings, ruleset, and secret checks are run from.
 - [`.github/copilot-instructions.md`](./.github/copilot-instructions.md): GitHub Copilot / VS Code mechanics, including the Copilot review runbook that implements "PR Review Etiquette".

@@ -90,9 +90,10 @@ violate section 4.
   the UI label tells you orchestrator from callee at a glance.
 - **Job and step `name:`.** Every job `name:` ends in **"job"**, every step `name:` in **"step"**, the
   aggregator included (`Check pull request workflow status job`). A job name also bound as a ruleset
-  required-status-check `context:` is codified in [`repo-config/`](./repo-config/). It follows the suffix
-  rule like any job, but changing it means updating those ruleset files and the live ruleset **in
-  lockstep**, or required-check enforcement silently breaks.
+  required-status-check `context:` is codified in the fleet's committed ruleset payloads, which the hub
+  hosts rather than this repository carrying them. It follows the suffix rule like any job, but changing
+  it means updating those payloads and the live ruleset **in lockstep**, or required-check enforcement
+  silently breaks.
 - **Concurrency.** Every entry-point workflow declares a `concurrency` group. The default is
   `group: '${{ github.workflow }}-${{ github.ref }}'` with `cancel-in-progress: true`. Three entry
   workflows override it. The **publisher** uses a ref-independent group with `cancel-in-progress: false` so publishes
@@ -504,7 +505,8 @@ applicable guarantee is not operational (section 1).
   action *installs* (e.g. the actionlint binary behind `raven-actions/actionlint`) is not a `uses:` ref and is
   left unpinned to track latest, so CI picks up new lint rules.
 - **D9.2** File/workflow/job/step names follow the suffix rules. A name also used as a ruleset
-  required-check `context:` is codified in `repo-config/` and changed only in lockstep with the ruleset.
+  required-check `context:` is codified in the fleet's ruleset payloads and changed only in lockstep with
+  the ruleset.
 - **D9.3** Bash `run:` blocks start `set -euo pipefail`; multi-line `if:` uses `>-`.
 - **D9.4** Line endings follow `.editorconfig`.
 - **D9.5** No decorative / non-shipped workflow remains, in particular no date-badge workflow
@@ -611,7 +613,7 @@ determined by NBGV from the checkout state in section 3.*
 ### 5D. Configuration audit
 
 Run the self-audit in [`AUDIT.md`](./AUDIT.md) (section 6). It confirms the listed secret names exist,
-the `main`/`develop` rulesets match the committed payloads in [`repo-config/`](./repo-config/) (merge
+the `main`/`develop` rulesets match the fleet's committed payloads (merge
 method + status check + signed commits + strict-off), and the repository settings (auto-merge, allowed
 merge methods) are in place. A missing or incorrect configuration item is a defect (D10). Secret *values*
 cannot be read back, so the audit asserts the names exist and a GitHub App is installed. The NuGet.org
@@ -680,10 +682,12 @@ first successful publish locks it to the repo and owner IDs.
   enabled.
 - The GitHub App installed with the scopes above.
 
-**Validation.** This configuration is codified in [`repo-config/`](./repo-config/): the branch rulesets
-and repository settings as JSON. The self-audit in [`AUDIT.md`](./AUDIT.md) diffs the live rulesets,
-settings, and secret names against the committed baseline; that self-audit **is** the 5D audit.
-`repo-config/configure.sh` applies the rulesets and settings idempotently to a repository; Dependabot
-vulnerability alerts and security updates are enabled once at provisioning time, outside the script.
+**Validation.** This configuration is codified as JSON in the fleet's repository-configuration payloads,
+which the hub hosts rather than this repository carrying them: the branch rulesets and repository settings.
+The self-audit in [`AUDIT.md`](./AUDIT.md) diffs the live rulesets, settings, and secret names against the
+committed baseline, and that self-audit **is** the 5D audit. Run `repo-config/configure.sh check <owner>/<repo> release`
+from a hub checkout to compare them, then `repo-config/configure.sh apply <owner>/<repo> release` for what it
+reports, which is idempotent. Dependabot vulnerability alerts and security updates are enabled once at
+provisioning time, outside the script.
 Secret values cannot be read back, so the audit asserts the names exist and a GitHub App is installed
 rather than checking contents.

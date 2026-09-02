@@ -6,5 +6,9 @@
 .idea
 .vs
 .artifacts
+
+# Coverage output is a build artifact, per WORKFLOW.md D1.6.
+coverage/
+*.cobertura.xml
 .DS_Store
 *.user

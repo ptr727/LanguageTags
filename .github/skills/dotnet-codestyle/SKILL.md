@@ -49,9 +49,11 @@ All builds must complete without warnings, enforced three ways:
   surfaced as a warning fails the build and must be fixed or deliberately suppressed at the
   narrowest scope that fits (see Analyzer suppressions below), never left to accumulate.
 - **CI lint backstop.** CI runs the clean-compile checks on every PR as the authoritative gate.
-  A working local hook is strongly suggested, not optional: wire Husky.Net from the canonical
-  `catalog/snippets/husky/` config. See GOVERNANCE.md "Running the Linters Locally" for what the
-  hook must cover and what its absence means.
+  The .NET mechanism for a local hook is Husky.Net, wired from the canonical
+  `catalog/snippets/husky/` config in the hub, hub-local and not carried into every fleet repo.
+  GOVERNANCE.md's hub-only "Running the Linters Locally (Known-Working Invocations)" section
+  carries the obligation itself, what the hook must cover, its audit treatment, and the
+  per-clone enablement steps.
 
 **A new port is not a license to silence diagnostics.** Brownfield or just-ported status never
 justifies relaxing analyzer severities or muting newly surfaced warnings. Fix them. (The only
@@ -95,8 +97,9 @@ updates, dependency upgrades, benchmarks) on top:
   `dotnet format style --verify-no-changes --severity=info --verbosity=detailed`.
 - **`dotnet-outdated-tool`** checks for dependency updates, and Nerdbank.GitVersioning owns
   version management.
-- CI is the authoritative lint backstop. A local pre-commit hook is strongly suggested: wire
-  Husky.Net from `catalog/snippets/husky/` for local enforcement, including the shared doc gates.
+- CI is the authoritative lint backstop. The .NET mechanism for a local pre-commit hook is
+  Husky.Net, wired from `catalog/snippets/husky/` in the hub, hub-local and not carried into every
+  fleet repo, and covering the shared doc gates alongside the language checks.
 - **Required VS Code extensions**: CSharpier, markdownlint, CSpell. Use the workspace settings
   without overrides.
 

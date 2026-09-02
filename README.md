@@ -98,12 +98,12 @@ See [Usage][usage] for detailed usage instructions.
 
 ## Overview
 
-> **ℹ️ TL;DR**:
+> **TL;DR**:
 >
 > - Catalog of ISO 639-2, ISO 639-3, RFC 5646 language tags in JSON and C# record format.
 > - Code for IETF BCP 47 language tag construction and parsing per the RFC 5646 semantic rules.
 >
-> **⚠️ Note**: The implemented language tag parsing and normalization logic may be incomplete or inaccurate.
+> **Warning**: The implemented language tag parsing and normalization logic may be incomplete or inaccurate.
 >
 > - Verify the results for your specific usage.
 > - Refer to [Libraries][libraries] for other known implementations.
@@ -143,7 +143,7 @@ LogOptions.SetFactory(loggerFactory);
 
 ## Usage
 
-> **ℹ️ Note**: Refer to the [Tag Theory][tag-theory] section for an overview of terms and theory of operation.
+> **Note**: Refer to the [Tag Theory][tag-theory] section for an overview of terms and theory of operation.
 
 ### Tag Lookup
 
@@ -211,7 +211,7 @@ iso = languageLookup.GetIsoFromIetf("cmn-Hant"); // "chi"
 
 Tag matching can be used to select content based on preferred vs. available languages.
 
-> **ℹ️ Examples**:
+> **Examples**:
 >
 > - HTTP [`Accept-Language`][acceptlanguage-link] and [`Content-Language`][contentlanguage-link].
 > - Matroska media stream [`LanguageIETF Element`][matroskalanguage-link].
@@ -449,7 +449,7 @@ isValid = languageTag.IsValid; // true
 
 ## Tag Theory
 
-> **ℹ️ Note**: Refer to [References][references] for complete specification details.
+> **Note**: Refer to [References][references] for complete specification details.
 
 ### Terminology
 
@@ -464,9 +464,9 @@ isValid = languageTag.IsValid; // true
 
 ### Format
 
-> **ℹ️ TL;DR**: IETF language tags are constructed from sub-tags with specific rules.
+> **TL;DR**: IETF language tags are constructed from sub-tags with specific rules.
 >
-> **ℹ️ Note**: Refer to [RFC 5646 Section 2.1][rfc5646section21-link] for complete language tag syntax and rules.
+> **Note**: Refer to [RFC 5646 Section 2.1][rfc5646section21-link] for complete language tag syntax and rules.
 
 **Normal tags**:
 

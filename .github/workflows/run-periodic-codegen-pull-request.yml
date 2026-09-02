@@ -1,25 +1,27 @@
 name: Run daily codegen and pull request action
 
-# Daily check for upstream language-data changes. The task regenerates LanguageData and opens a PR per
-# branch only when the data changed (see run-codegen-pull-request-task.yml). The merge-bot auto-merges it,
-# and the changed data is a shipped input, so the publisher then releases it.
+# Daily check for upstream language-data changes.
+# The hub task regenerates the data through this repository's own codegen hook and opens a pull request per branch only when it changed.
+# The merge-bot auto-merges that pull request, and the changed data is a shipped input, so the publisher then releases it.
 on:
   workflow_dispatch:
   schedule:
     - cron: '0 4 * * *'
 
-# Workflow-only group (no -${{ github.ref }}): the task writes to the fixed codegen-main/codegen-develop
-# branches regardless of the triggering ref, so a dispatch and the scheduled run must not race on them.
+# Workflow-only group, with no github.ref, because the task writes to the fixed codegen-main and codegen-develop branches regardless of the triggering ref.
+# A dispatch and the scheduled run must therefore not race on them.
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: true
+
+# Every write in the called workflow uses the App token, so GITHUB_TOKEN gets no scope.
+permissions: {}
 
 jobs:
 
   run-codegen:
     name: Run codegen and pull request job
-    uses: ./.github/workflows/run-codegen-pull-request-task.yml
-    secrets: inherit
-    permissions:
-      contents: write
-      pull-requests: write
+    uses: ptr727/ProjectTemplate/.github/workflows/run-codegen-pull-request-task.yml@a9afa1d0f56e0160b65baf70ae64a9b6122e8405 # 2.0.539
+    secrets:
+      CODEGEN_APP_CLIENT_ID: ${{ secrets.CODEGEN_APP_CLIENT_ID }}
+      CODEGEN_APP_PRIVATE_KEY: ${{ secrets.CODEGEN_APP_PRIVATE_KEY }}

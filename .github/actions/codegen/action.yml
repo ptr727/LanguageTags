@@ -1,0 +1,18 @@
+# This repository's codegen hook, run by the hub's run-codegen-pull-request-task.yml.
+# The task owns the App token, the SDK install, the checkout, the CSharpier format, and the per-branch pull request.
+# This hook carries only the generator invocation, which is the one part of that sequence that is this repository's own.
+name: Run codegen (LanguageTags)
+description: Regenerate the embedded ISO 639, RFC 5646, and UN M.49 data from the upstream registries.
+
+runs:
+  using: composite
+  steps:
+
+    # No --skip-download here, unlike the drift guard in the validate hook.
+    # This is the run whose whole purpose is to fetch upstream and notice that it moved.
+    - name: Run codegen step
+      shell: bash
+      run: |
+        set -Eeuo pipefail
+        dotnet run --project ./LanguageTagsCreate/LanguageTagsCreate.csproj -- \
+          --codepath .

@@ -686,7 +686,8 @@ first successful publish locks it to the repo and owner IDs.
 which the hub hosts rather than this repository carrying them: the branch rulesets and repository settings.
 The self-audit in [`AUDIT.md`](./AUDIT.md) diffs the live rulesets, settings, and secret names against the
 committed baseline, and that self-audit **is** the 5D audit. Run `repo-config/configure.sh check <owner>/<repo> release`
-from a hub checkout to compare them, and `apply` for what it reports, which is idempotent. Dependabot
-vulnerability alerts and security updates are enabled once at provisioning time, outside the script.
+from a hub checkout to compare them, then `repo-config/configure.sh apply <owner>/<repo> release` for what it
+reports, which is idempotent. Dependabot vulnerability alerts and security updates are enabled once at
+provisioning time, outside the script.
 Secret values cannot be read back, so the audit asserts the names exist and a GitHub App is installed
 rather than checking contents.

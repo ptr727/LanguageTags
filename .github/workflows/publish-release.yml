@@ -1,21 +1,20 @@
 name: Publish project release action
 
-# Branch-scoped self-publisher: a push to main or develop, or a manual dispatch, publishes that branch.
+# Publisher. A human PR merge never auto-publishes; a release is a deliberate dispatch or a bot merge to main.
 #
-# - Trigger: a push that changes a shipped input (the on.push.paths inclusion list below - library source,
-#   embedded data, version floor, build configuration, or package versions), or a workflow_dispatch.
-# - Inclusion-only: add a path to that list when a new input starts affecting the shipped package. Package versions
-#   (Directory.Packages.props) ARE listed: a NuGet package cannot be rebuilt on a cadence (a version can't be
-#   re-pushed), so a dependency bump must republish to keep the package's declared dependencies current - this
-#   closes the stale/vulnerable-dependency window. GitHub Actions bumps are not listed (they do not ship in
-#   the package), so an Actions Dependabot bump does not republish (a package-version bump does).
-# - Output: main publishes a stable release, develop a prerelease. A dispatch force-publishes its branch.
-# - Gate: the publish job needs the same validate-task the PR runs, so nothing publishes that would fail
-#   validation, on any path (push, dispatch, or force-push).
-# - The merge-bot merges with an App token, so its merge commits reach this push trigger.
+# - Push trigger (main only, on.push.paths inclusion list below - library source, embedded data, version floor,
+#   build config, or package versions): a code-affecting Dependabot/codegen merge auto-publishes a stable release.
+#   The plan job (publish-plan-task.yml) computes the gate once - only the codegen App / Dependabot actor
+#   qualifies on a push, so a human merge or promotion to main skips and the maintainer dispatches when ready.
+# - Inclusion-only: add a path when a new input starts affecting the shipped package. Package versions
+#   (Directory.Packages.props) ARE listed: a NuGet version can't be re-pushed, so a dependency bump must
+#   republish to keep declared dependencies current (closes the stale/vulnerable-dependency window). GitHub
+#   Actions bumps are not listed (they don't ship in the package), so an Actions bump merges without republishing.
+# - workflow_dispatch: the maintainer publishes the chosen branch - main a stable release, develop a prerelease.
+# - Gate: the publish job needs the same validate-task the PR runs, so nothing publishes that would fail validation.
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
     paths:
       - 'LanguageTags/**'
       - 'LanguageData/**'
@@ -32,22 +31,31 @@ concurrency:
 
 jobs:
 
-  # The same unit-test + lint gate the PR runs. The publish job needs it, so a failing test or lint blocks
-  # the release.
+  # Single source of the release-gate decision (publish? stable?); validate + publish gate on its outputs
+  # instead of re-testing event/actor/branch. See publish-plan-task.yml for the policy.
+  plan:
+    name: Plan release job
+    uses: ./.github/workflows/publish-plan-task.yml
+    with:
+      event_name: ${{ github.event_name }}
+      actor: ${{ github.actor }}
+      ref_name: ${{ github.ref_name }}
+
+  # The same unit-test + lint gate the PR runs, on the branch tip; runs only when a publish will happen.
   validate:
     name: Validate job
+    needs: [plan]
+    if: ${{ needs.plan.outputs.publish == 'true' }}
     uses: ./.github/workflows/validate-task.yml
-    # Thread CODECOV_TOKEN through so the unit-test job can upload coverage.
     secrets: inherit
 
-  # Build, version, validate, push, and release the triggering branch. Grants the write scopes
-  # build-release-task needs (it declares none, so the read-only smoke caller is not forced to over-grant).
-  # The push trigger is already limited to main/develop, and the if-guard covers a workflow_dispatch, which
-  # can target any branch.
+  # Build, version, validate, push, and release the triggering branch (main = release, develop = prerelease via
+  # dispatch). Grants the write scopes build-release-task needs (it declares none, so the read-only smoke caller
+  # is not forced to over-grant). Gated on the plan decision.
   publish:
     name: Publish project release job
-    needs: validate
-    if: ${{ github.event_name == 'push' || github.ref_name == 'main' || github.ref_name == 'develop' }}
+    needs: [plan, validate]
+    if: ${{ needs.plan.outputs.publish == 'true' }}
     uses: ./.github/workflows/build-release-task.yml
     secrets: inherit
     permissions:

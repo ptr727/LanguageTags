@@ -7,7 +7,7 @@
          The 18.9.0 floor is load-bearing rather than cautionary.
          Below 18.1.0 the package is built against Microsoft.Testing.Platform 1.x, and an 18.0.x resolution throws a TypeLoadException against the 2.x platform xunit.v3 4.0.0 carries, runs zero tests, and still writes a well-formed Cobertura file reporting full coverage.
          18.9.0 is the first release on Microsoft.Testing.Platform 2.3.x. -->
-    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.9.0" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.11.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.11" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.9.0" />
     <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.400" />

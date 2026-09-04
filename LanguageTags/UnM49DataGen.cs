@@ -345,6 +345,7 @@ public sealed partial class UnM49Data
                     [
                         @"AT",
                         @"BE",
+                        @"BG",
                         @"CY",
                         @"DE",
                         @"EE",
@@ -352,6 +353,7 @@ public sealed partial class UnM49Data
                         @"FI",
                         @"FR",
                         @"GR",
+                        @"HR",
                         @"IE",
                         @"IT",
                         @"LT",

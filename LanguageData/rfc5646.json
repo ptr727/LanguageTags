@@ -1,5 +1,5 @@
 {
-  "FileDate": "2026-08-08",
+  "FileDate": "2026-09-17",
   "RecordList": [
     {
       "Type": "Language",
@@ -100853,6 +100853,7 @@
       "Type": "Region",
       "SubTag": "NR",
       "Description": [
+        "Naoero",
         "Nauru"
       ],
       "Added": "2005-10-16",

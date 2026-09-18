@@ -13,7 +13,7 @@ public sealed partial class Rfc5646Data
     public static Rfc5646Data Create() =>
         new()
         {
-            FileDate = new DateOnly(2026, 8, 8),
+            FileDate = new DateOnly(2026, 9, 17),
             RecordList =
             [
                 new()
@@ -134245,7 +134245,7 @@ public sealed partial class Rfc5646Data
                     Deprecated = null,
                     PreferredValue = null,
                     Tag = null,
-                    Description = [@"Nauru"],
+                    Description = [@"Naoero", @"Nauru"],
                     Comments = [],
                     Prefix = [],
                 },

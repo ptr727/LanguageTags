@@ -12,7 +12,7 @@ flowchart TD
   s0m["0m: fleet membership, every owned non-fork repo has a registry entry"] --> s0["0: has the repo been stood up? if not, STANDUP.md"]
   s0 --> s1["1: scope, ground-truth branch (main)"]
   s1 --> s2["2: resolve the repo's type(s)"]
-  s2 --> s3["3: applicability gate, per check"]
+  s2 --> s3["3: applicability gate, per item or check"]
   s3 --> s4["4: per-dimension checks, letter and intent"]
   s4 --> s5["5: assert Actions implement WORKFLOW.md"]
   s5 --> s6["6: validate settings, rulesets, secrets"]
@@ -29,14 +29,14 @@ flowchart TD
 
 This audit is not occasional. Run it whenever you **create, adopt, or materially change** a fleet repo, and on demand for any known repo:
 
-- **A full sweep opens with a fleet membership check, not a per-repo one.** `spec/audit.py`, run with no repo names, first lists every non-fork repository the registry `owner` actually owns on GitHub and diffs it against `registry/repos.json`. A repo that exists but carries no entry is invisible to every other check in this file, since all of them iterate the registry and never look past it, so this is the only place that gap is caught (ptr727/ProjectTemplate#550). The check also reconciles one field: a registry `status: "archived"` must agree with GitHub's own archived flag, in either direction. A name-filtered run or `--issue` skips it, since those are scoped to repos already known to the registry. Run this as `gh auth login` for the owner's own account: a fine-grained PAT scoped to "selected repositories" returns an incomplete list with no error, so the sweep would read clean while some repos were never inspected.
+- **A full sweep opens with a fleet membership check, not a per-repo one.** `spec/audit.py`, run with no repo names, first lists every non-fork repository the registry `owner` actually owns on GitHub and diffs it against `registry/repos.json`. A repo that exists but carries no entry is invisible to every other check in this file, since all of them iterate the registry and never look past it, so this is the only place that gap is caught. The check also reconciles one field: a registry `status: "archived"` must agree with GitHub's own archived flag, in either direction. A name-filtered run or `--issue` skips it, since those are scoped to repos already known to the registry. Run this as `gh auth login` for the owner's own account: a fine-grained PAT scoped to "selected repositories" returns an incomplete list with no error, so the sweep would read clean while some repos were never inspected.
 - **Onboarding a repo is complete only when it either passes this audit** (operational on every applicable check) **or carries a committed `reports/<repo>/audit.md` plus a tracking issue** enumerating every residual delta. A repo that is partially set up but never audited is itself a **defect**, the exact state this process prevents. The create-to-conformance counterpart is [`STANDUP.md`][standup]. Because both read the same manifests, a repo stood up by that file passes this audit by construction.
-- **Touching a repo** (any conformance-affecting change) ends by re-running the applicable checks and **reconciling the registry entry to reality**: `status`, `types`, `releaseTrigger`, `workflowModel`, `driftNotes`. The registry records reality, not intent. [`spec/validate.py`][validate] proves the catalog is self-consistent, not that it matches the live repo. Closing that gap is this audit's job. The deterministic subset (settings, rulesets, secret names, file presence, per-scope Markdown section presence, workflow interface conformance, verbatim content, hub-hosted files a repo carries, branch facts) is mechanized in [`spec/audit.py`][audit-runner]: owner-initiated, run on demand when onboarding a repo, on suspected drift, or before fleet-wide changes. A required section missing from a carried Markdown file is a **drift finding**, not a letter, because a heading rename reads as missing and equivalence is judged by hand. A carried `interface` workflow (spec/fidelity-model.md) is checked by name and wiring (required jobs, the ruleset-bound check name, the artifact-name handoff, and the forbidden `artifact-ids:` fork), all at **drift**, since the body is owned and a rename is a hint to verify. A carried `verbatim` unit, whether a whole file (`.markdownlint-cli2.jsonc`) or a canonical workflow job region (the `github-release` job), is content-hashed against the hub's canonical after line-ending normalization. A mismatch is classified **stale** (matches a past hub revision, re-vendor) or **modified** (matches none, the repo changed fixed content), both at **drift**, since equivalence is intent-governed and a byte diff is a hint to review. A carried `intent` unit gets one advisory beyond presence, a last-modified comparison: a hub canonical changing after the copy's own last commit marks the copy as possibly trailing, at **drift**, a hint rather than proof, since a copy touched without reconciling reads current and content is never judged.
+- **Touching a repo** (any conformance-affecting change) ends by re-running the applicable checks and **reconciling the registry entry to reality**: `status`, `types`, `releaseTrigger`, `workflowModel`, `driftNotes`. The registry records reality, not intent. [`spec/validate.py`][validate] proves the catalog is self-consistent, not that it matches the live repo. Closing that gap is this audit's job. The deterministic subset (settings, rulesets, secret names, file presence, per-scope Markdown section presence, workflow interface conformance, verbatim content, hub-hosted files a repo carries, branch facts) is mechanized in [`spec/audit.py`][audit-runner]: owner-initiated, run on demand when onboarding a repo, on suspected drift, or before fleet-wide changes. A required section missing from a carried Markdown file is a **drift finding**, not a letter, because a heading rename reads as missing and equivalence is judged by hand. A carried `interface` workflow (spec/fidelity-model.md) is checked by name and wiring (required jobs, the ruleset-bound check name, the artifact-name handoff, and the forbidden `artifact-ids:` fork), all at **drift**, since the body is owned and a rename is a hint to verify. A carried `verbatim` unit, whether a whole file (`.markdownlint-cli2.jsonc`) or a canonical workflow job region (the `github-release` job), is content-hashed against the hub's canonical after line-ending normalization. A mismatch is classified **stale** (matches a past hub revision, re-vendor) or **modified** (matches none, the repo changed fixed content), both at **drift**, since equivalence is intent-governed and a byte diff is a hint to review. A carried `intent` unit gets one advisory beyond presence, a last-modified comparison: a hub canonical changing after the copy's own last commit marks the copy as possibly trailing, at **drift**, a hint rather than proof, since a copy touched without reconciling reads current and content is never judged. A content scan also looks for a version literal: a three-part version, a full 40-character commit SHA, or an abbreviated one of 7 to 12 characters mixing digits and letters, in `AGENTS.md`, `GOVERNANCE.md`, `CODESTYLE.md`, or `WORKFLOW.md`, outside the verbatim sections downstream and across the whole file in the hub, is a **drift** finding, since a pin's value in prose goes stale at the next bump and every other literal reads like one.
 
 **Verify the host before running any hub tool.** The tools carry version floors, and a host below one answers `--version`, looks healthy, and produces a wrong answer, so a clean audit run from a broken host is a clean-looking result rather than a result.
 
 ```shell
-python3 scripts/host_gate.py --repo <path-to-target-checkout>   # run from a hub checkout, floors from spec/host-tools.json
+python3 scripts/host_gate.py --repo "<path-to-target-checkout>"   # run from a hub checkout, floors from spec/host-tools.json
 ```
 
 Pass `--repo`, since the gate reads the target's own `host-tools.json` relative to it and defaults to the working directory. Omitting it does not read the target's declaration at all, so every floor that repo adds goes unapplied, and the run reports nothing about the omission. A finding is a **host** misconfiguration rather than a repo one, and [`docs/host-setup.md`][host-setup] is the contract it checks.
@@ -61,7 +61,7 @@ Otherwise read its `types[]`. If the entry is `classificationPending` (a backlog
 
 ## 3. Applicability Gate
 
-Reuse [`WORKFLOW.md`][workflow] section 1: a check that governs a construct the repo does not contain is **N/A**. Record it as N/A and **exclude it from the verdict**. N/A is never a defect. A Docker check on a repo with no image, a NuGet check on a Python package, and the artifact-lifecycle clauses on a source-only repo are all N/A.
+Reuse [`WORKFLOW.md`][workflow] section 1, extended to this audit's own checks: an item or check that governs a construct the repo does not contain is **N/A**. Record it as N/A and **exclude it from the verdict**. N/A is never a defect. A Docker check on a repo with no image, a NuGet check on a Python package, and the artifact-lifecycle clauses on a source-only repo are all N/A.
 
 Which carried files and sections a repo is expected to have is decided by its scope selectors (its type(s) plus workflow model, release trigger, and consumer model). The scope model and the `appliesTo` selector vocabulary are defined in [`spec/scope-model.md`][scope-model].
 
@@ -88,36 +88,96 @@ A check with `intentRef`/`workflowRef` points at the prose section that owns the
 - **verbatim-tree** - every applicable `trees[]` declaration in [`spec/files.json`][files] owns its target tree. The audit reports missing files as letter findings, stale or modified bytes as drift, and extra files under a pruned target as drift. An unreadable or truncated repository tree is undecided and produces drift rather than a clean result.
 - **repo-setup** - every required secret for the repo's publish mechanisms is configured, and no forbidden secret is present (per [`spec/secrets.json`][secrets]).
 - **runtime-secrets** - a repo-scoped runtime-secrets directory, when present, is named `.secrets/` (dotted, not a bare `secrets/`), a single opaque credential file carries no extension, and every real secret file has a tracked `<name>.example` beside it cataloged in `.secrets/README.md`. N/A for a repo with no such directory. See [GOVERNANCE.md "Repo-Scoped Secrets"][governance-repo-scoped-secrets].
-- **linter-parity** - one config per linter (`.markdownlint-cli2.jsonc`, `cspell.json`, ruff/pyright, editorconfig/csharpier, actionlint) drives the editor extension, the CLI, and CI, and CI runs each. A local hook exists and runs at minimum the diff-scoped prose gate and the eol check via `hub-fetch-run.py`, or the hub's own local script copies for the hub repo itself (`parity.hooks`, intent). A repo with none wired is a defect, and one mid-convergence on the language-formatting half stays operational.
+- **linter-parity** - one config per linter (`.markdownlint-cli2.jsonc`, `cspell.json`, ruff/pyright, editorconfig/csharpier, actionlint) drives the editor extension, the CLI, and CI, and CI runs each. That count is of the root config, so a nested `.markdownlint-cli2.jsonc` is not a second one. A local hook exists and runs at minimum the diff-scoped prose gate and the eol check via `hub-fetch-run.py`, or the hub's own local script copies for the hub repo itself (`parity.hooks`, intent). A repo with none wired is a defect, and one mid-convergence on the language-formatting half stays operational.
 - **recurring-violations** - comments concise and non-narrative, ASCII only (no em-dash, no smart quotes), US spelling, line endings per `.editorconfig`. These are frequent regressions, so this dimension is high priority and always runs, and each check is grep-able (see below).
 - **readme-structure** - the README follows [`spec/readme-structure.md`][readme-structure] (applicable sections, in order). Mechanically checked against the declared model in [`spec/readme-sections.json`][readme-sections]: required sections present, declared sections in their relative order, `License` last, the shields each deliverable implies, the license shield in the closing License section, and the tagline and its mirrors. A heading the model does not name is dropped before the order comparison, so a repo-specific section is never a finding.
 
 ## 5. Assert the Actions Implement WORKFLOW.md
 
-Run [`WORKFLOW.md`][workflow]'s methodology against the repo's **own** Actions: the 5A static audit (structural facts per applicable D-guarantee, each with a `file:line` citation) and the 5B trace scenarios (predicted run/skip + version + release + artifact-end-state vs expected). The contract in WORKFLOW.md section 4 is satisfied by **outcome**, not by matching the catalog snippets in [`catalog/snippets/workflows/`][workflows] byte for byte. Those are the reference implementation, not required bytes.
+Run [`WORKFLOW.md`][workflow]'s methodology against the repo's **own** Actions, reading a workflow it only calls at the SHA it pins: the 5A static audit (structural facts per applicable D-guarantee, each cited in the form 5A sets out) and the 5B trace scenarios (predicted run/skip + version + release + artifact-end-state vs expected). The contract in WORKFLOW.md section 4 is satisfied by **outcome**, not by matching the catalog snippets in [`catalog/snippets/workflows/`][workflows] byte for byte. Those are the reference implementation, not required bytes. Where a guarantee names a construct, D6.1's `release-asset-<branch>-<target>` and D9.2's ruleset-bound job `name:` among them, that name is the outcome and a divergence is a **defect** here. That is a separate judgment from the `verbatim` content hash section 0 describes, which classifies a mismatch as stale or modified and reports either at **drift**, since equivalence is intent-governed and a byte diff is a hint to review rather than a verdict.
 
 ## 6. Validate Settings, Rulesets, and Secrets
 
-- **General settings and rulesets** - fetch the hub and check out `main`. Run `repo-config/configure.sh check <owner>/<repo> release|operational` from that checkout. Pass the target repository and its registry `workflowModel` explicitly. The command checks the shared settings, state-dependent settings, Dependabot security features, and both rulesets against the hub payloads. It preserves and reports `bypass_actors` without asserting them because bypass authority is a per-repository human decision.
+- **General settings, the registry description, labels, rulesets, the Dependabot security features, the fleet project link, and deployment environments** - fetch the hub and check out `main`. Run `repo-config/configure.sh check "<owner>/<repo>" "<release|operational>"` from that checkout. Pass the target repository and its registry `workflowModel` explicitly. The token needs project access as well as the admin the ruleset endpoints require, since a token without it cannot read the project link and the command reports that group as failing rather than as clean, and the command's own error names the scope to grant. The host needs a runnable `py -3` or `python3` too, since a run against a hub checkout resolves the registry description through [`spec/resolve_description.py`][resolve-description] and exits before the first check when neither interpreter answers. The command checks what `configure.sh apply` writes: the declared settings, the derived settings and the registry description, the declared labels, the Dependabot security features, the shared `main` ruleset, the `develop` ruleset the model selects, and the link to the fleet project the hub declares. It reports the live `bypass_actors` list without asserting it, because bypass authority is a per-repository human decision. It also checks one group apply never writes, the deployment environments the registry's `environments` declares for the repo: each one exists, its deployment-branch policy is the form declared, and under a `custom` policy the entries it allows are exactly the declared branches, so anything added by hand reads as drift. An environment the registry declares nothing about is reported rather than asserted, since GitHub creates some on its own. Neither this command nor the **Secrets** bullet below queries an environment's own secret and variable stores, where the API exposes a secret's name but not its value and a variable's name and value both, so a clean run says nothing about whether an environment holds what a deploy needs.
 
-- **Secrets** - from the same hub checkout, run [`spec/audit.py`][audit-runner] `[repo]` and read its Secrets section. It resolves the required set from the hub's own [`spec/secrets.json`][secrets] plus the registry entry's `publish[]`/`types[]`/`requiredSecrets[]`, confirming each required name exists (name only, not the values) in the Actions store and, where the mechanism needs it (Docker Hub, codegen App), the Dependabot store too.
+- **Secrets** - from the same hub checkout, run [`spec/audit.py`][audit-runner] `"<RepoName>"` and read the findings it prints with a `secrets:` prefix. That argument is the registry entry name rather than the `<owner>/<repo>` form `configure.sh` takes, and an `<owner>/<repo>` argument prints `Not cataloged` and exits 2. The runner reads both the Actions and the Dependabot store on every repo, and a token that cannot read either one fails that repo's whole run with an error rather than reporting names as missing. It resolves what each store must hold from the hub's own [`spec/secrets.json`][secrets] plus the registry entry's `publish[]`/`types[]`/`requiredSecrets[]`. That file's `baseline` requires its names in both stores for every fleet repo, and a mechanism adds to a store only where the mechanism's own `stores` list names that store. A declared type claims nothing where the entry's profile for it reads `lint-only`, and claims no coverage token where the tree carries no tests for it, so a repo declaring a language can still owe nothing beyond the baseline. It reports three things: a required name missing from a store, a forbidden name present in either store, and a configured name no applicable mechanism claims. A forbidden name present draws the third as well as the second, since the claimed set is built from the required names alone. Names are read, never values.
 
-- **Dependabot ecosystem coverage** - for each ecosystem the repo's tree implies, `.github/dependabot.yml` must declare it: `github-actions` when `.github/workflows/` is present (its workflows reference actions, and otherwise those versions go stale and a stood-up merge-bot has no action-update PRs to auto-merge), and `devcontainers` when a `.devcontainer` is present. The mechanical check (`spec/audit.py`) asserts each implied ecosystem's **presence**. A tree-implied ecosystem declared nowhere is a **drift finding** (the file exists, so its absence would instead be a file-presence letter). Then confirm **by inspection** that each declared ecosystem **dual-targets `main` + `develop`** per the [Branching Model][governance-branching-model], since the regex below cannot pair an ecosystem with its `target-branch`. Language ecosystems (`nuget`/`uv`/`npm`) are directory-scoped and audited by inspection too.
+- **Dependabot ecosystem coverage** - for each ecosystem the repo's tree implies, `.github/dependabot.yml` must declare it: `github-actions` when `.github/workflows/` holds at least one `.yml` or `.yaml` entry (those workflows reference actions, and otherwise those versions go stale and a stood-up merge-bot has no action-update PRs to auto-merge), and `devcontainers` when a `.devcontainer` is present. The mechanical check (`spec/audit.py`) asserts each implied ecosystem's **presence**, and it runs at all only where `.github/dependabot.yml` exists and is non-empty. A missing `dependabot.yml` is a file-presence letter of its own, and an empty one is caught by neither check, since the file-presence check reports only absence, so an empty file is reported by hand. A tree-implied ecosystem that file declares nowhere is a **drift finding**. Then confirm **by inspection** that each declared ecosystem **dual-targets `main` + `develop`** per the [Branching Model][governance-branching-model], since the regex below cannot pair an ecosystem with its `target-branch`. Language ecosystems (`nuget`/`uv`/`npm`) are directory-scoped and audited by inspection too.
 
   ```bash
-  # Anchor to the line start (optional list dash) so a commented-out '# package-ecosystem:' is not counted.
-  dependabot_content=$(gh api "repos/<owner>/<repo>/contents/.github/dependabot.yml?ref=<ground>" --jq '.content') || exit 1
-  dependabot_yaml=$(base64 -d <<<"$dependabot_content") || exit 1
-  decl=$(grep -oE '^[[:space:]]*-?[[:space:]]*package-ecosystem:[[:space:]]*"?[a-z-]+' <<<"$dependabot_yaml" | grep -oE '[a-z-]+$' | sort -u)
-  root_paths=$(gh api "repos/<owner>/<repo>/contents?ref=<ground>" --jq '.[].path') || exit 1
-  github_paths=$(gh api "repos/<owner>/<repo>/contents/.github?ref=<ground>" --jq '.[].path') || exit 1
+  #!/usr/bin/env bash
+  # Save and run this as a script rather than pasting it into a shell, since it exits rather than returns.
+  # It prints one line per implied ecosystem, and its exit status reports whether the reads succeeded rather than whether an ecosystem is missing.
+  set -Eeuo pipefail
+  repo="<owner>/<repo>"
+  ground=main # The branch section 1 reads as ground truth.
+
+  root_paths=$(gh api "repos/$repo/contents?ref=$ground" --jq '.[].path')
+  # A repo carrying no .github directory would 404 on the listing below, which is an absence rather than the read failure that exit code otherwise means.
+  github_paths=""
+  if grep -Fxq .github <<<"$root_paths"; then
+      github_paths=$(gh api "repos/$repo/contents/.github?ref=$ground" --jq '.[].path')
+  fi
   has() { grep -Fxq "$1" <<<"$root_paths"$'\n'"$github_paths"; }
-  has .github/workflows && { grep -qx github-actions <<<"$decl" && echo "github-actions: present" || echo "github-actions: MISSING (workflows present)"; }
-  has .devcontainer     && { grep -qx devcontainers  <<<"$decl" && echo "devcontainers: present"  || echo "devcontainers: MISSING (.devcontainer present)"; }
-  # then read dependabot.yml and confirm each present ecosystem has both a main and a develop target-branch entry
+
+  if ! has .github/dependabot.yml; then
+      echo "dependabot.yml absent: a file-presence finding, and ecosystem coverage is not checked at all"
+      exit 0
+  fi
+  # The raw media type answers with the file itself, so nothing here decodes base64 or reads a content key that can be absent.
+  dependabot_yaml=$(gh api "repos/$repo/contents/.github/dependabot.yml?ref=$ground" -H "Accept: application/vnd.github.raw")
+  # The mechanical check gates on a non-empty file, so an empty one skips here too rather than reporting every implied ecosystem missing.
+  if [ -z "$dependabot_yaml" ]; then
+      echo "dependabot.yml empty: the mechanical check skips it and the file-presence check reports only absence, so report this one by hand"
+      exit 0
+  fi
+  # Anchor to the line start (optional list dash) so a commented-out '# package-ecosystem:' is not counted.
+  # Accept either quote or none, as the mechanical check does.
+  # The trailing class is the mechanical check's own, so a value carrying a digit is read whole rather than truncated to its leading letters.
+  eco_re="^[[:space:]]*-?[[:space:]]*package-ecosystem:[[:space:]]*[\"']?[[:alnum:]_-]+"
+  # A file declaring no ecosystem at all matches nothing, and grep exiting 1 would otherwise abort the run under the header above.
+  # The two greps are separate statements so that only a no-match is absorbed.
+  # Chained through a pipe they are not, because a failing first stage produces no output, the second stage then no-matches, and pipefail reports that exit 1 rather than the failure.
+  matched=$(grep -oE "$eco_re" <<<"$dependabot_yaml") || [ "$?" -eq 1 ]
+  decl=$(grep -oE '[[:alnum:]_-]+$' <<<"$matched" | sort -u) || [ "$?" -eq 1 ]
+
+  if has .github/workflows; then
+      # The contents API answers with an object rather than an array where the path is a file, so the type is tested rather than assumed.
+      yaml_count=$(gh api "repos/$repo/contents/.github/workflows?ref=$ground" --jq 'if type == "array" then [.[] | select(.name | test("\\.ya?ml$"))] | length else 0 end')
+      if [ "$yaml_count" -gt 0 ]; then
+          grep -qx github-actions <<<"$decl" && echo "github-actions: present" || echo "github-actions: MISSING (.github/workflows/ holds a workflow file)"
+      fi
+  fi
+  if has .devcontainer; then
+      grep -qx devcontainers <<<"$decl" && echo "devcontainers: present" || echo "devcontainers: MISSING (.devcontainer present)"
+  fi
+  # Then read dependabot.yml and confirm each present ecosystem has both a main and a develop target-branch entry.
   ```
 
-- **Dependabot on self-hosted runners (account setting)** - a repo whose `dependabot-updates` or `update-graph` workflow runs are all `cancelled` with zero steps has this problem. The account-wide toggle at `https://github.com/settings/security_analysis`, `Dependabot on self-hosted runners`, routes Dependabot's own update jobs to a self-hosted runner pool. With none registered on the account, those jobs queue for up to 24 hours, then get cancelled. The cancelled-with-zero-steps pattern above is the only Actions-API-visible signal, not an explicit cause, and ordinary CI is unaffected. The account-setting root cause surfaces only as a `Self-hosted runner unavailable` message on the repo's own Dependabot page. GitHub never routes a public repo through this setting, so `ProjectTemplate` itself cannot show the symptom (ptr727/ProjectTemplate#1015). Detection stops there, like the rest of this audit. Remediation is a separate, manual action. Confirm the toggle, and `Automatically enable for new repositories` beside it, are both off, or register a matching self-hosted runner instead of disabling it. Disabling the toggle does not rerun jobs already queued. Each affected repo still needs its own manual `Check for Updates` click on its own Dependabot page.
+- **Dependabot on self-hosted runners (owner setting)** - the owner-level toggle named `Dependabot on self-hosted runners`, which for a user-account owner sits at `https://github.com/settings/security_analysis`, routes Dependabot's own update jobs to a self-hosted runner pool. With none registered on the owner, those jobs queue for up to 24 hours, then get cancelled, and ordinary CI is unaffected throughout. GitHub routes only a private repo through this setting, which is why the fleet's public repos updated throughout while its private ones stalled, so read the audited repo's visibility first with `gh repo view "<owner>/<repo>" --json visibility` and treat a public one as N/A. On a private repo, read the newest Dependabot run's job:
+
+  ```bash
+  #!/usr/bin/env bash
+  # Save and run this as a script rather than pasting it into a shell, since it exits rather than returns.
+  set -Eeuo pipefail
+  repo="<owner>/<repo>"
+
+  # Dependabot's own update jobs run under the dynamic event rather than from a workflow file, so they are selected by path.
+  # Read the newest run rather than the history, since a repo whose account setting has since been turned off keeps every run cancelled while it was on.
+  # The dynamic event is shared with GitHub's other generated runs, Copilot's reviewer among them, which on an active repo fill whole pages, so the pages are walked rather than the first alone, within the 1000 runs this endpoint returns at most.
+  # The run's date is carried out with its id so the report can say when this repo's updates last ran, which the finding below does not turn on.
+  runs=$(gh api --paginate "repos/$repo/actions/runs?event=dynamic&per_page=100" --jq '.workflow_runs[] | select((.path // "") | startswith("dynamic/dependabot")) | "\(.id) \(.created_at)"')
+  if [ -z "$runs" ]; then
+      echo "no Dependabot run in this repo's dynamic run history"
+      exit 0
+  fi
+  # The endpoint answers newest first and paginates in that order, so the first line is the newest Dependabot run whichever page it landed on.
+  run=$(head -n 1 <<<"$runs")
+  echo "newest Dependabot run: $run"
+  gh api "repos/$repo/actions/runs/${run%% *}/jobs" --jq '.jobs[] | "\(.conclusion) labels=\(.labels | join(",")) runner=\(.runner_name // "") steps=\(.steps | length)"'
+  ```
+
+  A job reading `labels=dependabot` with no runner name was routed to the pool, its empty step list saying it never started, where a job GitHub's own runners took reads `labels=ubuntu-latest` with a runner name and the steps it ran. Those four fields together are the finding: a newest run that was routed and then cancelled having run no step says this repo's Dependabot updates last failed that way and have not succeeded since, because a later success would be the newest run instead. Why they are still failing is not something the API answers, since the toggle's own state, whether a matching runner is registered and online, and whether the queue was ever restarted all sit outside it. The audit reports the repo and that run's date, and leaves the choice of remedy to the maintainer. Detection stops there, like the rest of this audit. Every remedy here is an owner-level or web-UI action no target-repo pull request can carry, so this is reported rather than converged under section 10: turn the toggle off, along with `Automatically enable for new repositories` beside it, or bring a matching self-hosted runner online instead. Disabling the toggle reruns nothing already queued, so an affected repo also needs its own manual `Check for Updates` click on its own Dependabot page, and a repo whose toggle is already off needs only that click.
 
 ## 7. Verdict Model
 
@@ -154,7 +214,7 @@ flowchart LR
   finding -->|"one repo"| s10["10: Converge, branch + fix + PR"]
   s10 --> review["review loop to green"]
   review --> merge["maintainer merges"]
-  merge --> reaudit["re-audit, commit the report"]
+  merge --> reaudit["re-audit, the hub commits the report"]
   s9 --> reaudit
 ```
 
@@ -193,6 +253,7 @@ The convergence model: the hub audits and the agent **applies** the fixes via ta
 [repo-config]: https://github.com/ptr727/ProjectTemplate/tree/main/repo-config
 [reports]: https://github.com/ptr727/ProjectTemplate/tree/main/reports
 [repos]: https://github.com/ptr727/ProjectTemplate/blob/main/registry/repos.json
+[resolve-description]: https://github.com/ptr727/ProjectTemplate/blob/main/spec/resolve_description.py
 [resync]: https://github.com/ptr727/ProjectTemplate/blob/main/RESYNC.md
 [scope-model]: https://github.com/ptr727/ProjectTemplate/blob/main/spec/scope-model.md
 [secrets]: https://github.com/ptr727/ProjectTemplate/blob/main/spec/secrets.json

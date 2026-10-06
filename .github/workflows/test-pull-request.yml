@@ -58,7 +58,7 @@ jobs:
 
   validate:
     name: Validate job
-    uses: ptr727/ProjectTemplate/.github/workflows/validate-task.yml@bc9dc654288d9dac165acdde75379131d04fc537 # 2.0.805
+    uses: ptr727/ProjectTemplate/.github/workflows/validate-task.yml@0b7cba39577e35929f4a9ece7dcf25a497f89bef # 2.0.810
     permissions:
       contents: read
     # Mapped explicitly rather than inherited, since this is a cross-repository call and secrets: inherit would hand the callee every secret this repository holds.
@@ -75,7 +75,7 @@ jobs:
     name: Smoke build job
     needs: [changes]
     if: needs.changes.outputs.release == 'true' || github.event_name == 'workflow_dispatch'
-    uses: ptr727/ProjectTemplate/.github/workflows/build-release-task.yml@bc9dc654288d9dac165acdde75379131d04fc537 # 2.0.805
+    uses: ptr727/ProjectTemplate/.github/workflows/build-release-task.yml@0b7cba39577e35929f4a9ece7dcf25a497f89bef # 2.0.810
     permissions:
       contents: read
     with:

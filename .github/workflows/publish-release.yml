@@ -39,7 +39,7 @@ jobs:
   # Single source of the release-gate decision, publish or not and stable or not, reused by every job below.
   plan:
     name: Plan release job
-    uses: ptr727/ProjectTemplate/.github/workflows/publish-plan-task.yml@f75f9b520256c0ab65fc4a70cf1601a813780cf7 # 2.0.826
+    uses: ptr727/ProjectTemplate/.github/workflows/publish-plan-task.yml@95cc8b14471ca93ec1bbbdd6d63d021455749354 # 2.0.850
     with:
       event_name: ${{ github.event_name }}
       actor: ${{ github.actor }}
@@ -50,7 +50,7 @@ jobs:
     name: Validate job
     needs: [plan]
     if: ${{ needs.plan.outputs.publish == 'true' }}
-    uses: ptr727/ProjectTemplate/.github/workflows/validate-task.yml@f75f9b520256c0ab65fc4a70cf1601a813780cf7 # 2.0.826
+    uses: ptr727/ProjectTemplate/.github/workflows/validate-task.yml@95cc8b14471ca93ec1bbbdd6d63d021455749354 # 2.0.850
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     permissions:
@@ -65,7 +65,7 @@ jobs:
     name: Publish project release job
     needs: [plan, validate]
     if: ${{ needs.plan.outputs.publish == 'true' && needs.validate.result == 'success' }}
-    uses: ptr727/ProjectTemplate/.github/workflows/build-release-task.yml@f75f9b520256c0ab65fc4a70cf1601a813780cf7 # 2.0.826
+    uses: ptr727/ProjectTemplate/.github/workflows/build-release-task.yml@95cc8b14471ca93ec1bbbdd6d63d021455749354 # 2.0.850
     permissions:
       contents: write
       actions: write

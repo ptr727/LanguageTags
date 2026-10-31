@@ -331,7 +331,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Abaga",
+                    RefName = "Wagama",
                     Comment = null,
                 },
                 new()
@@ -4285,17 +4285,6 @@ public sealed partial class Iso6393Data
                 },
                 new()
                 {
-                    Id = "asw",
-                    Part2B = null,
-                    Part2T = null,
-                    Part1 = null,
-                    Scope = "I",
-                    LanguageType = "L",
-                    RefName = "Australian Aborigines Sign Language",
-                    Comment = null,
-                },
-                new()
-                {
                     Id = "asx",
                     Part2B = null,
                     Part2T = null,
@@ -4379,7 +4368,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Atemble",
+                    RefName = "Mand",
                     Comment = null,
                 },
                 new()
@@ -17018,7 +17007,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Degenan",
+                    RefName = "Degenang",
                     Comment = null,
                 },
                 new()
@@ -21254,6 +21243,17 @@ public sealed partial class Iso6393Data
                     Scope = "I",
                     LanguageType = "L",
                     RefName = "Fiwaga",
+                    Comment = null,
+                },
+                new()
+                {
+                    Id = "fjs",
+                    Part2B = null,
+                    Part2T = null,
+                    Part1 = null,
+                    Scope = "I",
+                    LanguageType = "L",
+                    RefName = "Fiji Sign Language",
                     Comment = null,
                 },
                 new()
@@ -28535,7 +28535,7 @@ public sealed partial class Iso6393Data
                     Part1 = "iu",
                     Scope = "M",
                     LanguageType = "L",
-                    RefName = "Inuktitut",
+                    RefName = "Canadian Inuktut",
                     Comment = null,
                 },
                 new()
@@ -35300,7 +35300,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Korak",
+                    RefName = "Amako",
                     Comment = null,
                 },
                 new()
@@ -40734,7 +40734,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Langam",
+                    RefName = "Pondi",
                     Comment = null,
                 },
                 new()
@@ -43979,7 +43979,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Mongol",
+                    RefName = "Mwakai",
                     Comment = null,
                 },
                 new()
@@ -59060,7 +59060,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Papi",
+                    RefName = "Baiyamo",
                     Comment = null,
                 },
                 new()
@@ -59082,7 +59082,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Uma",
+                    RefName = "Uma (Indonesia)",
                     Comment = null,
                 },
                 new()
@@ -59093,7 +59093,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Pipil",
+                    RefName = "Central American Nawat",
                     Comment = null,
                 },
                 new()
@@ -62041,7 +62041,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Ronji",
+                    RefName = "Uma (Papua New Guinea)",
                     Comment = null,
                 },
                 new()
@@ -63790,7 +63790,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Suarmin",
+                    RefName = "Asaba",
                     Comment = null,
                 },
                 new()
@@ -66914,7 +66914,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Sausi",
+                    RefName = "Wia",
                     Comment = null,
                 },
                 new()
@@ -74713,7 +74713,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Ulwa",
+                    RefName = "Ulwa (Nicaragua)",
                     Comment = null,
                 },
                 new()
@@ -75109,7 +75109,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Urigina",
+                    RefName = "Kobuka",
                     Comment = null,
                 },
                 new()
@@ -80163,6 +80163,17 @@ public sealed partial class Iso6393Data
                 },
                 new()
                 {
+                    Id = "xiw",
+                    Part2B = null,
+                    Part2T = null,
+                    Part1 = null,
+                    Scope = "I",
+                    LanguageType = "L",
+                    RefName = "Shiwa",
+                    Comment = null,
+                },
+                new()
+                {
                     Id = "xiy",
                     Part2B = null,
                     Part2T = null,
@@ -83216,7 +83227,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Yapunda",
+                    RefName = "Yeri",
                     Comment = null,
                 },
                 new()
@@ -83271,7 +83282,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Yagomi",
+                    RefName = "Tanda",
                     Comment = null,
                 },
                 new()
@@ -83744,7 +83755,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Yaul",
+                    RefName = "Ulwa (Papua New Guinea)",
                     Comment = null,
                 },
                 new()
@@ -83766,7 +83777,7 @@ public sealed partial class Iso6393Data
                     Part1 = null,
                     Scope = "I",
                     LanguageType = "L",
-                    RefName = "Yele",
+                    RefName = "Yeli Dnye",
                     Comment = null,
                 },
                 new()

@@ -39,7 +39,7 @@ jobs:
   # Single source of the release-gate decision, publish or not and stable or not, reused by every job below.
   plan:
     name: Plan release job
-    uses: ptr727/ProjectTemplate/.github/workflows/publish-plan-task.yml@320713d9d491f578b5604a8d67b82478717d7b05 # 2.0.1319
+    uses: ptr727/ProjectTemplate/.github/workflows/publish-plan-task.yml@3a83cd0974ee481c9321bd3b6cf223e5112f876b # 2.0.1337
     with:
       event_name: ${{ github.event_name }}
       actor: ${{ github.actor }}
@@ -50,7 +50,7 @@ jobs:
     name: Validate job
     needs: [plan]
     if: ${{ needs.plan.outputs.publish == 'true' }}
-    uses: ptr727/ProjectTemplate/.github/workflows/validate-task.yml@320713d9d491f578b5604a8d67b82478717d7b05 # 2.0.1319
+    uses: ptr727/ProjectTemplate/.github/workflows/validate-task.yml@3a83cd0974ee481c9321bd3b6cf223e5112f876b # 2.0.1337
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     permissions:
@@ -65,7 +65,7 @@ jobs:
     name: Publish project release job
     needs: [plan, validate]
     if: ${{ needs.plan.outputs.publish == 'true' && needs.validate.result == 'success' }}
-    uses: ptr727/ProjectTemplate/.github/workflows/build-release-task.yml@320713d9d491f578b5604a8d67b82478717d7b05 # 2.0.1319
+    uses: ptr727/ProjectTemplate/.github/workflows/build-release-task.yml@3a83cd0974ee481c9321bd3b6cf223e5112f876b # 2.0.1337
     permissions:
       contents: write
       actions: write
@@ -99,7 +99,7 @@ jobs:
           name: nuget-build-${{ github.ref_name }}
           path: ./nuget
       - name: Setup .NET SDK step
-        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
         with:
           dotnet-version: 10.x
       # Trades the GitHub OIDC token for a short-lived NuGet key, so there is no stored API key.

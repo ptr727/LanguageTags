@@ -175,7 +175,7 @@
       "Id": "abg",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Wagama"
+      "RefName": "Abaga"
     },
     {
       "Id": "abh",
@@ -2385,6 +2385,12 @@
       "RefName": "Asoa"
     },
     {
+      "Id": "asw",
+      "Scope": "I",
+      "LanguageType": "L",
+      "RefName": "Australian Aborigines Sign Language"
+    },
+    {
       "Id": "asx",
       "Scope": "I",
       "LanguageType": "L",
@@ -2430,7 +2436,7 @@
       "Id": "ate",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Mand"
+      "RefName": "Atemble"
     },
     {
       "Id": "atg",
@@ -9467,7 +9473,7 @@
       "Id": "dge",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Degenang"
+      "RefName": "Degenan"
     },
     {
       "Id": "dgg",
@@ -11846,12 +11852,6 @@
       "Scope": "I",
       "LanguageType": "L",
       "RefName": "Fiwaga"
-    },
-    {
-      "Id": "fjs",
-      "Scope": "I",
-      "LanguageType": "L",
-      "RefName": "Fiji Sign Language"
     },
     {
       "Id": "fkk",
@@ -15947,7 +15947,7 @@
       "Part1": "iu",
       "Scope": "M",
       "LanguageType": "L",
-      "RefName": "Canadian Inuktut"
+      "RefName": "Inuktitut"
     },
     {
       "Id": "ikv",
@@ -19732,7 +19732,7 @@
       "Id": "koz",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Amako"
+      "RefName": "Korak"
     },
     {
       "Id": "kpa",
@@ -22740,7 +22740,7 @@
       "Id": "lnm",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Pondi"
+      "RefName": "Langam"
     },
     {
       "Id": "lnn",
@@ -24562,7 +24562,7 @@
       "Id": "mgt",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Mwakai"
+      "RefName": "Mongol"
     },
     {
       "Id": "mgu",
@@ -32941,7 +32941,7 @@
       "Id": "ppe",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Baiyamo"
+      "RefName": "Papi"
     },
     {
       "Id": "ppi",
@@ -32953,13 +32953,13 @@
       "Id": "ppk",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Uma (Indonesia)"
+      "RefName": "Uma"
     },
     {
       "Id": "ppl",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Central American Nawat"
+      "RefName": "Pipil"
     },
     {
       "Id": "ppm",
@@ -34581,7 +34581,7 @@
       "Id": "roe",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Uma (Papua New Guinea)"
+      "RefName": "Ronji"
     },
     {
       "Id": "rof",
@@ -35573,7 +35573,7 @@
       "Id": "seo",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Asaba"
+      "RefName": "Suarmin"
     },
     {
       "Id": "sep",
@@ -37338,7 +37338,7 @@
       "Id": "ssj",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Wia"
+      "RefName": "Sausi"
     },
     {
       "Id": "ssk",
@@ -41696,7 +41696,7 @@
       "Id": "ulw",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Ulwa (Nicaragua)"
+      "RefName": "Ulwa"
     },
     {
       "Id": "uly",
@@ -41919,7 +41919,7 @@
       "Id": "urg",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Kobuka"
+      "RefName": "Urigina"
     },
     {
       "Id": "urh",
@@ -44709,12 +44709,6 @@
       "RefName": "Indus Valley Language"
     },
     {
-      "Id": "xiw",
-      "Scope": "I",
-      "LanguageType": "L",
-      "RefName": "Shiwa"
-    },
-    {
       "Id": "xiy",
       "Scope": "I",
       "LanguageType": "L",
@@ -46384,7 +46378,7 @@
       "Id": "yev",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Yeri"
+      "RefName": "Yapunda"
     },
     {
       "Id": "yey",
@@ -46414,7 +46408,7 @@
       "Id": "ygm",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Tanda"
+      "RefName": "Yagomi"
     },
     {
       "Id": "ygp",
@@ -46675,7 +46669,7 @@
       "Id": "yla",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Ulwa (Papua New Guinea)"
+      "RefName": "Yaul"
     },
     {
       "Id": "ylb",
@@ -46687,7 +46681,7 @@
       "Id": "yle",
       "Scope": "I",
       "LanguageType": "L",
-      "RefName": "Yeli Dnye"
+      "RefName": "Yele"
     },
     {
       "Id": "ylg",

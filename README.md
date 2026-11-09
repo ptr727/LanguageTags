@@ -98,7 +98,7 @@ See [Usage][usage] for detailed usage instructions.
 
 ## Overview
 
-> **TL;DR**:
+> **Summary**:
 >
 > - Catalog of ISO 639-2, ISO 639-3, RFC 5646 language tags in JSON and C# record format.
 > - Code for IETF BCP 47 language tag construction and parsing per the RFC 5646 semantic rules.
@@ -464,7 +464,7 @@ isValid = languageTag.IsValid; // true
 
 ### Format
 
-> **TL;DR**: IETF language tags are constructed from sub-tags with specific rules.
+> **Summary**: IETF language tags are constructed from sub-tags with specific rules.
 >
 > **Note**: Refer to [RFC 5646 Section 2.1][rfc5646section21-link] for complete language tag syntax and rules.
 

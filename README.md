@@ -225,7 +225,7 @@ Sub-tag matching happens left to right until a match is found.
 Examples:
 
 - `pt` will match `pt` Portuguese, or `pt-BR` Brazilian Portuguese, or `pt-PT` European Portuguese.
-- `pt-BR` will only match `pt-BR` Brazilian Portuguese\
+- `pt-BR` will only match `pt-BR` Brazilian Portuguese.
 - `zh` will match `zh` Chinese, or `zh-Hans` simplified Chinese, or `zh-Hant` for traditional Chinese, and other variants.
 - `zh-Hans` will only match `zh-Hans` simplified Chinese.
 
@@ -559,7 +559,6 @@ The third-party tools, libraries, and actions this project depends on.
 - [Create Pull Request][createpr-link]: GitHub action that opens a pull request from workspace changes.
 - [CSharpier][csharpier-link]: C# code formatter.
 - [GH Release][ghrelease-link]: GitHub action that creates a release.
-- [Git Auto Commit][ghautocommit-link]: GitHub action that commits workspace changes.
 - [GitHub Actions][ghactions-link]: CI and automation runner.
 - [GitHub Dependabot][ghdependabot-link]: Dependency update bot.
 - [Husky.Net][huskynet-link]: Git hook manager for .NET.
@@ -637,7 +636,6 @@ Licensed under the [MIT License][license]\
 [csharpier-link]: https://csharpier.com/
 [dansmithlanguagetagssharp-link]: https://github.com/DanSmith/languagetags-sharp
 [ghactions-link]: https://github.com/actions
-[ghautocommit-link]: https://github.com/marketplace/actions/git-auto-commit
 [ghdependabot-link]: https://github.com/dependabot
 [ghrelease-link]: https://github.com/marketplace/actions/gh-release
 [huskynet-link]: https://alirezanet.github.io/Husky.Net/

@@ -558,10 +558,14 @@ The third-party tools, libraries, and actions this project depends on.
 - [AwesomeAssertions][awesomeassertions-link]: Assertion library for .NET tests.
 - [Create Pull Request][createpr-link]: GitHub action that opens a pull request from workspace changes.
 - [CSharpier][csharpier-link]: C# code formatter.
+- [cspell][cspell-link]: Spell checker.
+- [dotnet-outdated][dotnetoutdated-link]: Outdated NuGet dependency reporter.
+- [editorconfig-checker][editorconfigchecker-link]: Line-ending and whitespace linter.
 - [GH Release][ghrelease-link]: GitHub action that creates a release.
 - [GitHub Actions][ghactions-link]: CI and automation runner.
 - [GitHub Dependabot][ghdependabot-link]: Dependency update bot.
 - [Husky.Net][huskynet-link]: Git hook manager for .NET.
+- [markdownlint-cli2][markdownlintcli2-link]: Markdown linter.
 - [Nerdbank.GitVersioning][nerbankgitversion-link]: Version computation from git height.
 - [Serilog][serilog-link]: Structured logging library for .NET.
 - [xUnit.Net][xunit-link]: Test framework for .NET.
@@ -634,7 +638,10 @@ Licensed under the [MIT License][license]\
 [contentlanguage-link]: https://www.rfc-editor.org/rfc/rfc9110.html#name-content-language
 [createpr-link]: https://github.com/marketplace/actions/create-pull-request
 [csharpier-link]: https://csharpier.com/
+[cspell-link]: https://cspell.org
 [dansmithlanguagetagssharp-link]: https://github.com/DanSmith/languagetags-sharp
+[dotnetoutdated-link]: https://github.com/dotnet-outdated/dotnet-outdated
+[editorconfigchecker-link]: https://github.com/editorconfig-checker/editorconfig-checker
 [ghactions-link]: https://github.com/actions
 [ghdependabot-link]: https://github.com/dependabot
 [ghrelease-link]: https://github.com/marketplace/actions/gh-release
@@ -648,6 +655,7 @@ Licensed under the [MIT License][license]\
 [iso6393-link]: https://iso639-3.sil.org/
 [iso6393source-link]: https://iso639-3.sil.org/sites/iso639-3/files/downloads/iso-639-3.tab
 [jkporterbcp47-link]: https://github.com/jkporter/bcp47
+[markdownlintcli2-link]: https://github.com/DavidAnson/markdownlint-cli2
 [matroskalanguage-link]: https://datatracker.ietf.org/doc/html/draft-ietf-cellar-matroska-07#name-language-codes
 [mattcglanguagesubtagregistry-link]: https://github.com/mattcg/language-subtag-registry
 [nerbankgitversion-link]: https://github.com/dotnet/Nerdbank.GitVersioning

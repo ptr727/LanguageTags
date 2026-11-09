@@ -28,9 +28,9 @@ C# .NET library for ISO 639-2, ISO 639-3, RFC 5646 / BCP 47 language tags.
 - Internal CI/CD rework, no library API changes.
   - Branch-scoped self-publishing workflows
   - Keyless OIDC NuGet publishing.
-  - Hardened repository configuration, see [WORKFLOW.md](./WORKFLOW.md).
+  - Hardened repository configuration, see [WORKFLOW.md][workflow].
 
-See [Release History](./HISTORY.md) for complete release notes and older versions.
+See [Release History][history] for complete release notes and older versions.
 
 ## Getting Started
 
@@ -64,7 +64,7 @@ Get started with LanguageTags in two easy steps:
    string tag = languageTag.ToString(); // "en-latn-gb-boont-r-extended-sequence-x-private"
    ```
 
-See [Usage](#usage) for detailed usage instructions.
+See [Usage][usage] for detailed usage instructions.
 
 ## Table of Contents
 
@@ -75,7 +75,8 @@ See [Usage](#usage) for detailed usage instructions.
     - [Release Notes](#release-notes)
   - [Getting Started](#getting-started)
   - [Table of Contents](#table-of-contents)
-  - [Use Cases](#use-cases)
+  - [Overview](#overview)
+  - [Installation](#installation)
   - [Usage](#usage)
     - [Tag Lookup](#tag-lookup)
     - [Tag Conversion](#tag-conversion)
@@ -84,7 +85,6 @@ See [Usage](#usage) for detailed usage instructions.
     - [Tag Parser](#tag-parser)
     - [Tag Normalization](#tag-normalization)
     - [Tag Validation](#tag-validation)
-  - [Installation](#installation)
   - [Questions or Issues](#questions-or-issues)
   - [Build Artifacts](#build-artifacts)
   - [Contributing](#contributing)
@@ -96,22 +96,54 @@ See [Usage](#usage) for detailed usage instructions.
   - [3rd Party Tools](#3rd-party-tools)
   - [License](#license)
 
-## Use Cases
+## Overview
 
-> **ℹ️ TL;DR**:
+> **Summary**:
 >
 > - Catalog of ISO 639-2, ISO 639-3, RFC 5646 language tags in JSON and C# record format.
 > - Code for IETF BCP 47 language tag construction and parsing per the RFC 5646 semantic rules.
 >
-> **⚠️ Note**: The implemented language tag parsing and normalization logic may be incomplete or inaccurate.
+> **Warning**: The implemented language tag parsing and normalization logic may be incomplete or inaccurate.
 >
 > - Verify the results for your specific usage.
-> - Refer to [Libraries](#libraries) for other known implementations.
-> - Refer to [References](#references) for specification details.
+> - Refer to [Libraries][libraries] for other known implementations.
+> - Refer to [References][references] for specification details.
+
+## Installation
+
+**Project integration**:
+
+```shell
+# Add the package to your project
+dotnet add package ptr727.LanguageTags
+```
+
+```csharp
+// Include the namespace
+using ptr727.LanguageTags;
+```
+
+**Debug log configuration**:
+
+```csharp
+// Configure global logging (static override/factory)
+using Microsoft.Extensions.Logging;
+using ptr727.LanguageTags;
+using Serilog;
+using Serilog.Extensions.Logging;
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .WriteTo.Debug()
+    .CreateLogger();
+
+ILoggerFactory loggerFactory = new SerilogLoggerFactory(Log.Logger, dispose: true);
+LogOptions.SetFactory(loggerFactory);
+```
 
 ## Usage
 
-> **ℹ️ Note**: Refer to the [Tag Theory](#tag-theory) section for an overview of terms and theory of operation.
+> **Note**: Refer to the [Tag Theory][tag-theory] section for an overview of terms and theory of operation.
 
 ### Tag Lookup
 
@@ -179,7 +211,7 @@ iso = languageLookup.GetIsoFromIetf("cmn-Hant"); // "chi"
 
 Tag matching can be used to select content based on preferred vs. available languages.
 
-> **ℹ️ Examples**:
+> **Examples**:
 >
 > - HTTP [`Accept-Language`][acceptlanguage-link] and [`Content-Language`][contentlanguage-link].
 > - Matroska media stream [`LanguageIETF Element`][matroskalanguage-link].
@@ -193,7 +225,7 @@ Sub-tag matching happens left to right until a match is found.
 Examples:
 
 - `pt` will match `pt` Portuguese, or `pt-BR` Brazilian Portuguese, or `pt-PT` European Portuguese.
-- `pt-BR` will only match `pt-BR` Brazilian Portuguese\
+- `pt-BR` will only match `pt-BR` Brazilian Portuguese.
 - `zh` will match `zh` Chinese, or `zh-Hans` simplified Chinese, or `zh-Hant` for traditional Chinese, and other variants.
 - `zh-Hans` will only match `zh-Hans` simplified Chinese.
 
@@ -231,10 +263,10 @@ IEnumerable<string> expanded = languageLookup.ExpandRegion("es-MX");
 The `LanguageTagBuilder` class supports fluent builder style tag construction, and will return a constructed `LanguageTag` class through the final `Build()` or `Normalize()` methods.
 
 The `Build()` method will construct the tag, but will not perform any correctness validation or normalization.\
-Use the `Validate()` method to test for shape correctness. See [Tag Validation](#tag-validation) for details.
+Use the `Validate()` method to test for shape correctness. See [Tag Validation][tag-validation] for details.
 
 The `Normalize()` method will build the tag and perform normalization only.\
-Use `Validate()` to check structural correctness. See [Tag Normalization](#tag-normalization) for details.
+Use `Validate()` to check structural correctness. See [Tag Normalization][tag-normalization] for details.
 
 ```csharp
 LanguageTag languageTag = LanguageTag.CreateBuilder()
@@ -277,7 +309,7 @@ Grandfathered tags will be converted to their current preferred form and parsed 
 E.g. `en-gb-oed` -> `en-GB-oxendict`, `i-klingon` -> `tlh`.
 
 The `ParseAndNormalize()` method will parse the text tag and perform normalization.\
-See [Tag Normalization](#tag-normalization) for details.
+See [Tag Normalization][tag-normalization] for details.
 
 ```csharp
 LanguageTag? languageTag = LanguageTag.Parse("en-latn-gb-boont-r-extended-sequence-x-private");
@@ -356,7 +388,7 @@ Note that `LanguageTag` objects created by `Parse()` or `Normalize()` are alread
 
 Validation includes the following:
 
-- Subtag shape correctness, see [Format](#format) for a summary.
+- Subtag shape correctness, see [Format][format] for a summary.
 - No duplicate variants, extension prefixes, extension tags, or private tags.
 - Does not validate subtag values against the registry or enforce the full grammar beyond these checks.
 
@@ -370,44 +402,12 @@ bool isValid = languageTag.Validate(); // true
 isValid = languageTag.IsValid; // true
 ```
 
-## Installation
-
-**Project integration**:
-
-```shell
-# Add the package to your project
-dotnet add package ptr727.LanguageTags
-```
-
-```csharp
-// Include the namespace
-using ptr727.LanguageTags;
-```
-
-**Debug log configuration**:
-
-```csharp
-// Configure global logging (static override/factory)
-using Microsoft.Extensions.Logging;
-using ptr727.LanguageTags;
-using Serilog;
-using Serilog.Extensions.Logging;
-
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Debug()
-    .WriteTo.Debug()
-    .CreateLogger();
-
-ILoggerFactory loggerFactory = new SerilogLoggerFactory(Log.Logger, dispose: true);
-LogOptions.SetFactory(loggerFactory);
-```
-
 ## Questions or Issues
 
 **Tag testing**:
 
 - The [BCP47 language subtag lookup][r12asubtags-link] site offers convenient tag parsing and validation capabilities.
-- Refer to the [unit tests](./LanguageTagsTests) for examples, do note that tests may pass but not be complete or accurate per the RFC spec.
+- Refer to the [unit tests][tests-project] for examples, do note that tests may pass but not be complete or accurate per the RFC spec.
 
 **General questions**:
 
@@ -423,16 +423,16 @@ LogOptions.SetFactory(loggerFactory);
 
 **Build process and artifacts**:
 
-- **[`LanguageTagsCreate`](./LanguageTagsCreate) project**:
+- **[`LanguageTagsCreate`][codegen-project] project**:
   - Downloads language tag data files.
   - Converts the tag data into JSON files.
   - Generates C# records of the tags.
-- **[`LanguageData`](./LanguageData/) directory**:
-  - ISO 639-2: [Source][iso6392source-link], [Data](./LanguageData/iso6392), [JSON](./LanguageData/iso6392.json), [Code](./LanguageTags/Iso6392DataGen.cs)
-  - ISO 639-3: [Source][iso6393source-link], [Data](./LanguageData/iso6393), [JSON](./LanguageData/iso6393.json), [Code](./LanguageTags/Iso6393DataGen.cs)
-  - RFC 5646 : [Source][rfc5646source-link], [Data](./LanguageData/rfc5646), [JSON](./LanguageData/rfc5646.json), [Code](./LanguageTags/Rfc5646DataGen.cs)
-  - UN M.49 : [Source][unm49source-link], [Data](./LanguageData/unm49), [JSON](./LanguageData/unm49.json), [Code](./LanguageTags/UnM49DataGen.cs)
-- A daily [GitHub Actions](./.github/workflows/run-periodic-codegen-pull-request.yml) job opens PRs to keep the data files up to date.
+- **[`LanguageData`][language-data] directory**:
+  - ISO 639-2: [Source][iso6392source-link], [Data][iso6392-data], [JSON][iso6392-json], [Code][iso6392-code]
+  - ISO 639-3: [Source][iso6393source-link], [Data][iso6393-data], [JSON][iso6393-json], [Code][iso6393-code]
+  - RFC 5646 : [Source][rfc5646source-link], [Data][rfc5646-data], [JSON][rfc5646-json], [Code][rfc5646-code]
+  - UN M.49 : [Source][unm49source-link], [Data][unm49-data], [JSON][unm49-json], [Code][unm49-code]
+- A daily [GitHub Actions][codegen-workflow] job opens PRs to keep the data files up to date.
 
 ## Contributing
 
@@ -441,15 +441,15 @@ LogOptions.SetFactory(loggerFactory);
   - Feature branch -> `develop` via **squash merge** (develop is kept linear).
   - `develop` -> `main` via **merge commit** (preserves develop's commit list on main as the second parent of each release commit).
   - Dependabot and the daily codegen workflow both target `main` and `develop` in parallel via separate PRs.
-  - See [`WORKFLOW.md`](./WORKFLOW.md) for complete details.
+  - See [`WORKFLOW.md`][workflow] for complete details.
 - **Code style**:
-  - See [`CODESTYLE.md`](./CODESTYLE.md) and [`.editorconfig`](./.editorconfig) for C# code style rules.
+  - See [`CODESTYLE.md`][codestyle] and [`.editorconfig`][editorconfig] for C# code style rules.
 - **Repository setup**:
-  - See [`AUDIT.md`](./AUDIT.md) for how repository settings, rulesets, and secrets are checked.
+  - See [`AUDIT.md`][audit] for how repository settings, rulesets, and secrets are checked.
 
 ## Tag Theory
 
-> **ℹ️ Note**: Refer to [References](#references) for complete specification details.
+> **Note**: Refer to [References][references] for complete specification details.
 
 ### Terminology
 
@@ -464,9 +464,9 @@ LogOptions.SetFactory(loggerFactory);
 
 ### Format
 
-> **ℹ️ TL;DR**: IETF language tags are constructed from sub-tags with specific rules.
+> **Summary**: IETF language tags are constructed from sub-tags with specific rules.
 >
-> **ℹ️ Note**: Refer to [RFC 5646 Section 2.1][rfc5646section21-link] for complete language tag syntax and rules.
+> **Note**: Refer to [RFC 5646 Section 2.1][rfc5646section21-link] for complete language tag syntax and rules.
 
 **Normal tags**:
 
@@ -553,79 +553,112 @@ LogOptions.SetFactory(loggerFactory);
 
 ## 3rd Party Tools
 
-**3rd party tools used in this project**:
+The third-party tools, libraries, and actions this project depends on.
 
-- [AwesomeAssertions][awesomeassertions-link]
-- [Create Pull Request][createpr-link]
-- [CSharpier][csharpier-link]
-- [GH Release][ghrelease-link]
-- [Git Auto Commit][ghautocommit-link]
-- [GitHub Actions][ghactions-link]
-- [GitHub Dependabot][ghdependabot-link]
-- [Husky.Net][huskynet-link]
-- [Nerdbank.GitVersioning][nerbankgitversion-link]
-- [Serilog][serilog-link]
-- [xUnit.Net][xunit-link]
+- [AwesomeAssertions][awesomeassertions-link]: Assertion library for .NET tests.
+- [Create Pull Request][createpr-link]: GitHub action that opens a pull request from workspace changes.
+- [CSharpier][csharpier-link]: C# code formatter.
+- [cspell][cspell-link]: Spell checker.
+- [dotnet-outdated][dotnetoutdated-link]: Outdated NuGet dependency reporter.
+- [editorconfig-checker][editorconfigchecker-link]: Line-ending and whitespace linter.
+- [GH Release][ghrelease-link]: GitHub action that creates a release.
+- [GitHub Actions][ghactions-link]: CI and automation runner.
+- [GitHub Dependabot][ghdependabot-link]: Dependency update bot.
+- [Husky.Net][huskynet-link]: Git hook manager for .NET.
+- [markdownlint-cli2][markdownlintcli2-link]: Markdown linter.
+- [Nerdbank.GitVersioning][nerbankgitversion-link]: Version computation from git height.
+- [Serilog][serilog-link]: Structured logging library for .NET.
+- [xUnit.Net][xunit-link]: Test framework for .NET.
 
 ## License
 
-Licensed under the [MIT License][license-link]\
+Licensed under the [MIT License][license]\
 ![GitHub License][license-shield]
 
-<!-- Shields links -->
+<!-- Sections -->
+
+[format]: #format
+[libraries]: #libraries
+[references]: #references
+[tag-normalization]: #tag-normalization
+[tag-theory]: #tag-theory
+[tag-validation]: #tag-validation
+[usage]: #usage
+
+<!-- Shields -->
+
+[lastcommit-shield]: https://img.shields.io/github/last-commit/ptr727/LanguageTags?logo=github&label=Last%20Commit
+[license-shield]: https://img.shields.io/github/license/ptr727/LanguageTags?label=License
+[nugetreleaseversion-shield]: https://img.shields.io/nuget/v/ptr727.LanguageTags?logo=nuget&label=NuGet%20Release
+[prereleaseversion-shield]: https://img.shields.io/github/v/release/ptr727/LanguageTags?include_prereleases&filter=*-g*&label=GitHub%20Pre-Release&logo=github
+[releasebuildstatus-shield]: https://img.shields.io/github/actions/workflow/status/ptr727/LanguageTags/publish-release.yml?logo=github&label=Releases%20Build
+[releaseversion-shield]: https://img.shields.io/github/v/release/ptr727/LanguageTags?logo=github&label=GitHub%20Release
+
+<!-- Distribution -->
 
 [actions-link]: https://github.com/ptr727/LanguageTags/actions
 [commits-link]: https://github.com/ptr727/LanguageTags/commits/main
 [discussions-link]: https://github.com/ptr727/LanguageTags/discussions
 [github-link]: https://github.com/ptr727/LanguageTags
 [issues-link]: https://github.com/ptr727/LanguageTags/issues
-[lastcommit-shield]: https://img.shields.io/github/last-commit/ptr727/LanguageTags?logo=github&label=Last%20Commit
-[license-link]: ./LICENSE
-[license-shield]: https://img.shields.io/github/license/ptr727/LanguageTags?label=License
 [nuget-link]: https://www.nuget.org/packages/ptr727.LanguageTags/
-[nugetreleaseversion-shield]: https://img.shields.io/nuget/v/ptr727.LanguageTags?logo=nuget&label=NuGet%20Release
-[prereleaseversion-shield]: https://img.shields.io/github/v/release/ptr727/LanguageTags?include_prereleases&filter=*-g*&label=GitHub%20Pre-Release&logo=github
-[releasebuildstatus-shield]: https://img.shields.io/github/actions/workflow/status/ptr727/LanguageTags/publish-release.yml?logo=github&label=Releases%20Build
 [releases-link]: https://github.com/ptr727/LanguageTags/releases
-[releaseversion-shield]: https://img.shields.io/github/v/release/ptr727/LanguageTags?logo=github&label=GitHub%20Release
 
-<!-- 3rd Party tool links -->
+<!-- Repo -->
 
-[awesomeassertions-link]: https://awesomeassertions.org/
-[createpr-link]: https://github.com/marketplace/actions/create-pull-request
-[csharpier-link]: https://csharpier.com/
-[ghactions-link]: https://github.com/actions
-[ghautocommit-link]: https://github.com/marketplace/actions/git-auto-commit
-[ghdependabot-link]: https://github.com/dependabot
-[ghrelease-link]: https://github.com/marketplace/actions/gh-release
-[huskynet-link]: https://alirezanet.github.io/Husky.Net/
-[nerbankgitversion-link]: https://github.com/marketplace/actions/nerdbank-gitversioning
-[serilog-link]: https://serilog.net/
-[xunit-link]: https://xunit.net/
+[audit]: ./AUDIT.md
+[codegen-project]: ./LanguageTagsCreate
+[codegen-workflow]: ./.github/workflows/run-periodic-codegen-pull-request.yml
+[codestyle]: ./CODESTYLE.md
+[editorconfig]: ./.editorconfig
+[history]: ./HISTORY.md
+[iso6392-code]: ./LanguageTags/Iso6392DataGen.cs
+[iso6392-data]: ./LanguageData/iso6392
+[iso6392-json]: ./LanguageData/iso6392.json
+[iso6393-code]: ./LanguageTags/Iso6393DataGen.cs
+[iso6393-data]: ./LanguageData/iso6393
+[iso6393-json]: ./LanguageData/iso6393.json
+[language-data]: ./LanguageData/
+[license]: ./LICENSE
+[rfc5646-code]: ./LanguageTags/Rfc5646DataGen.cs
+[rfc5646-data]: ./LanguageData/rfc5646
+[rfc5646-json]: ./LanguageData/rfc5646.json
+[tests-project]: ./LanguageTagsTests
+[unm49-code]: ./LanguageTags/UnM49DataGen.cs
+[unm49-data]: ./LanguageData/unm49
+[unm49-json]: ./LanguageData/unm49.json
+[workflow]: ./WORKFLOW.md
 
-<!-- Data source links -->
-
-[iso6392source-link]: https://www.loc.gov/standards/iso639-2/ISO-639-2_utf-8.txt
-[iso6393source-link]: https://iso639-3.sil.org/sites/iso639-3/files/downloads/iso-639-3.tab
-[rfc5646source-link]: https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
-[unm49source-link]: https://raw.githubusercontent.com/unicode-org/cldr/main/common/supplemental/supplementalData.xml
-
-<!-- Other links -->
+<!-- External -->
 
 [acceptlanguage-link]: https://www.rfc-editor.org/rfc/rfc9110.html#name-accept-language
+[awesomeassertions-link]: https://awesomeassertions.org/
 [bcp47-link]: https://www.rfc-editor.org/info/bcp47
 [cldr-link]: https://cldr.unicode.org/
 [contentlanguage-link]: https://www.rfc-editor.org/rfc/rfc9110.html#name-content-language
+[createpr-link]: https://github.com/marketplace/actions/create-pull-request
+[csharpier-link]: https://csharpier.com/
+[cspell-link]: https://cspell.org
 [dansmithlanguagetagssharp-link]: https://github.com/DanSmith/languagetags-sharp
+[dotnetoutdated-link]: https://github.com/dotnet-outdated/dotnet-outdated
+[editorconfigchecker-link]: https://github.com/editorconfig-checker/editorconfig-checker
+[ghactions-link]: https://github.com/actions
+[ghdependabot-link]: https://github.com/dependabot
+[ghrelease-link]: https://github.com/marketplace/actions/gh-release
+[huskynet-link]: https://alirezanet.github.io/Husky.Net/
 [ianatags-link]: https://www.iana.org/assignments/language-subtags-tags-extensions/language-subtags-tags-extensions.xhtml
 [ietflanguagetag-link]: https://en.wikipedia.org/wiki/IETF_language_tag
 [iso15924-link]: https://unicode.org/iso15924/iso15924-codes.html
 [iso31661-link]: https://en.wikipedia.org/wiki/ISO_3166-1
 [iso6392-link]: https://www.loc.gov/standards/iso639-2/
+[iso6392source-link]: https://www.loc.gov/standards/iso639-2/ISO-639-2_utf-8.txt
 [iso6393-link]: https://iso639-3.sil.org/
+[iso6393source-link]: https://iso639-3.sil.org/sites/iso639-3/files/downloads/iso-639-3.tab
 [jkporterbcp47-link]: https://github.com/jkporter/bcp47
+[markdownlintcli2-link]: https://github.com/DavidAnson/markdownlint-cli2
 [matroskalanguage-link]: https://datatracker.ietf.org/doc/html/draft-ietf-cellar-matroska-07#name-language-codes
 [mattcglanguagesubtagregistry-link]: https://github.com/mattcg/language-subtag-registry
+[nerbankgitversion-link]: https://github.com/dotnet/Nerdbank.GitVersioning
 [oxigraphoxilangtag-link]: https://github.com/oxigraph/oxilangtag
 [pyfischrustlanguagetags-link]: https://github.com/pyfisch/rust-language-tags/
 [r12asubtags-link]: https://r12a.github.io/app-subtags/
@@ -642,8 +675,12 @@ Licensed under the [MIT License][license-link]\
 [rfc5646section228-link]: https://www.rfc-editor.org/rfc/rfc5646#section-2.2.8
 [rfc5646section229-link]: https://www.rfc-editor.org/rfc/rfc5646#section-2.2.9
 [rfc5646section45-link]: https://www.rfc-editor.org/rfc/rfc5646#section-4.5
+[rfc5646source-link]: https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
 [rspeerlangcodes-link]: https://github.com/rspeer/langcodes
+[serilog-link]: https://serilog.net/
 [unm49-link]: https://unstats.un.org/unsd/methodology/m49/
+[unm49source-link]: https://raw.githubusercontent.com/unicode-org/cldr/main/common/supplemental/supplementalData.xml
 [w3cchoosingtag-link]: https://www.w3.org/International/questions/qa-choosing-language-tags
 [w3ctags-link]: https://www.w3.org/International/articles/language-tags/
 [wikipediacodes-link]: https://en.wikipedia.org/wiki/Codes_for_constructed_languages
+[xunit-link]: https://xunit.net/

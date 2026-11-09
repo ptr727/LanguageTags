@@ -10,8 +10,7 @@ on:
   schedule:
     - cron: '0 4 * * *'
 
-# Workflow-only group, with no github.ref, because the task writes to the fixed codegen-main and codegen-develop branches regardless of the triggering ref.
-# A dispatch and the scheduled run must therefore not race on them.
+# GOVERNANCE.md "Workflow YAML Conventions" Concurrency exception (5).
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: true

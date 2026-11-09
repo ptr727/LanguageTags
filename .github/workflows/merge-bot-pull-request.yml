@@ -6,8 +6,7 @@ on:
   pull_request_target:
     types: [opened, reopened, synchronize]
 
-# Concurrency keys on the PR number rather than on github.ref, which under pull_request_target is the base branch and would serialize every bot PR against it, so each PR queues independently.
-# The cancel-in-progress setting is false so a follow-up synchronize does not cancel an in-flight opened run before it enables auto-merge.
+# GOVERNANCE.md "Workflow YAML Conventions" Concurrency exception (1).
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: false

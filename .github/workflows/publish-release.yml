@@ -25,10 +25,10 @@ on:
       - 'Directory.Packages.props'
   workflow_dispatch:
 
-# The group is ref-independent so concurrent publishes serialize.
-# The cancel-in-progress setting is false so a publish is never cancelled mid-release, which would leave a half-created GitHub release or a partial NuGet push.
+# GOVERNANCE.md "Workflow YAML Conventions" Concurrency exception (2).
+# The expression must track publish-plan-task.yml's push rule and actor allowlist.
 concurrency:
-  group: ${{ github.workflow }}
+  group: ${{ github.workflow }}-${{ github.ref }}${{ github.event_name == 'push' && (github.ref != 'refs/heads/main' || (github.actor != 'ptr727-codegen[bot]' && github.actor != 'dependabot[bot]')) && format('-{0}', github.run_id) || '' }}
   cancel-in-progress: false
 
 # GITHUB_TOKEN gets no scope by default, and each job below grants only what it writes with.

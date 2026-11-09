@@ -92,9 +92,10 @@ jobs:
 
   # Single required status check.
   # Its name is the ruleset-bound context, so do not rename it without updating the ruleset in lockstep.
+  # A push or dispatch run takes another name, so only the pull request's own run can post that context on its head.
   # It treats a skipped smoke build, meaning an unchanged target, as a pass, and blocks on failure or cancelled (D1.5, D7.4).
   check-workflow-status:
-    name: Check pull request workflow status job
+    name: ${{ github.event_name == 'pull_request' && 'Check pull request workflow status job' || 'Check workflow status job' }}
     runs-on: ubuntu-latest
     needs: [changes, validate, smoke-build]
     if: always()

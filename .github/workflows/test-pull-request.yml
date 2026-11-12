@@ -1,6 +1,6 @@
 name: Test pull request action
 
-# CI for every pull request into main or develop, and for those two branches after a merge lands on them.
+# CI for every pull request, and for main and develop after a merge lands on them.
 # The validate and smoke-build jobs are reusable tasks reached by pin, so their bodies are not here.
 # The changes filter and the aggregator are this repository's own, and the aggregator's name is bound by the branch ruleset.
 #
@@ -10,7 +10,6 @@ name: Test pull request action
 # A feature branch matches no push entry, so a pull request still runs exactly once.
 on:
   pull_request:
-    branches: [main, develop]
   push:
     branches: [main, develop]
   workflow_dispatch:
@@ -58,7 +57,7 @@ jobs:
 
   validate:
     name: Validate job
-    uses: ptr727/ProjectTemplate/.github/workflows/validate-task.yml@9afb02a85c5a2fd59806e5c7fa5d7bf964d56e7a # 2.0.1401
+    uses: ptr727/ProjectTemplate/.github/workflows/validate-task.yml@009d3e5ec0d0e94b308142ab9d61589fcfd57787 # 2.0.1421
     permissions:
       contents: read
     # Mapped explicitly rather than inherited, since this is a cross-repository call and secrets: inherit would hand the callee every secret this repository holds.
@@ -75,7 +74,7 @@ jobs:
     name: Smoke build job
     needs: [changes]
     if: needs.changes.outputs.release == 'true' || github.event_name == 'workflow_dispatch'
-    uses: ptr727/ProjectTemplate/.github/workflows/build-release-task.yml@9afb02a85c5a2fd59806e5c7fa5d7bf964d56e7a # 2.0.1401
+    uses: ptr727/ProjectTemplate/.github/workflows/build-release-task.yml@009d3e5ec0d0e94b308142ab9d61589fcfd57787 # 2.0.1421
     permissions:
       contents: read
     with:
@@ -103,11 +102,15 @@ jobs:
       - name: Check workflow results step
         run: |
           set -Eeuo pipefail
-          for result in "changes:${{ needs.changes.result }}" "validate:${{ needs.validate.result }}" "smoke-build:${{ needs.smoke-build.result }}"; do
+          for result in "changes:${{ needs.changes.result }}" "validate:${{ needs.validate.result }}"; do
             name="${result%%:*}"
             value="${result#*:}"
-            if [[ "$value" != "success" && "$value" != "skipped" ]]; then
+            if [[ "$value" != "success" ]]; then
               echo "::error::Job '$name' did not succeed ($value)."
               exit 1
             fi
           done
+          if [[ "${{ needs.smoke-build.result }}" != "success" && "${{ needs.smoke-build.result }}" != "skipped" ]]; then
+            echo "::error::Job 'smoke-build' did not succeed (${{ needs.smoke-build.result }})."
+            exit 1
+          fi

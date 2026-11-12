@@ -9,6 +9,5 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <ArtifactsPath>$(MSBuildThisFileDirectory).artifacts</ArtifactsPath>
     <IsPackable>false</IsPackable>
-    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
 </Project>

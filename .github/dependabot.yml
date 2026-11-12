@@ -9,10 +9,11 @@
 # develop, merge on main) and auto-merges both. develop is forward-only: no main -> develop back-merges, each
 # branch absorbs its own bot PRs. Dependabot opens CVE security PRs against the default branch (main) whatever
 # the target-branch, and the merge-bot handles them in the same path.
+#
+# Exclude-patterns keeps the fleet's toolchain packages out of the catch-all bump.
+# A tool's own version bump can flag previously-compliant code, blocking the whole group over it.
 version: 2
 updates:
-
-  # ----- nuget -----
 
   - package-ecosystem: "nuget"
     target-branch: "main"
@@ -23,6 +24,10 @@ updates:
       nuget-deps:
         patterns:
           - "*"
+        exclude-patterns:
+          - "csharpier"
+          - "husky"
+          - "dotnet-outdated-tool"
 
   - package-ecosystem: "nuget"
     target-branch: "develop"
@@ -33,12 +38,18 @@ updates:
       nuget-deps:
         patterns:
           - "*"
+        exclude-patterns:
+          - "csharpier"
+          - "husky"
+          - "dotnet-outdated-tool"
 
-  # ----- github-actions -----
-
+  # The "/" directory covers only .github/workflows and a root action.yml.
+  # A repo carrying its own composite actions under .github/actions, such as a validate hook, keeps the second glob so their pins stay current.
   - package-ecosystem: "github-actions"
     target-branch: "main"
-    directory: "/"
+    directories:
+      - "/"
+      - "/.github/actions/*"
     schedule:
       interval: "daily"
     groups:
@@ -48,7 +59,9 @@ updates:
 
   - package-ecosystem: "github-actions"
     target-branch: "develop"
-    directory: "/"
+    directories:
+      - "/"
+      - "/.github/actions/*"
     schedule:
       interval: "daily"
     groups:

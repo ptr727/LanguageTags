@@ -23,6 +23,8 @@ on:
       - 'version.json'
       - 'Directory.Build.props'
       - 'Directory.Packages.props'
+      # Selects the SDK line, so it decides which compiler builds the package.
+      - 'global.json'
   workflow_dispatch:
 
 # GOVERNANCE.md "Workflow YAML Conventions" Concurrency exception (2).
@@ -39,7 +41,7 @@ jobs:
   # Single source of the release-gate decision, publish or not and stable or not, reused by every job below.
   plan:
     name: Plan release job
-    uses: ptr727/ProjectTemplate/.github/workflows/publish-plan-task.yml@9afb02a85c5a2fd59806e5c7fa5d7bf964d56e7a # 2.0.1401
+    uses: ptr727/ProjectTemplate/.github/workflows/publish-plan-task.yml@009d3e5ec0d0e94b308142ab9d61589fcfd57787 # 2.0.1421
     with:
       event_name: ${{ github.event_name }}
       actor: ${{ github.actor }}
@@ -50,7 +52,7 @@ jobs:
     name: Validate job
     needs: [plan]
     if: ${{ needs.plan.outputs.publish == 'true' }}
-    uses: ptr727/ProjectTemplate/.github/workflows/validate-task.yml@9afb02a85c5a2fd59806e5c7fa5d7bf964d56e7a # 2.0.1401
+    uses: ptr727/ProjectTemplate/.github/workflows/validate-task.yml@009d3e5ec0d0e94b308142ab9d61589fcfd57787 # 2.0.1421
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     permissions:
@@ -65,7 +67,7 @@ jobs:
     name: Publish project release job
     needs: [plan, validate]
     if: ${{ needs.plan.outputs.publish == 'true' && needs.validate.result == 'success' }}
-    uses: ptr727/ProjectTemplate/.github/workflows/build-release-task.yml@9afb02a85c5a2fd59806e5c7fa5d7bf964d56e7a # 2.0.1401
+    uses: ptr727/ProjectTemplate/.github/workflows/build-release-task.yml@009d3e5ec0d0e94b308142ab9d61589fcfd57787 # 2.0.1421
     permissions:
       contents: write
       actions: write
@@ -83,7 +85,9 @@ jobs:
   # The push lives here rather than in the hub task so the OIDC token's job_workflow_ref claim names this repository, which NuGet.org validates against the package owner (ptr727/ProjectTemplate#1126).
   # A skipped publish job skips this one too, so no separate release gate is needed.
   # The release is cut before this job runs, so a failed push leaves a release for a version that never reached NuGet.org.
-  # Re-running the publisher is the remedy, since the release-exists gate and --skip-duplicate are both idempotent.
+  # Re-running all jobs is the remedy, since the release-exists gate and --skip-duplicate are both idempotent.
+  # A fresh dispatch recovers too, but only while the branch tip is still the failed run's commit (D4.5).
+  # Re-running only the failed jobs does not work, because the delete step below already removed the build artifact (D5.2).
   publish-nuget:
     name: Publish NuGet library job
     needs: [validate, publish]
@@ -94,6 +98,7 @@ jobs:
       actions: write
     steps:
       - name: Download build artifacts step
+        id: download
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: nuget-build-${{ github.ref_name }}
@@ -118,14 +123,16 @@ jobs:
             --source https://api.nuget.org/v3/index.json \
             --api-key "$NUGET_API_KEY" \
             --skip-duplicate
+      # See D5.2.
       - name: Delete consumed NuGet build artifact step
+        if: ${{ !cancelled() && steps.download.outcome == 'success' }}
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -Eeuo pipefail
-          if ! ids=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/${{ github.run_id }}/artifacts" --paginate \
-            --jq ".artifacts[] | select(.name == \"nuget-build-${{ github.ref_name }}\") | .id"); then
+          if ! ids=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts" --paginate \
+            --jq '.artifacts[] | select(.name == "nuget-build-" + env.GITHUB_REF_NAME) | .id'); then
             echo "::warning::Could not list NuGet build artifacts. The retention-days backstop will reap them."
             ids=""
           fi

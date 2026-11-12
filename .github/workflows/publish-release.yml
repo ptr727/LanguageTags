@@ -23,6 +23,8 @@ on:
       - 'version.json'
       - 'Directory.Build.props'
       - 'Directory.Packages.props'
+      # Selects the SDK line, so it decides which compiler builds the package.
+      - 'global.json'
   workflow_dispatch:
 
 # GOVERNANCE.md "Workflow YAML Conventions" Concurrency exception (2).

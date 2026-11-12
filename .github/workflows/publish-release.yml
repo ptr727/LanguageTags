@@ -83,7 +83,8 @@ jobs:
   # The push lives here rather than in the hub task so the OIDC token's job_workflow_ref claim names this repository, which NuGet.org validates against the package owner (ptr727/ProjectTemplate#1126).
   # A skipped publish job skips this one too, so no separate release gate is needed.
   # The release is cut before this job runs, so a failed push leaves a release for a version that never reached NuGet.org.
-  # Re-running all jobs, or dispatching again, is the remedy, since the release-exists gate and --skip-duplicate are both idempotent.
+  # Re-running all jobs is the remedy, since the release-exists gate and --skip-duplicate are both idempotent.
+  # A fresh dispatch recovers too, but only while the branch tip is still the failed run's commit (D4.5).
   # Re-running only the failed jobs does not work, because the delete step below already removed the build artifact (D5.2).
   publish-nuget:
     name: Publish NuGet library job

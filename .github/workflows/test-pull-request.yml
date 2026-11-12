@@ -54,7 +54,6 @@ jobs:
               - 'version.json'
               - 'Directory.Build.props'
               - 'Directory.Packages.props'
-              - 'global.json'
 
   validate:
     name: Validate job

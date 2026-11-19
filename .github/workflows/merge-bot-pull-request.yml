@@ -18,7 +18,7 @@ jobs:
 
   merge-bot:
     name: Merge bot pull request job
-    uses: ptr727/ProjectTemplate/.github/workflows/merge-bot-task.yml@59adddf8f03ff69427d4d97972cf766fa25a5aa3 # 2.0.1461
+    uses: ptr727/ProjectTemplate/.github/workflows/merge-bot-task.yml@0c2dd7228fbda6747e4c9f0b0b4136de8e4c8635 # 2.0.1468
     # The repository-wide auto-delete stays off, so the task deletes each merged bot head branch instead.
     with:
       delete-branch: true
